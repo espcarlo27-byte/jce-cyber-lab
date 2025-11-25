@@ -13,11 +13,11 @@ index=winlog sourcetype=XmlWinEventLog EventCode=1
 | table _time host User Image ParentImage CommandLine
 
 
----
+
 
 ### `logs.md`
 
-```markdown
+
 # Symbolic Log Entries — SIM-001
 
 ## LAB-SIM-SYSMON-2025-126 — Suspicious Process Execution Detected
