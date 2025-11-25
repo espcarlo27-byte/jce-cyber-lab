@@ -2,7 +2,7 @@
 
 ## Suspicious Process Execution (whoami.exe)
 
-```spl
+
 index=winlog sourcetype=XmlWinEventLog EventCode=1
 | eval exe=lower(Image)
 | search exe="c:\\windows\\system32\\whoami.exe"
