@@ -1,14 +1,12 @@
 # Detection Queries — SIM-001
 
 ## Suspicious Process Execution (whoami.exe)
-
-
 index=winlog sourcetype=XmlWinEventLog EventCode=1
 | eval exe=lower(Image)
 | search exe="c:\\windows\\system32\\whoami.exe"
 | table _time host User Image ParentImage CommandLine
 
-# Expanded Detection (whoami.exe, certutil.exe, powershell.exe)
+## Expanded Detection (whoami.exe, certutil.exe, powershell.exe)
 index=winlog sourcetype=XmlWinEventLog EventCode=1
 | eval exe=lower(Image)
 | search exe="c:\\windows\\system32\\whoami.exe" OR exe="c:\\windows\\system32\\certutil.exe" OR exe="c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
@@ -17,7 +15,7 @@ index=winlog sourcetype=XmlWinEventLog EventCode=1
 
 ---
 
-### 3. `logs.md`
+### `logs.md`
 
 ```markdown
 # Symbolic Log Entries — SIM-001
