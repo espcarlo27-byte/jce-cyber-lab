@@ -1,7 +1,8 @@
 # JCE Cyber Lab 🛡️
 
 ## Executive Summary
-This lab demonstrates my ability to design, deploy, and operate a full detection engineering and SOC workflow, including SIEM ingestion, endpoint telemetry, IDS alerting, detection tuning, and incident response documentation. It serves as both a technical learning environment and a professional cybersecurity portfolio.
+
+This cyber lab demonstrates my ability to design, deploy, and operate a full detection engineering and SOC workflow across network, endpoint, and identity layers. It contains end-to-end attack simulations, symbolic and real log evidence, Splunk detections, alerting pipelines, and MITRE-aligned validation. Each detection scenario has a **dedicated simulation folder (1:1 mapping)** to show reproducible hands-on results.
 
 ---
 
@@ -9,118 +10,138 @@ This lab demonstrates my ability to design, deploy, and operate a full detection
 
 ![Lab Topology](diagrams/lab-topology.png)
 
-- **pfSense** (10.0.0.1) – Firewall, NAT, VPN, traffic mirroring
-- **Windows Server 2025** (10.0.0.10) – Active Directory, GPO, MS SQL Server
-- **Security Onion (Eval)** (10.0.0.20) – Suricata, Zeek, Wazuh, Syslog
-- **Kali Linux** (10.0.0.30) – Red team simulations, packet crafting
-- **Windows 11 Endpoint** (10.0.0.50) – Sysmon, Splunk Forwarder, test user activity
-- **Ubuntu VM** (10.0.0.60) – Splunk Enterprise Server
+* **pfSense** (10.0.0.1) – Firewall, NAT, VPN, TAP/SPAN mirroring
+* **Windows Server 2025** (10.0.0.10) – AD, DNS, GPO, MS SQL Server
+* **Security Onion (Eval)** (10.0.0.20) – Suricata, Zeek, Wazuh, Syslog
+* **Kali Linux** (10.0.0.30) – Red-team simulations and tooling
+* **Windows 11 Endpoint** (10.0.0.50) – Sysmon, Splunk Universal Forwarder
+* **Ubuntu VM** (10.0.0.60) – Splunk Enterprise SIEM
 
 ---
 
-## 📊 Badges
+## 📊 Detection Validation Matrix (Aligned 1:1)
 
-![Splunk](https://img.shields.io/badge/SIEM-Splunk-blue) ![Security Onion](https://img.shields.io/badge/NSM-Security%20Onion-orange) ![Sysmon](https://img.shields.io/badge/Telemetry-Sysmon-purple) ![Suricata](https://img.shields.io/badge/IDS-Suricata-red) ![Kali Linux](https://img.shields.io/badge/OS-Kali%20Linux-black) ![Ubuntu](https://img.shields.io/badge/OS-Ubuntu-orange)
+Each scenario has a matching `/simulations/SIM-00X-*` folder containing: steps, logs, queries, alerts, and screenshots.
 
----
-
-## 🧪 Symbolic Validation Matrix
-
-| Scenario ID | Scenario | ATT&CK | Log Source | Detection Tools | Outcome |
-|-------------|----------|--------|------------|----------------|---------|
-| LAB-SIM-001 | Phishing Email | T1566 | Email Logs | Suricata, Splunk | Alert triggered, email headers parsed |
-| LAB-SIM-002 | DNS Tunneling | T1071.004 | Network Logs | Zeek, Suricata | Abnormal DNS queries detected |
-| LAB-SIM-003 | Privilege Escalation | T1055 | Sysmon | Sysmon, Wazuh | Event ID 4688, alert fired |
-| LAB-SIM-004 | SQL Injection | T1190 | Web Logs | Splunk, Suricata | SQL log anomaly, Suricata HTTP rule |
-| LAB-SIM-005 | Unauthorized File Access | T1070 | Windows Event Logs | Windows Event Logs, Splunk | Access report, policy violation noted |
-
-Each scenario is documented in `/symbolic-validation/` with screenshots, rule IDs, and remediation steps.
+| SIM ID  | Scenario                 | MITRE ATT&CK | Data Source              | Detection Tools          | Status |
+| ------- | ------------------------ | ------------ | ------------------------ | ------------------------ | ------ |
+| SIM-001 | Phishing Email           | T1566.002    | Email + Network + Sysmon | Suricata, Splunk         | Ready  |
+| SIM-002 | DNS Tunneling            | T1071.004    | DNS + Network            | Zeek, Suricata, Splunk   | Ready  |
+| SIM-003 | Privilege Escalation     | T1055        | Sysmon                   | Sysmon, Wazuh, Splunk    | Ready  |
+| SIM-004 | SQL Injection            | T1190        | Web/HTTP Logs            | Suricata, Splunk         | Ready  |
+| SIM-005 | Unauthorized File Access | T1070        | Windows Logs             | Sysmon, Splunk           | Ready  |
+| SIM-006 | Sysmon ProcessCreate     | T1059        | Sysmon                   | Sysmon, Splunk           | Ready  |
+| SIM-007 | Sysmon FileCreate        | T1105        | Sysmon                   | Sysmon, Splunk           | Ready  |
+| SIM-008 | PowerShell Download      | T1059.001    | Sysmon + Network         | Sysmon, Suricata, Splunk | Ready  |
 
 ---
 
-## 🔬 Simulations
+## 🧪 Simulations (Hands-On Evidence)
 
-- [SIM-001 – Sysmon ProcessCreate](simulations/SIM-001-Sysmon-ProcessCreate/)
-- [SIM-002 – Sysmon FileCreate](simulations/SIM-002-Sysmon-FileCreate/)
-- [SIM-003 – PowerShell Download](simulations/SIM-003-PowerShell-Download/)
+Every simulation contains:
 
----
+* `README.md` – Summary + expected outcome
+* `steps.md` – Full reproducible steps
+* `logs.md` – Symbolic and real logs
+* `queries.md` – SPL detection logic
+* `alert-config.md` – Alert definition + symbolic ID
+* `screenshots/` – Evidence of hits and alerts
 
-## 📊 Detection & Response
+### Available Simulations
 
-- **SIEM**: Splunk Enterprise (Ubuntu VM), Security Onion
-- **IDS/IPS**: Suricata, Zeek
-- **HIDS**: Wazuh + Sysmon
-- **Threat Hunting**: SPL dashboards, packet analysis
-- **Incident Response**: NIST-based playbooks
-
----
-
-## 🔐 Governance & Compliance
-
-- **Access control validation** with Windows ACLs
-- **Audit log integrity** enforced through forwarder monitoring
-- **User behavior monitoring** through Sysmon event families
-- **Compliance simulation** aligned to SOC II / NIST 800-53
+* [SIM-001 – Phishing Email](simulations/SIM-001-Phishing-Email/)
+* [SIM-002 – DNS Tunneling](simulations/SIM-002-DNS-Tunneling/)
+* [SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)
+* [SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)
+* [SIM-005 – Unauthorized File Access](simulations/SIM-005-Unauthorized-File-Access/)
+* [SIM-006 – Sysmon ProcessCreate](simulations/SIM-006-Sysmon-ProcessCreate/)
+* [SIM-007 – Sysmon FileCreate](simulations/SIM-007-Sysmon-FileCreate/)
+* [SIM-008 – PowerShell Download](simulations/SIM-008-PowerShell-Download/)
 
 ---
 
-## ⚙️ Automation
-
-- n8n workflow to triage alerts and parse logs
-- Python scripts for log parsing and anomaly detection
-
----
-
-## 🧑‍💻 Skills Demonstrated
-
-- SIEM engineering (Splunk on Ubuntu VM)
-- Log parsing and ingestion
-- IDS tuning (Suricata/Zeek)
-- HIDS configuration (Sysmon/Wazuh)
-- Threat detection engineering
-- Building repeatable simulations
-- Incident response documentation
-- NIST/NIST-800-61 alignment
-- MITRE ATT&CK mapping
-- Scripting automation (Python, n8n)
-
----
-
-## 🗂️ Folder Structure
+## 📂 Repository Structure
 
 ```
 jce-cyber-lab/
+├── README.md
 ├── diagrams/
+├── detection-matrix/
 ├── simulations/
+│   ├── SIM-001-Phishing-Email/
+│   ├── SIM-002-DNS-Tunneling/
+│   ├── SIM-003-Privilege-Escalation/
+│   ├── SIM-004-SQL-Injection/
+│   ├── SIM-005-Unauthorized-File-Access/
+│   ├── SIM-006-Sysmon-ProcessCreate/
+│   ├── SIM-007-Sysmon-FileCreate/
+│   └── SIM-008-PowerShell-Download/
 ├── splunk-queries/
-├── dashboards/
 ├── alerts/
+├── dashboards/
 ├── troubleshooting/
 └── scratchpad/
 ```
 
 ---
 
+## 📊 Detection & Response Capabilities
+
+* **SIEM:** Splunk Enterprise (Ubuntu)
+* **NSM/IDS:** Suricata + Zeek (Security Onion)
+* **HIDS / Telemetry:** Sysmon + Wazuh
+* **Threat Hunting:** SPL dashboards, network analysis
+* **IR Framework:** NIST 800-61
+
+---
+
+## ⚙️ Automation
+
+* n8n workflows for automated triage
+* Python scripts for log parsing and anomaly detection
+* Custom symbolic log tagging
+
+---
+
+## 🧑‍💻 Skills Demonstrated
+
+* SIEM engineering (Splunk)
+* Detection engineering and SPL writing
+* Sysmon rule validation
+* Suricata/Zeek NSM analysis
+* Log ingestion + parsing pipeline design
+* MITRE ATT&CK mapping
+* Incident response workflow creation
+* Dashboard creation and alert tuning
+
+---
+
 ## 📌 How to Replicate This Lab
 
-1. Deploy VMware VMs using the IP scheme in the topology diagram.
-2. Install Splunk Enterprise on the Ubuntu VM.
-3. Install Windows Server 2025, Security Onion, Windows 11, and Kali Linux VMs.
-4. Configure pfSense firewall and NAT.
-5. Deploy Sysmon and forward logs to Splunk.
-6. Run attack simulations and collect symbolic logs.
-7. Apply SPL queries to detect simulated activity.
-8. Configure alerts using the provided templates.
-9. Review dashboards and validate detection results.
+1. Deploy all VMs based on the topology diagram.
+2. Install Splunk on Ubuntu and configure ingest from:
+
+   * Windows Sysmon (via Splunk UF)
+   * Security Onion (Suricata/Zeek logs)
+3. Configure pfSense routes + monitoring.
+4. Run simulations in order (SIM-001 → SIM-008).
+5. Capture logs and screenshots as evidence.
+6. Validate detections using dashboards and alerts.
+7. Update detection-matrix with results.
 
 ---
 
 ## 📈 Next Steps
 
-- Expand to VMware ESXi for enterprise-scale simulation
-- Integrate Velociraptor for endpoint forensics
-- Prepare for CySA+ and Splunk Core Certified User
+* Add Velociraptor for DFIR endpoint collection
+* Add more credential access simulations
+* Expand to VMware ESXi cluster
+* Build a full SOC dashboard pack
+
+---
+
+> **“Every detection is documented. Every alert is validated. Every scenario is reproducible.”**
+> — Carlo
 
 ---
 
