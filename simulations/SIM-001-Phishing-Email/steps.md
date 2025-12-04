@@ -30,17 +30,18 @@ Before running this simulation, ensure the following lab components are online a
   - Able to serve HTTP content  
 
 Before you continue, verify Splunk sees *any* new logs from:  
-- index=winevent_sysmon  
-- index=winevent_security  
-- index=network_suricata  
+  - index=winevent_sysmon  
+  - index=winevent_security  
+  - index=network_suricata  
 
+---
 ---
 
 ## 2. Prepare the Phishing Landing Page (Kali – 10.0.0.30)
 
 On your Kali VM, create a fake phishing webpage:
 
-
+```bash
 mkdir -p ~/sim001-phish
 cd ~/sim001-phish
 
@@ -53,15 +54,18 @@ cat > index.html << 'EOF'
   </body>
 </html>
 EOF
-
+```
 Start a lightweight web server:
-   python3 -m http.server 8080
+
+&nbsp;&nbsp;&nbsp;&nbsp;python3 -m http.server 8080
 
 Confirm the server is running at:
-   http://10.0.0.30:8080/
+
+&nbsp;&nbsp;&nbsp;&nbsp;http://10.0.0.30:8080/
 
 ### Take note — this URL will be used in the simulated phishing email.
 
+---
 ---
 
 ## 3. Simulate a Phishing Email on Windows 11
@@ -82,8 +86,6 @@ Confirm the server is running at:
 
       Regards,
       HR Team
-
----
 
    ### Option B – If you don't have a mail server
 
@@ -110,13 +112,14 @@ Confirm the server is running at:
 ### The important part is the phishing URL that the user will click.
 
 ---
+---
 
 ## 4. User Clicks the Link (Windows 11) — Generate Telemetry
 
-On Windows 11:
-- Open the “email” or text file  
-- Click the link or copy/paste into Chrome/Edge  
-- The webpage hosted by Kali should load  
+**On Windows 11:**
+   - Open the “email” or text file  
+   - Click the link or copy/paste into Chrome/Edge  
+   - The webpage hosted by Kali should load  
 
 ### This generates:
 
@@ -137,16 +140,20 @@ Capture timestamps for easier hunting later.
 
 On Security Onion:
 
-Use SO dashboard or SSH to inspect Suricata logs.
+>Use SO dashboard or SSH to inspect Suricata logs.
 
 Check Suricata HTTP logs:
 
-sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
+>sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
 
 You should see an entry similar to:
-src_ip: 10.0.0.50
-dest_ip: 10.0.0.30
-dest_port: 8080
+
+>src_ip: 10.0.0.50
+
+>dest_ip: 10.0.0.30
+
+>dest_port: 8080
+
 (You will paste symbolic versions into logs.md.)
 
 
