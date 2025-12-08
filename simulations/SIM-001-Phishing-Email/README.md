@@ -1,4 +1,4 @@
-# SIM-001 – Phishing Email (T1566.002 – Spearphishing Link)
+# SIM-001 – Phishing Email (T1566.002) – Spearphishing Link
 
 ## 🎯 Goal
 
