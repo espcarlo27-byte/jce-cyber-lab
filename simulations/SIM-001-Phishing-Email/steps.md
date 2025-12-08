@@ -39,7 +39,7 @@ Before you continue, verify Splunk sees *any* new logs from:
 
 ## 2. Prepare the Phishing Landing Page (Kali – 10.0.0.30)
 
-On your Kali VM, create a fake phishing webpage:
+a. On your Kali VM, create a fake phishing webpage:
 
 ```bash
 mkdir -p ~/sim001-phish
@@ -55,13 +55,13 @@ cat > index.html << 'EOF'
 </html>
 EOF
 ```
-Start a lightweight web server:
+b. Start a lightweight web server:
 
-&nbsp;&nbsp;&nbsp;&nbsp;python3 -m http.server 8080
+- python3 -m http.server 8080
 
-Confirm the server is running at:
+c. Confirm the server is running at:
 
-&nbsp;&nbsp;&nbsp;&nbsp;http://10.0.0.30:8080/
+- http://10.0.0.30:8080/
 
 ### Take note — this URL will be used in the simulated phishing email.
 
@@ -72,7 +72,7 @@ Confirm the server is running at:
 
    ### Option A – If you have a mail client (Outlook or Thunderbird)
 
-      Send an email to your test user:
+   Send an email to your test user:
 
       **Subject:**  
       HR Policy Update – Action Required  
@@ -87,9 +87,9 @@ Confirm the server is running at:
       Regards,
       HR Team
 
-   ### Option B – If you don't have a mail server
+  ### Option B – If you don't have a mail server
 
-      Use a simulated email:
+  Use a simulated email:
 
       1. Open Notepad on Windows 11  
       2. Paste the following:
@@ -123,53 +123,61 @@ Confirm the server is running at:
 
 ### This generates:
 
-### Sysmon Events
-- Event ID 1 – Browser process start  
-- Parent process: Outlook.exe / explorer.exe  
-- Command line containing the suspicious URL  
+- Sysmon Events
+  - Event ID 1 – Browser process start  
+  - Parent process: Outlook.exe / explorer.exe  
+  - Command line containing the suspicious URL  
 
-### Suricata/Zeek Events
-- HTTP connection to Kali  
-- Optional Suricata alert depending on rule set  
+- Suricata/Zeek Events
+  - HTTP connection to Kali  
+  - Optional Suricata alert depending on rule set  
 
-Capture timestamps for easier hunting later.
+### Capture timestamps for easier hunting later.
 
+---
 ---
 
 ## 5. Validate Network Telemetry (Security Onion)
 
 On Security Onion:
 
->Use SO dashboard or SSH to inspect Suricata logs.
+  - Use SO dashboard or SSH to inspect Suricata logs.
 
 Check Suricata HTTP logs:
 
->sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
+  - sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
 
 You should see an entry similar to:
 
->src_ip: 10.0.0.50
+  - src_ip: 10.0.0.50
 
->dest_ip: 10.0.0.30
+  - dest_ip: 10.0.0.30
 
->dest_port: 8080
+  - dest_port: 8080
 
 (You will paste symbolic versions into logs.md.)
 
+---
+---
 
 ## 6. Validate Sysmon Telemetry in Splunk
 
 In Splunk, run:
 
+```
 index=winevent_sysmon EventCode=1 host=WIN11-LAB
 (Image="*\\chrome.exe" OR Image="*\\msedge.exe")
 | table _time, Computer, User, Image, ParentImage, CommandLine
+```
 
 Look for:
-ParentImage = Outlook.exe OR explorer.exe
-CommandLine contains the phishing URL
+  - ParentImage = Outlook.exe OR explorer.exe
+  - CommandLine contains the phishing URL
 
 Take a screenshot for screenshots/.
+
+---
+---
 
 ## 7. Correlate Network + Endpoint Activity in Splunk
 
@@ -185,28 +193,32 @@ This produces evidence of:
 
 If results appear, capture a screenshot for the simulation folder.
 
+---
+---
 
 ## 8. Configure Splunk Alert (LAB-SIM-001-PHISHING-ALERT)
 
 Create an alert using the final correlation SPL.
 
-### Alert requirements:
+- Alert requirements:
 
-- Triggers if: ≥ 1 correlated event  
-- Runs every 5 minutes  
-- Time window: last 15 minutes  
-- Severity: Medium  
+  - Triggers if: ≥ 1 correlated event  
+  - Runs every 5 minutes  
+  - Time window: last 15 minutes  
+  - Severity: Medium  
 
-### Output fields must include:
+- Output fields must include:
 
-- user  
-- host  
-- process  
-- url  
-- symbolic_id = LAB-SIM-001-PHISHING-ALERT  
+  - user  
+  - host  
+  - process  
+  - url  
+  - symbolic_id = LAB-SIM-001-PHISHING-ALERT  
 
 Paste the alert configuration details into `alert-config.md`.
 
+---
+---
 
 ## 9. Save Evidence
 
@@ -217,6 +229,8 @@ In the `screenshots/` folder, add:
 - sim001-splunk-search.png  
 - sim001-alert-fired.png  
 
+---
+---
 
 ## 10. Mark Simulation Completion
 
