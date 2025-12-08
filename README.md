@@ -145,6 +145,3 @@ jce-cyber-lab/
 
 ---
 
-> “Every detection is documented. Every alert is validated. Every scenario is reproducible.”
-> — Carlo
-
