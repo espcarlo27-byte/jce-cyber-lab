@@ -72,3 +72,86 @@ What This Detects:
 - Invoke-WebRequest
 - IEX / DownloadString
 - Script-based payload execution
+
+---
+---
+
+## 4. Broad Phishing Keyword Hunt (Cross-Index)
+
+Purpose:
+This query performs a wide keyword-based search across all lab-related indexes to identify any phishing-related artifacts that may not be captured by strict process detection.
+
+```spl
+(index=lab_index OR index=winevent_system OR index=winevent_security)
+("phish" OR "policy" OR "update" OR "http://" OR "https://")
+| table _time, host, user, Image, ParentImage, CommandLine
+| sort - _time
+```
+
+What This Helps With:
+- Catching edge cases
+- Verifying email artifacts
+- Identifying alternate download methods
+
+---
+---
+
+## 5. ✅ PRIMARY CORRELATION QUERY (ALERT-READY)
+
+Purpose:
+This is the main detection query for SIM-001.
+It is the query used to:
+- Validate the phishing click
+- Generate a dashboard signal
+- Trigger the Splunk alert
+
+```spl
+(index=winevent_system OR index=winevent_security OR index=lab_index)
+(Image="*\\chrome.exe" OR NewProcessName="*\\chrome.exe")
+("http://" OR "https://")
+| eval simulation_id="SIM-001"
+| eval symbolic_id="LAB-SIM-001-PHISHING-ALERT"
+| table _time, host, user, Image, ParentImage, CommandLine, simulation_id, symbolic_id
+| sort - _time
+```
+
+What This Confirms:
+- A phishing link was clicked
+- Chrome executed with a URL
+- The event is tagged with:
+  - simulation_id = SIM-001
+  - symbolic_id = LAB-SIM-001-PHISHING-ALERT
+
+This query is directly reused in the alert configuration.
+
+---
+---
+
+## 6. Last 15 Minutes Validation (Post-Execution Check)
+
+Purpose:
+Used immediately after completing the simulation to confirm that activity occurred in real time.
+
+```spl
+(index=winevent_system OR index=winevent_security OR index=lab_index)
+(Image="*\\chrome.exe" OR NewProcessName="*\\chrome.exe")
+("http://" OR "https://")
+earliest=-15m
+| table _time, host, user, Image, ParentImage, CommandLine
+| sort - _time
+```
+
+Expected Outcome:
+- If results appear here → SIM-001 executed successfully
+- If no results → something in the lab pipeline is broken
+
+---
+---
+
+✅ Interpretation Guide
+- Results in Section 2 → Confirmed phishing link click
+- Results in Section 3 → Payload execution detected
+- Results in Section 5 → Alert should fire
+- Results in Section 6 → Real-time validation successful
+
+This file serves as the core detection engineering artifact for SIM-001.
