@@ -39,7 +39,7 @@ Before you continue, verify Splunk sees *any* new logs from:
 
 ## 2. Prepare the Phishing Landing Page (Kali – 10.0.0.30)
 
-a. On your Kali VM, create a fake phishing webpage:
+A. On your Kali VM, create a fake phishing webpage:
 
 ```bash
 mkdir -p ~/sim001-phish
@@ -55,15 +55,16 @@ cat > index.html << 'EOF'
 </html>
 EOF
 ```
-b. Start a lightweight web server:
+
+B. Start a lightweight web server:
 
 - python3 -m http.server 8080
 
-c. Confirm the server is running at:
+C. Confirm the server is running at:
 
 - http://10.0.0.30:8080/
 
-### Take note — this URL will be used in the simulated phishing email.
+***Take note — this URL will be used in the simulated phishing email.***
 
 ---
 ---
@@ -109,7 +110,7 @@ c. Confirm the server is running at:
       3. Save it as:
          C:\Users\testuser\Desktop\sim001-email.txt
 
-### The important part is the phishing URL that the user will click.
+***The important part is the phishing URL that the user will click.***
 
 ---
 ---
@@ -121,18 +122,16 @@ c. Confirm the server is running at:
    - Click the link or copy/paste into Chrome/Edge  
    - The webpage hosted by Kali should load  
 
-### This generates:
-
-- Sysmon Events
+This generates:
+- **Sysmon Events**
   - Event ID 1 – Browser process start  
   - Parent process: Outlook.exe / explorer.exe  
   - Command line containing the suspicious URL  
-
-- Suricata/Zeek Events
+- **Suricata/Zeek Events**
   - HTTP connection to Kali  
   - Optional Suricata alert depending on rule set  
 
-### Capture timestamps for easier hunting later.
+***Capture timestamps for easier hunting later.***
 
 ---
 ---
@@ -140,22 +139,17 @@ c. Confirm the server is running at:
 ## 5. Validate Network Telemetry (Security Onion)
 
 On Security Onion:
-
   - Use SO dashboard or SSH to inspect Suricata logs.
 
 Check Suricata HTTP logs:
-
   - sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
 
 You should see an entry similar to:
-
   - src_ip: 10.0.0.50
-
   - dest_ip: 10.0.0.30
-
   - dest_port: 8080
 
-(You will paste symbolic versions into logs.md.)
+***(You will paste symbolic versions into logs.md.)***
 
 ---
 ---
@@ -164,7 +158,7 @@ You should see an entry similar to:
 
 In Splunk, run:
 
-```
+```spl
 index=winevent_sysmon EventCode=1 host=WIN11-LAB
 (Image="*\\chrome.exe" OR Image="*\\msedge.exe")
 | table _time, Computer, User, Image, ParentImage, CommandLine
@@ -174,7 +168,7 @@ Look for:
   - ParentImage = Outlook.exe OR explorer.exe
   - CommandLine contains the phishing URL
 
-Take a screenshot for screenshots/.
+***Take a screenshot for screenshots/.***
 
 ---
 ---
@@ -182,16 +176,14 @@ Take a screenshot for screenshots/.
 ## 7. Correlate Network + Endpoint Activity in Splunk
 
 Use the correlation SPL in your `queries.md`:
-
 - Join HTTP requests (Suricata)  
 - With Sysmon browser process  
 - Based on timestamps and IP  
 
 This produces evidence of:
-
 **“User clicked a phishing link → network request → browser process executed.”**
 
-If results appear, capture a screenshot for the simulation folder.
+***If results appear, capture a screenshot for the simulation folder.***
 
 ---
 ---
@@ -199,23 +191,19 @@ If results appear, capture a screenshot for the simulation folder.
 ## 8. Configure Splunk Alert (LAB-SIM-001-PHISHING-ALERT)
 
 Create an alert using the final correlation SPL.
-
 - Alert requirements:
-
   - Triggers if: ≥ 1 correlated event  
   - Runs every 5 minutes  
   - Time window: last 15 minutes  
   - Severity: Medium  
-
 - Output fields must include:
-
   - user  
   - host  
   - process  
   - url  
   - symbolic_id = LAB-SIM-001-PHISHING-ALERT  
 
-Paste the alert configuration details into `alert-config.md`.
+***Paste the alert configuration details into `alert-config.md`.***
 
 ---
 ---
@@ -223,7 +211,6 @@ Paste the alert configuration details into `alert-config.md`.
 ## 9. Save Evidence
 
 In the `screenshots/` folder, add:
-
 - sim001-email-view.png  
 - sim001-suricata-hit.png  
 - sim001-splunk-search.png  
@@ -235,7 +222,6 @@ In the `screenshots/` folder, add:
 ## 10. Mark Simulation Completion
 
 Update the SIM-001 checklist in the simulation’s README.md:
-
 - Steps executed  
 - Logs captured  
 - Queries tested  
