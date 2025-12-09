@@ -4,43 +4,45 @@
 
 Before running this simulation, ensure the following lab components are online and communicating:
 
-- **Windows 11 Endpoint (10.0.0.50)**  
-  - Sysmon installed & configured  
-  - Splunk Universal Forwarder running  
-  - Log forwarding to Splunk confirmed  
+- **Windows 11 Endpoint (10.0.0.50)**
+  - Windows Security Auditing enabled
+  - Process Creation logging (EventCode 4688)
+  - Command-line auditing enabled
+  - Splunk Universal Forwarder running
+  - Log forwarding to Splunk confirmed
 
-- **Security Onion (10.0.0.20)**  
-  - Suricata & Zeek active  
-  - Network visibility into Windows 11 subnet  
-  - Logs flowing to Splunk OR stored within SO  
+- **Security Onion (10.0.0.20)**
+  - Suricata & Zeek active
+  - Network visibility into Windows 11 subnet
+  - Logs available in SO (optional for this sim)
 
-- **Splunk Enterprise (10.0.0.60 – Ubuntu)**  
-  - Ingesting:  
-    - Sysmon logs  
-    - Windows Event Logs  
-    - Suricata / Zeek network logs  
-  - Time synchronization (NTP) enabled across all hosts  
+- **Splunk Enterprise (10.0.0.60 – Ubuntu)**
+  - Ingesting:
+    - Windows Security Logs (`winevent_security`)
+    - Windows System Logs (`winevent_system`)
+  - Time synchronization (NTP) enabled across all hosts
 
-- **pfSense (10.0.0.1)**  
-  - Proper routing  
-  - Traffic mirroring (SPAN / TAP) configured if needed  
+- **pfSense (10.0.0.1)**
+  - Proper routing
+  - Internet access between Kali ↔ Windows 11
 
-- **Kali Linux (10.0.0.30)**  
-  - Used as the phishing “attacker” host  
-  - Able to serve HTTP content  
+- **Kali Linux (10.0.0.30)**
+  - Used as the phishing “attacker” host
+  - Able to host HTTP content
 
-Before you continue, verify Splunk sees *any* new logs from:  
-  - index=winevent_sysmon  
-  - index=winevent_security  
-  - index=network_suricata  
+Before you continue, verify Splunk sees recent Windows logs:
 
----
+```spl
+(index=winevent_security OR index=winevent_system)
+| head 10
+```
+
 ---
 
 ## 2. Prepare the Phishing Landing Page (Kali – 10.0.0.30)
+A. Create a Fake Phishing Web Page
 
-A. On your Kali VM, create a fake phishing webpage:
-
+On Kali Terminal :
 ```bash
 mkdir -p ~/sim001-phish
 cd ~/sim001-phish
@@ -56,176 +58,178 @@ cat > index.html << 'EOF'
 EOF
 ```
 
-B. Start a lightweight web server:
+B. Start a Lightweight Web Server
+```bash
+python3 -m http.server 8080
+```
 
-- python3 -m http.server 8080
-
-C. Confirm the server is running at:
-
-- http://10.0.0.30:8080/
-
+C. Confirm Server Is Running
+Open in a browser:
+```cpp
+http://10.0.0.30:8080/
+```
 ***Take note — this URL will be used in the simulated phishing email.***
 
 ---
----
 
 ## 3. Simulate a Phishing Email on Windows 11
+**Option A – With a Mail Client**
+Send an email to your test user:
+```text
+Subject: HR Policy Update – Action Required
 
-   ### Option A – If you have a mail client (Outlook or Thunderbird)
+Body:
+Dear user,
 
-   Send an email to your test user:
+Please review the HR policy update:
+http://10.0.0.30:8080/
 
-      **Subject:**  
-      HR Policy Update – Action Required  
+Regards,
+HR Team
+```
 
-      **Body:**
+**Option B – Without a Mail Server (Text-Based Simulation)**
 
-          Dear user,
+1. Open Notepad on Windows 11
+2. Paste the following:
+```text
+From: hr@lab.local
+To: user@lab.local
+Subject: HR Policy Update – Action Required
 
-          Please review the HR policy update:
-          http://10.0.0.30:8080/
+Dear user,
 
-      Regards,
-      HR Team
+Please review the new HR policy:
+http://10.0.0.30:8080/
 
-  ### Option B – If you don't have a mail server
+Thanks,
+HR Team
+```
+3. Save it as: 
+```makefile
+C:\Users\testuser\Desktop\sim001-email.txt
+```
 
-  Use a simulated email:
+***The important element is the phishing URL that the user will click.***
 
-      1. Open Notepad on Windows 11  
-      2. Paste the following:
-
-          From: hr@lab.local
-          To: user@lab.local
-          Subject: HR Policy Update – Action Required
-
-          Dear user,
-
-          Please review the new HR policy:
-          http://10.0.0.30:8080/
-
-          Thanks,
-          HR Team
-
-      3. Save it as:
-         C:\Users\testuser\Desktop\sim001-email.txt
-
-***The important part is the phishing URL that the user will click.***
-
----
 ---
 
 ## 4. User Clicks the Link (Windows 11) — Generate Telemetry
 
-**On Windows 11:**
-   - Open the “email” or text file  
-   - Click the link or copy/paste into Chrome/Edge  
-   - The webpage hosted by Kali should load  
+On Windows 11:
+- Open the email or text file
+- Click the link or copy/paste into Google Chrome
+- The webpage hosted on Kali should load
 
 This generates:
-- **Sysmon Events**
-  - Event ID 1 – Browser process start  
-  - Parent process: Outlook.exe / explorer.exe  
-  - Command line containing the suspicious URL  
-- **Suricata/Zeek Events**
-  - HTTP connection to Kali  
-  - Optional Suricata alert depending on rule set  
+**Windows Endpoint Telemetry (Security Event 4688)**
+- Browser process creation
+- New_Process_Name = chrome.exe
+- Command line contains http://10.0.0.30:8080
 
-***Capture timestamps for easier hunting later.***
+**Network Telemetry**
+- HTTP connection from:
+    - 10.0.0.50 → 10.0.0.30
+
+***Capture approximate timestamps for easier hunting later.***
 
 ---
----
 
-## 5. Validate Network Telemetry (Security Onion)
+## 5. (Optional) Validate Network Telemetry (Security Onion)
 
 On Security Onion:
-  - Use SO dashboard or SSH to inspect Suricata logs.
-
-Check Suricata HTTP logs:
-  - sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
-
-You should see an entry similar to:
-  - src_ip: 10.0.0.50
-  - dest_ip: 10.0.0.30
-  - dest_port: 8080
-
-***(You will paste symbolic versions into logs.md.)***
-
----
----
-
-## 6. Validate Sysmon Telemetry in Splunk
-
-In Splunk, run:
-
-```spl
-index=winevent_sysmon EventCode=1 host=WIN11-LAB
-(Image="*\\chrome.exe" OR Image="*\\msedge.exe")
-| table _time, Computer, User, Image, ParentImage, CommandLine
+```bash
+sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
 ```
 
+Expected fields:
+- src_ip: 10.0.0.50
+- dest_ip: 10.0.0.30
+- dest_port: 8080
+
+***Symbolic versions are stored in logs.md.***
+
+---
+
+## 6. Validate Endpoint Telemetry in Splunk (FINAL WORKING QUERY)
+
+In Splunk, run:
+~~~spl
+(index=winevent_security OR index=winevent_system)
+EventCode=4688
+New_Process_Name="*\\chrome.exe"
+| table _time, host, user, New_Process_Name, Process_Command_Line
+| sort - _time
+~~~
+
 Look for:
-  - ParentImage = Outlook.exe OR explorer.exe
-  - CommandLine contains the phishing URL
+- New_Process_Name = chrome.exe
+- Process_Command_Line contains:
+```cpp
+http://10.0.0.30:8080
+```
 
-***Take a screenshot for screenshots/.***
-
----
----
-
-## 7. Correlate Network + Endpoint Activity in Splunk
-
-Use the correlation SPL in your `queries.md`:
-- Join HTTP requests (Suricata)  
-- With Sysmon browser process  
-- Based on timestamps and IP  
-
-This produces evidence of:
-**“User clicked a phishing link → network request → browser process executed.”**
-
-***If results appear, capture a screenshot for the simulation folder.***
+Take screenshot:
+- sim001-splunk-url-detection.png
 
 ---
+
+## 7. Correlate Phishing Click in Splunk (FINAL CORRELATION)
+~~~spl
+(index=winevent_security OR index=winevent_system)
+EventCode=4688
+New_Process_Name="*\\chrome.exe"
+Process_Command_Line="*http*"
+| eval simulation_id="SIM-001"
+| eval symbolic_id="LAB-SIM-001-PHISHING-ALERT"
+| table _time, host, user, New_Process_Name, Process_Command_Line, simulation_id, symbolic_id
+| sort - _time
+~~~
+
+***Take screenshot:***  sim001-splunk-correlation.png
+
+This confirms:
+***“User clicked phishing link → browser executed → URL captured → detection validated.”***
+
 ---
 
 ## 8. Configure Splunk Alert (LAB-SIM-001-PHISHING-ALERT)
 
-Create an alert using the final correlation SPL.
-- Alert requirements:
-  - Triggers if: ≥ 1 correlated event  
-  - Runs every 5 minutes  
-  - Time window: last 15 minutes  
-  - Severity: Medium  
-- Output fields must include:
-  - user  
-  - host  
-  - process  
-  - url  
-  - symbolic_id = LAB-SIM-001-PHISHING-ALERT  
+Use the correlation query above to configure the alert:
+- Schedule: Every 5 minutes
+- Time Window: Last 15 minutes
+- Trigger When: Number of Results > 0
+- Trigger Type: Per Result
+- Throttle: 10 minutes
+- Severity: Medium
 
-***Paste the alert configuration details into `alert-config.md`.***
+***Paste the final configuration into:***  alert-config.md
 
----
 ---
 
 ## 9. Save Evidence
 
-In the `screenshots/` folder, add:
-- sim001-email-view.png  
-- sim001-suricata-hit.png  
-- sim001-splunk-search.png  
-- sim001-alert-fired.png  
+In the screenshots/ folder, add:
+- sim001-email-view.png
+- sim001-splunk-url-detection.png
+- sim001-splunk-correlation.png
+- sim001-alert-config.png
+- sim001-alert-fired.png
 
----
 ---
 
 ## 10. Mark Simulation Completion
 
-Update the SIM-001 checklist in the simulation’s README.md:
-- Steps executed  
-- Logs captured  
-- Queries tested  
-- Alert triggered  
-- Screenshots saved  
-- Validation matrix updated  
+Update the checklist in README.md:
+- [x] Steps executed
+- [x] Logs captured
+- [x] Queries tested
+- [x] Alert triggered
+- [x] Screenshots saved
+- [x] Validation matrix updated
 
+---
+
+## ✅ FINAL STATUS
+
+**SIM-001 – Phishing Email Detection is COMPLETE and FULLY VALIDATED**
