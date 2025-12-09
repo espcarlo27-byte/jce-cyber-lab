@@ -61,6 +61,7 @@ Every simulation contains:
 ---
 
 ## 📂 Repository Structure
+```text
 jce-cyber-lab/
 ├── README.md
 ├── diagrams/
@@ -79,7 +80,7 @@ jce-cyber-lab/
 ├── dashboards/
 ├── troubleshooting/
 └── scratchpad/
-
+```
 ---
 
 ## 📊 Detection & Response Capabilities
