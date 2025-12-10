@@ -26,7 +26,7 @@ Each scenario has a matching `/simulations/SIM-00X-*` folder containing: steps, 
 | SIM ID       | Scenario                 | MITRE ATT&CK | Data Source                          | Detection Tools                | Status        |
 | ------------ | ------------------------ | ------------ | ------------------------------------ | ------------------------------ | ------------- |
 | SIM-001      | Phishing Email           | T1566.002    | Windows Security 4688 + Network      | Splunk, Suricata               | ✅ Validated  |
-| SIM-002      | DNS Tunneling            | T1071.004    | DNS + Network                        | Zeek, Suricata, Splunk         | Ready         |
+| SIM-002      | DNS Tunneling            | T1071.004    | DNS + Network                        | Suricata, Zeek, tcpdump        | ✅ Validated (Sensor-Level) |
 | SIM-003      | Privilege Escalation     | T1055        | Windows + Sysmon                     | Wazuh, Splunk                  | Ready         |
 | SIM-004      | SQL Injection            | T1190        | Web/HTTP Logs                        | Suricata, Splunk               | Ready         |
 | SIM-005      | Unauthorized File Access | T1070        | Windows Logs                         | Splunk                         | Ready         |
