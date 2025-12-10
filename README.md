@@ -1,4 +1,4 @@
-# JCE Cyber Lab 🛡️
+# JCE Cyber Lab 🛡️ 
 
 ## Executive Summary
 
@@ -50,7 +50,7 @@ Every simulation contains:
 ### Available Simulations
 
 * ✅ [SIM-001 – Phishing Email (Validated)](simulations/SIM-001-Phishing-Email/)  
-* ✅ [SIM-002 – DNS Tunneling](simulations/SIM-002-DNS-Tunneling/)  
+* ✅ [SIM-002 – DNS Tunneling (Validated)](simulations/SIM-002-DNS-Tunneling/)  
 * [SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)  
 * [SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)  
 * [SIM-005 – Unauthorized File Access](simulations/SIM-005-Unauthorized-File-Access/)  
@@ -67,20 +67,22 @@ jce-cyber-lab/
 ├── diagrams/
 ├── detection-matrix/
 ├── simulations/
-│ ├── SIM-001-Phishing-Email/
-│ ├── SIM-002-DNS-Tunneling/
-│ ├── SIM-003-Privilege-Escalation/
-│ ├── SIM-004-SQL-Injection/
-│ ├── SIM-005-Unauthorized-File-Access/
-│ ├── SIM-006-Sysmon-ProcessCreate/
-│ ├── SIM-007-Sysmon-FileCreate/
-│ └── SIM-008-PowerShell-Download/
+│   ├── SIM-001-Phishing-Email/
+│   ├── SIM-002-DNS-Tunneling/
+│   ├── SIM-003-Privilege-Escalation/
+│   ├── SIM-004-SQL-Injection/
+│   ├── SIM-005-Unauthorized-File-Access/
+│   ├── SIM-006-Sysmon-ProcessCreate/
+│   ├── SIM-007-Sysmon-FileCreate/
+│   └── SIM-008-PowerShell-Download/
 ├── splunk-queries/
 ├── alerts/
 ├── dashboards/
+├── issues-and-resolutions/
 ├── troubleshooting/
 └── scratchpad/
 ```
+
 ---
 
 ## 📊 Detection & Response Capabilities
@@ -130,6 +132,15 @@ jce-cyber-lab/
 
 ---
 
+## 🚧 Lab Issues & Resolutions Log
+
+Throughout the JCE Cyber Lab simulations, various technical challenges were encountered and resolved.
+To view detailed troubleshooting notes for each simulation, click below:
+
+***👉 Issues & Resolutions Log***
+
+---
+
 ## 📈 Next Steps
 
 * Add Velociraptor for DFIR endpoint collection  
@@ -137,8 +148,5 @@ jce-cyber-lab/
 * Expand to VMware ESXi cluster  
 * Build a full SOC dashboard pack  
 
----
-
-> **“Every detection is documented. Every alert is validated. Every scenario is reproducible.”**  
-> — Carlo
-
+***“Every detection is documented. Every alert is validated. Every scenario is reproducible.”***
+**— Carlo**
