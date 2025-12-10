@@ -1,6 +1,7 @@
-# 🛠️ Issues & Resolutions Log
+# 🛠️ Issues & Resolutions Log (Master Index)
 
-This log documents all technical issues encountered during JCE Cyber Lab simulations and their resolutions.  
-Each issue includes context, impact, root cause, and a verified fix.
+Click on a simulation below to view detailed issues and resolutions.
 
----
+- [Simulation 1 – Phishing Email](sim-001-phishing-email.md)
+- [Simulation 2 – DNS Tunneling](sim-002-dns-tunneling.md)
+- Simulation 3 – Privilege Escalation (coming soon)
