@@ -46,12 +46,13 @@ This simulation validates the **LAB-SIM-002** entry in the detection validation 
 
 ---
 
-## 🧾 Status
+## ✅ Status
 
-- [ ] Steps executed
-- [ ] Logs captured
-- [ ] Queries validated
-- [ ] Alert firing
-- [ ] Screenshots saved
-- [ ] Detection matrix updated
+- ✅ DNS traffic generated and captured
+- ✅ Packet-level visibility validated
+- ✅ Security Onion sensor confirmed operational
+- ❌ Suricata → Elastic ingest blocked due to authentication failure
+- ✅ SIEM outage documented
+- ✅ Fallback detection successfully executed
+- ✅ Screenshots captured
 
