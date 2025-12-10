@@ -135,9 +135,9 @@ jce-cyber-lab/
 ## 🚧 Lab Issues & Resolutions Log
 
 Throughout the JCE Cyber Lab simulations, various technical challenges were encountered and resolved.
-To view detailed troubleshooting notes for each simulation, click below:
+Click below to view simulation-specific troubleshooting details:
 
-***👉 Issues & Resolutions Log***
+👉 **[Issues & Resolutions Index](./issues-and-resolutions/README.md)**
 
 ---
 
