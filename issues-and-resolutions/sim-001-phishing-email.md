@@ -72,7 +72,43 @@ After correcting the authentication configuration, the forwarder successfully re
 
 ---
 
-### ***Issue 3: Windows Event ID 4688 (Process Creation) Not Logging***
+### ***Issue 3: Phishing Simulation Did Not Execute Expected Payload or Generate Artifacts***
+
+**Description:**  
+During the phishing simulation, the payload embedded in the test email did not execute as expected. Although the phishing message was delivered or simulated, no child process, script execution, or suspicious activity was generated on the Windows 11 endpoint. As a result, the simulation produced incomplete or missing telemetry.
+
+**Impact:**  
+- No malicious child process was recorded  
+- No 4688 or Sysmon ProcessCreate events were generated  
+- Splunk detections did not trigger because no activity occurred  
+- The validation of phishing behavior was incomplete  
+- Time was spent troubleshooting ingestion instead of verifying the attack fired  
+
+**Root Cause:**  
+The phishing payload or attachment did not execute due to one or more of the following common causes:
+- The email was opened, but the attachment or script was never launched  
+- Windows SmartScreen or endpoint protections silently blocked execution  
+- The test payload required user interaction that did not occur  
+- The simulation steps were not executed in the intended order  
+- The phishing “artifact” was symbolic and required manual execution to generate telemetry  
+
+**Resolution:**  
+1. Confirmed whether the payload was actually run on the Windows 11 endpoint.  
+2. Disabled or bypassed SmartScreen prompts (only within the lab environment) to allow controlled execution.  
+3. Re-ran the phishing attachment manually to ensure it executed:  
+   ```powershell
+   Start-Process <payload-path>
+   ```
+4. Verified expected logs appeared locally in Event Viewer.
+5. Confirmed Splunk Universal Forwarder was capturing new events after rerunning the payload.
+6. Validated the simulation again with a successful execution path.
+
+**Validation:**   
+Once the payload was properly executed, Windows Security and Sysmon logs generated the expected process creation events. Splunk detections then triggered successfully, confirming the phishing scenario was executed end-to-end.
+
+---
+
+### ***Issue 4: Windows Event ID 4688 (Process Creation) Not Logging***
 
 **Description:**  
 During the phishing email simulation, the expected Windows Event ID **4688 (Process Creation)** did not appear in Splunk or in the local Windows Event Viewer. This event is required to capture the executed payload or script associated with the phishing activity.
@@ -108,3 +144,90 @@ On a default installation, Event ID 4688 may be missing due to:
 
 **Validation:**  
 Event ID 4688 began appearing consistently in both Event Viewer and Splunk searches, enabling the phishing simulation's detections to trigger successfully.
+
+---
+
+### ***Issue 5: Expected Network Evidence (EVE.json / Packet Logs) Not Found During Validation***
+
+**Description:**  
+While validating the phishing email simulation, expected network artifacts such as **Suricata EVE.json events** or packet captures were not found in the expected directories on the Security Onion sensor. Commands such as:
+```bash
+find / -name eve.json 2>/dev/null
+```
+returned no results, leading to uncertainty about whether Suricata had logged any related network activity.
+
+**Impact:**   
+- Network-side validation of the phishing simulation was delayed
+- No correlated Suricata or Zeek events were available for cross-analysis
+- Detection validation relied solely on endpoint logs until the issue was resolved
+- Reduced visibility into the initial command-and-control or payload retrieval behavior
+
+**Root Cause:**  
+Security Onion’s Eval mode places restrictions and structured paths on where logs are stored. Common contributing factors include:
+- Incorrect search paths for Suricata/Zeek logs
+- Suricata not generating EVE events for this simulation type
+- Using the wrong directory level (/nsm/ vs /opt/so/log/)
+- Logs being rotated or stored under a timestamped subfolder
+- Running commands without proper privileges
+
+**Resolution:**
+1. Verified the correct log locations for Security Onion (Eval Mode):
+   ```bash
+   /opt/so/log/suricata/eve.json
+   /nsm/suricata/<sensor-name>/eve.json
+   ```
+2. Confirmed Suricata was actively running and capturing traffic:
+   ```bash
+   systemctl status suricata
+   ```
+3. Validated that the phishing simulation produced traffic types that Suricata is expected to log.
+4. Adjusted search queries to account for rotated or compressed logs when needed:
+   ```bash
+   ls -lah /opt/so/log/suricata/
+   ```
+5. Re-ran the simulation to generate fresh network activity.
+
+**Validation:**   
+Correct log paths were confirmed, and Suricata events were successfully located, allowing network-side validation of the phishing simulation to proceed.
+
+---
+
+### ***Issue 6: Splunk Search Returned No Results Due to Incorrect Time Range or Index Selection***
+
+**Description:**  
+After executing the phishing simulation and confirming that logs were being generated on the Windows endpoint, Splunk searches continued to return **“No results found.”** This occurred even though telemetry was confirmed to be present locally on the host and the Splunk Universal Forwarder was running.
+
+**Impact:**  
+- Delayed validation of detection logic  
+- Misleading appearance that logs were still not ingesting  
+- Duplicate troubleshooting on components that were functioning correctly  
+- Difficulty confirming whether Event ID 4688 and other telemetry were present  
+
+**Root Cause:**  
+The issue was caused by incorrect Splunk search filters, specifically:
+- Selecting the wrong **time range** during searches (e.g., “Last 24 hours” when events were only seconds old)  
+- Not specifying the correct **index**, such as:  
+  - `index=wineventlog`  
+  - `index=sysmon`  
+  - `index=main`  
+- Running searches before Splunk completed indexing the event  
+- Using filters that were too restrictive, unintentionally excluding the correct event source  
+
+**Resolution:**  
+1. Adjusted Splunk search to a broad time range:  
+   ```spl
+   index=* earliest=-15m latest=now
+   ```
+2. Confirmed correct Windows log index using:
+   ```spl
+   | metadata type=sourcetypes
+   ```
+3. Re-ran searches with explicit source paths, such as:
+   ```spl
+   index=wineventlog EventCode=4688
+   ```
+4. Verified the event timestamps aligned with when the phishing simulation occurred.
+5. Allowed Splunk additional time to finish indexing newly forwarded events.
+
+**Validation:**   
+Once the correct time range and index were selected, Splunk displayed the expected 4688 events and related telemetry. This confirmed that the ingestion pipeline was functioning correctly and that prior “no results” responses were not ingestion failures but search configuration issues.
