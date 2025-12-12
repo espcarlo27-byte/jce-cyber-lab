@@ -231,3 +231,38 @@ The issue was caused by incorrect Splunk search filters, specifically:
 
 **Validation:**   
 Once the correct time range and index were selected, Splunk displayed the expected 4688 events and related telemetry. This confirmed that the ingestion pipeline was functioning correctly and that prior “no results” responses were not ingestion failures but search configuration issues.
+
+---
+
+### ***Issue 7: Endpoint Network Connectivity or DNS Resolution Prevented Expected Callback Activity***
+
+**Description:**  
+During the phishing email simulation, the payload executed successfully and endpoint logs were generated; however, no expected outbound network activity or callback behavior was observed from the Windows 11 endpoint. This made it unclear whether the simulated phishing payload attempted any external communication.
+
+**Impact:**  
+- No outbound network indicators were observed  
+- Suricata and Zeek did not record related traffic  
+- Network-based validation of the phishing scenario was incomplete  
+- Detection relied only on endpoint telemetry rather than full kill-chain visibility  
+
+**Root Cause:**  
+The issue was caused by network or name-resolution constraints within the lab environment, including one or more of the following:
+- DNS resolution not functioning correctly on the Windows 11 endpoint  
+- pfSense firewall rules blocking outbound traffic  
+- NAT configuration preventing egress from the internal network  
+- The phishing payload using a hostname that could not be resolved  
+- The simulation being designed to generate endpoint-only telemetry without real external callbacks  
+
+**Resolution:**  
+1. Verified network connectivity from the Windows 11 endpoint using:
+   ```powershell
+   ping 8.8.8.8
+   nslookup google.com
+   ```
+2. Confirmed correct default gateway and DNS server configuration.
+3. Reviewed pfSense firewall and NAT rules to ensure outbound traffic was permitted.
+4. Validated whether the phishing simulation was intended to generate real network callbacks or endpoint-only artifacts.
+5. Adjusted expectations and validation criteria accordingly based on the simulation design.
+
+**Validation:**   
+After confirming network connectivity and understanding the simulation’s intended behavior, endpoint and network visibility were correctly interpreted. This clarified that the absence of network callbacks was due to environment constraints or simulation scope rather than a logging failure.
