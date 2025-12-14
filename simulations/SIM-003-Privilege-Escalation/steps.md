@@ -5,14 +5,16 @@
 Before running this simulation, confirm the following components are online and healthy:
 
 - **Windows 11 Endpoint (10.0.0.50)**
-  - Logged in as a **standard (non-admin) user**
+  - Logged in as a **standard (non-admin) domain user** (e.g. `labuser`)
+  - Joined to domain: `local.lab`
   - Sysmon installed and running
   - Splunk Universal Forwarder running
-  - Local time synchronized
+  - Local system time synchronized
 
 - **Splunk Enterprise (Ubuntu – 10.0.0.60)**
-  - Receiving Windows Event Logs
+  - Receiving Windows Security logs
   - Receiving Sysmon logs
+  - Disk space not blocking searches
   - Splunk Web UI accessible
 
 - **Windows Server (SOC Console)**
@@ -20,149 +22,154 @@ Before running this simulation, confirm the following components are online and 
 
 > ❌ Security Onion, Kali, and pfSense are **not required** for SIM-003.
 
-Before proceeding, confirm Splunk is receiving events:
+### Verify Log Flow Before Proceeding
+
+In Splunk, confirm logs are coming in:
 
 ```spl
-index=winevent_sysmon OR index=winevent_security
+index=winevent_security OR index=winevent_sysmon
 | stats count by index
 ```
+***If results return counts, proceed.***
 
 ---
 
-## 2. Baseline Process Execution (Non-Elevated)
+## 2. Baseline Process Execution (Non-Elevated User)
 
-- On Windows 11, log in as a standard user.
-- Open Command Prompt (non-admin) and run:
-  ```bat
-  whoami
-  ```
-- Expected Output:
-  ```php-template
-  <HOSTNAME>\<standard_user>
-  ```
-- Now Run:
-  ```bat
-  cmd.exe
-  ```
-**This establishes baseline process creation under a non-privileged context.**
+On Windows 11, logged in as the standard domain user:
+   1. Open Command Prompt (do NOT run as administrator)
+   2. Run:
+      ```bat
+      whoami
+      ```
+      Expected Output:
+      ```lua
+      local.lab\labuser
+      ```
+   3. Execute a baseline process:
+      ```bat
+      cmd.exe
+      ```
+      ***⚠️ Note: Running cmd.exe inside an existing command prompt will not open a new window.
+This is expected behavior and still generates process telemetry.***
 
-***This baseline helps differentiate normal execution from elevated execution later.***
+***This establishes normal, non-privileged process creation.***
 
 ---
 
-## 3. Simulated Privilege Escalation (Safe Method)
+## 3. Simulated Privilege Escalation (UAC Elevation)
 
-On Windows 11, perform the following:
+While still logged in as labuser:
    1. Click Start
-   2. Search for Command Prompt
+   2. Search for Notepad
    3. Right-click → Run as administrator
    4. Approve the UAC prompt
+   5. Enter Administrator credentials
 
-**Inside the elevated Command Prompt, run:**
-```bat
-whoami
-```
-Expected Output:
-```perl
-nt authority\system
-OR
-<HOSTNAME>\Administrator
-```
-Now execute a child process:
-```bat
-powershell.exe
-```
-This creates:
-- A high-integrity parent process
-- A privileged child process
-- Clear privilege context change for detection
+Inside the elevated Notepad session:
+- Click File → Open
+- Launch cmd.exe OR powershell.exe from the elevated context
+
+This ensures:
+- A new high-integrity process
+- A clear privilege boundary crossing
+- Reliable Security Event ID 4688
 
 ---
 
 ## 4. Generate Additional Privileged Telemetry (Forced)
 
-Still inside the elevated PowerShell, run:
+Inside the elevated Command Prompt or PowerShell, run:
 ```powershell
 Start-Process cmd.exe
 Start-Process notepad.exe
 ```
-These commands generate:
+This creates:
 - Multiple privileged process creation events
-- Clear parent/child relationships
-- Reproducible Sysmon + Security logs
+- Clear parent → child relationships
+- Reliable Security + Sysmon telemetry
 
 ---
 
 ## 5. Validate Sysmon Telemetry in Splunk
 
-From Splunk Web, run:
+Run the following search:
 ```spl
 index=winevent_sysmon EventCode=1 host=WIN11*
 | table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel
 | sort -_time
 ```
-Look for:
-- **IntegrityLevel** = High or System
-- Parent/child relationships involving:
-    - cmd.exe
-    - powershell.exe
-    - notepad.exe
 
-***Take a screenshot when results are visible.***
+Confirm:
+- IntegrityLevel = High or System
+- Child processes such as:
+   - cmd.exe
+   - powershell.exe
+   - notepad.exe
+
+📸 Take screenshot: ***sim003-sysmon-processcreate.png***
 
 ---
 
-## 6. Validate Windows Security Telemetry in Splunk
+## 6. Validate Windows Security Telemetry (Event ID 4688)
 
 Run:
 ```spl
 index=winevent_security EventCode=4688 host=WIN11*
-| table _time host SubjectUserName NewProcessName ParentProcessName
+| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| table _time host actor NewProcessName ParentProcessName
 | sort -_time
 ```
-Confirm:
-- Elevated user context
-- Matching timestamps with Sysmon events
 
-***Take a screenshot when results are visible.***
+Confirm:
+- Non-elevated events show labuser
+- Elevated events show administrator
+(this is expected even for domain-admin elevation)
+
+📸 Take screenshot: ***sim003-security-4688.png***
 
 ---
 
 ## 7. Correlate Privilege Escalation Behavior
 
 Run the correlation query from queries.md:
-- Combine Sysmon process creation
-- With Security 4688 events
-- Based on host + time window
+- Combine:
+   - Sysmon Event ID 1
+   - Security Event ID 4688
+- Match by:
+   - Host
+   - Time window
 
 Expected conclusion:
-**“A privileged process spawned child processes inconsistent with baseline user activity.”**
+***“A privileged administrator process spawned child processes inconsistent with baseline user activity.”***
 
-***Take a screenshot of the correlated results.***
+📸 Take screenshot: ***sim003-correlation-results.png***
 
 ---
 
 ## 8. Configure and Test Splunk Alert
 
-Create the alert defined in **alert-config.md.**
+Create the alert defined in ***alert-config.md.***
 
-Alert requirements:
+Alert settings:
 - Trigger condition: Results ≥ 1
 - Frequency: Every 5 minutes
 - Time range: Last 15 minutes
 - Severity: High
-- Symbolic ID:
-   **LAB-SIM-003-PRIVESC-ALERT**
+- Symbolic ID: ***LAB-SIM-003-PRIVESC-ALERT***
 
-Force the alert by repeating Step 3 if needed.
-***Capture a screenshot of the alert firing.***
+To force the alert:
+- Repeat Step 3 (UAC elevation)
+
+📸 Take screenshot: ***sim003-alert-fired.png***
 
 ---
 
 ## 9. Save Evidence
 
-Add the following to the screenshots/ folder:
-- sim003-elevated-cmd.png
+Add the following files to screenshots/:
+- sim003-whoami-labuser.png
+- sim003-nonadmin-cmd.png
 - sim003-sysmon-processcreate.png
 - sim003-security-4688.png
 - sim003-correlation-results.png
@@ -180,3 +187,4 @@ Update the SIM-003 checklist in README.md:
 - ✅ Alert triggered
 - ✅ Screenshots saved
 - ✅ Detection matrix updated
+      
