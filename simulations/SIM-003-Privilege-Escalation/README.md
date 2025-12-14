@@ -1,100 +1,69 @@
-# SIM-003 – Privilege Escalation (T1055)
+# SIM-003 – Privilege Escalation via UAC (T1055)
 
 ## 🎯 Goal
 
-Simulate a **local privilege escalation attempt** on a Windows 11 endpoint and validate that:
+Demonstrate detection of privilege escalation by comparing
+non-admin and elevated process execution on a Windows endpoint.
 
-- Endpoint telemetry (Sysmon + Windows Security logs) records elevated process execution
-- Splunk ingests and correlates the events
-- Detection logic identifies abnormal privilege elevation behavior
-- An alert is triggered to represent SOC detection of a privilege escalation attempt
-
-This simulation demonstrates **endpoint-focused detection engineering** without reliance on network sensors.
+This simulation validates that:
+- A standard domain user executes processes in a **medium integrity** context
+- The same host later spawns processes in a **high integrity (administrator)** context
+- Windows Security Event ID 4688 captures this transition
+- Splunk can reliably detect and differentiate the escalation
 
 ---
 
 ## 🧩 MITRE ATT&CK Mapping
 
+- **Technique:** T1055 – Privilege Escalation
 - **Tactic:** Privilege Escalation (TA0004)
-- **Technique:** T1055 – Process Injection / Privilege Escalation (Simulated)
-
-> Note: This lab uses a **safe, non-exploit-based simulation** to generate realistic telemetry without modifying the kernel or system integrity.
 
 ---
 
 ## 🏗 Lab Components Used
 
-- **Victim Endpoint:**  
-  - Windows 11 (10.0.0.50)  
-  - Sysmon installed and configured  
-  - Splunk Universal Forwarder running  
-
-- **SIEM:**  
-  - Splunk Enterprise (Ubuntu – 10.0.0.60)
-
-- **SOC Console / Management:**  
-  - Windows Server (used to access Splunk Web UI)
+- **Windows 11 Endpoint** (10.0.0.50)
+  - Domain joined: `local.lab`
+  - Sysmon enabled
+  - Splunk Universal Forwarder installed
+- **Splunk Enterprise** (Ubuntu – 10.0.0.60)
+- **Windows Server (AD)** – Domain Controller
 
 ---
 
 ## 📂 Files in This Simulation
 
-- `steps.md` – Exact, reproducible steps to execute the simulation
-- `logs.md` – Symbolic and observed log samples (Sysmon + Security)
-- `queries.md` – SPL used to detect and validate escalation behavior
-- `alert-config.md` – Splunk alert definition and symbolic ID
-- `screenshots/` – Evidence of execution, detection, and alerting
-
----
-
-## 🧪 Attack Simulation Overview
-
-The simulation generates telemetry by:
-
-- Launching elevated processes using built-in Windows mechanisms
-- Creating abnormal parent/child process relationships
-- Triggering:
-  - Sysmon **Event ID 1** (Process Create)
-  - Windows Security **Event ID 4688**
-- Capturing execution context differences between standard and elevated sessions
-
-No malware, exploits, or system changes are introduced.
+- `steps.md` – Reproducible execution steps
+- `queries.md` – Detection and validation SPL
+- `alert-config.md` – Alert logic and configuration
+- `logs.md` – Symbolic event samples
+- `screenshots/` – Evidence of execution and detection
 
 ---
 
 ## ✅ Success Criteria
 
-The simulation is considered successful when:
+- Non-admin user (`labuser`) executes a process
+- Elevated process is executed via UAC
+- Windows logs Event ID 4688 for both contexts
+- Elevated execution is logged under `administrator`
+- Splunk detects and displays the privilege escalation
 
-- An elevated process is executed on the Windows 11 endpoint
-- Sysmon logs reflect the elevated process creation
-- Windows Security logs confirm privileged execution
-- Splunk queries return correlated results
-- A Splunk alert fires with the symbolic ID:
-  - `LAB-SIM-003-PRIVESC-ALERT`
+---
+
+## ⚠️ Lessons Learned
+
+- Windows Security logs often use `Account_Name` instead of `user`
+- Elevated domain admins may be logged as **local `administrator`**
+- Detection logic must normalize identity fields
+- GUI-based elevation provides clearer telemetry than CLI reuse
 
 ---
 
 ## 🧾 Status
 
-- [ ] Steps executed
-- [ ] Sysmon and Security logs captured
-- [ ] Detection queries validated in Splunk
-- [ ] Alert configured and triggered
-- [ ] Screenshots captured and saved
-- [ ] Detection matrix updated
-
-Update this checklist as the simulation is completed.
-
----
-
-## 📌 Notes
-
-This simulation focuses on **host-based privilege escalation detection**, which is a critical SOC capability when network telemetry is limited or unavailable.
-
-It is intentionally designed to be:
-- Safe
-- Repeatable
-- Interview-defensible
-- Aligned with real SOC workflows
-
+- [x] Baseline execution captured
+- [x] Elevated execution captured
+- [x] Detection queries validated
+- [x] Alert logic prepared
+- [x] Screenshots collected
