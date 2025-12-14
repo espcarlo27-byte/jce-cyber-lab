@@ -136,15 +136,13 @@ Expected Outcome:
 - Elevated integrity level present
 - Symbolic ID populated:  ***LAB-SIM-003-PRIVESC-ALERT***
 
-✅ Interpretation Guide   
-|---------------------------|----------------------------|   
+** ✅ Interpretation Guide   **  
 | Result                    | Meaning                    |   
 |---------------------------|----------------------------|   
 | High/System integrity     | Privilege escalation       |    
 | Abnormal parent chain     | Suspicious behavior        |   
 | Sysmon + Security match   | High-confidence detection  |   
 | Alert fires               | Detection validated        |   
-|---------------------------|----------------------------|   
 
 ***This file represents the finalized detection engineering logic for SIM-003 and
 reflects real-world Windows logging behavior observed during execution.***
