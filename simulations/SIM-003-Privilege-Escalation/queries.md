@@ -71,10 +71,10 @@ Why This Matters:
 Purpose:
 Confirm process creation at the native Windows Security auditing layer.
 
-**⚠️ Field Mapping Note:**   
-***Event ID 4688 does not reliably populate the user field.
-Windows instead records the executing account under fields such as:
-Account_Name and SubjectUserName.***
+> ⚠️ Field Mapping Note:   
+> ***Event ID 4688 does not reliably populate the user field.
+> Windows instead records the executing account under fields such as:
+> Account_Name and SubjectUserName.***
 ```spl
 index=winevent_security EventCode=4688 host=WIN11*
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
@@ -136,7 +136,7 @@ Expected Outcome:
 - Elevated integrity level present
 - Symbolic ID populated:  ***LAB-SIM-003-PRIVESC-ALERT***
 
-** ✅ Interpretation Guide   **  
+**✅ Interpretation Guide**  
 | Result                    | Meaning                    |   
 |---------------------------|----------------------------|   
 | High/System integrity     | Privilege escalation       |    
