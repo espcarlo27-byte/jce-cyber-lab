@@ -6,8 +6,9 @@ Before running this simulation, confirm the following components are online and 
 
 - **Windows 11 Endpoint (10.0.0.50)**
   - Logged in as a **standard (non-admin) domain user** (e.g. `labuser`)
+  - Hostname: **Windows11Pro**
   - Joined to domain: `local.lab`
-  - Sysmon installed and running
+  - Sysmon installed and running (used as supplemental telemetry)
   - Splunk Universal Forwarder running
   - Local system time synchronized
 
@@ -36,7 +37,7 @@ index=winevent_security OR index=winevent_sysmon
 
 ## 2. Baseline Process Execution (Non-Elevated User)
 
-On Windows 11, logged in as the standard domain user:
+On Windows 11, log in as a standard (non-admin) user.
    1. Open Command Prompt (do NOT run as administrator)
    2. Run:
       ```bat
@@ -61,25 +62,32 @@ On Windows 11, logged in as the standard domain user:
 
 While still logged in as labuser:
    1. Click Start
-   2. Search for Notepad
+   2. Search for Command Prompt
    3. Right-click → Run as administrator
    4. Approve the UAC prompt
    5. Enter Administrator credentials
 
-Inside the elevated Notepad session:
-- Click File → Open
-- Launch cmd.exe OR powershell.exe from the elevated context
-
-This ensures:
-- A new high-integrity process
-- A clear privilege boundary crossing
-- Reliable Security Event ID 4688
+Inside the elevated Command Prompt, run:
+```bat
+whoami
+```
+Expected output:
+```pgsql
+NT AUTHORITY\SYSTEM
+OR
+LOCAL.LAB\Administrator
+```
+Now execute:
+```bat
+powershell.exe
+```
+This creates a privileged parent → child process chain.
 
 ---
 
-## 4. Generate Additional Privileged Telemetry (Forced)
+## 4. Generate Additional Privileged Activity (Forced)
 
-Inside the elevated Command Prompt or PowerShell, run:
+Still inside the elevated PowerShell, run:
 ```powershell
 Start-Process cmd.exe
 Start-Process notepad.exe
@@ -88,102 +96,88 @@ This creates:
 - Multiple privileged process creation events
 - Clear parent → child relationships
 - Reliable Security + Sysmon telemetry
+- Clear escalation context
+- Reproducible Security telemetry
 
 ---
 
-## 5. Validate Sysmon Telemetry in Splunk
+## 5. Validate Privilege Escalation via Windows Security Logs (PRIMARY)
 
 Run the following search:
-```spl
-index=winevent_sysmon EventCode=1 host="Windows11Pro"
-| table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel
-| sort -_time
-```
-
-Expected outcome (environment-dependent):
-- If Sysmon ProcessCreate logging is enabled:
-   - `IntegrityLevel` = High or System
-   - Child processes such as:
-      - cmd.exe
-      - powershell.exe
-      - notepad.exe
-- If no results appear:
-   - This indicates Sysmon ProcessCreate events are not enabled or filtered in the current configuration.
-> Note: In this environment, Sysmon Event ID 1 did not capture elevated process creation.
-> Windows Security Event ID 4688 was used as the authoritative telemetry source.
-
-📸 Screenshot handling:
-- If results appear → save as ***sim003-sysmon-processcreate.png***
-- If no results appear → do not fabricate evidence
-   - Proceed to Step 6
-
----
-
-## 6. Validate Windows Security Telemetry (Event ID 4688)
-
-Run:
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
 | table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
 | sort -_time
 ```
-> Note: Field names were validated against live telemetry.
-> New_Process_Name, Parent_Process_Name, and Process_Command_Line were used instead of legacy field aliases to ensure reliable detection.
 
 Confirm:
-- Non-elevated events show labuser
-- Elevated events show administrator
-(this is expected even for domain-admin elevation)
+- Actor shows an elevated account
+- New processes include:
+   - cmd.exe
+   - powershell.exe
+   - notepad.exe
+- Parent/child relationships reflect escalation
 
-📸 Take screenshot: ***sim003-security-4688.png***
+📸 Take screenshot: `sim003-security-4688.png`
 
 ---
 
-## 7. Correlate Privilege Escalation Behavior
+## 6. Validate Sysmon Telemetry (Supplemental – If Available)
 
-Run the correlation query from queries.md:
-- Combine:
-   - Sysmon Event ID 1
-   - Security Event ID 4688
-- Match by:
-   - Host
-   - Time window
+If Sysmon telemetry is available, run:
+```spl
+index=winlog EventCode=1 host="Windows11Pro"
+| table _time host User Image ParentImage CommandLine IntegrityLevel
+| sort -_time
+```
+
+Confirm:
+- IntegrityLevel = High or System
+- Child processes match privileged activity
+
+📸 Optional screenshot: `sim003-sysmon-processcreate.png`
+
+> ⚠️ If no Sysmon events appear, proceed without this step.
+> Security Event 4688 is the authoritative validation source for this simulation.
+
+---
+
+## 7. Correlate Privileged Activity
+
+Run the correlation query from `queries.md`.
 
 Expected conclusion:
-***“A privileged administrator process spawned child processes inconsistent with baseline user activity.”***
+> “A privileged account spawned child processes inconsistent with baseline user activity.”
 
-📸 Take screenshot: ***sim003-correlation-results.png***
+📸 Take screenshot: `sim003-correlation-results.png`
 
 ---
 
 ## 8. Configure and Test Splunk Alert
 
-Create the alert defined in ***alert-config.md.***
+Create the alert defined in `alert-config.md`.
 
-Alert settings:
+Alert setting requirements:
 - Trigger condition: Results ≥ 1
 - Frequency: Every 5 minutes
 - Time range: Last 15 minutes
 - Severity: High
-- Symbolic ID: ***LAB-SIM-003-PRIVESC-ALERT***
+- Symbolic ID: `LAB-SIM-003-PRIVESC-ALERT`
 
-To force the alert:
-- Repeat Step 3 (UAC elevation)
+***Re-run Steps 3–4 to force the alert if needed.***
 
-📸 Take screenshot: ***sim003-alert-fired.png***
+📸 Take screenshot: `sim003-alert-fired.png`
 
 ---
 
 ## 9. Save Evidence
 
-Add the following files to screenshots/:
-- sim003-whoami-labuser.png
-- sim003-nonadmin-cmd.png
-- sim003-sysmon-processcreate.png
-- sim003-security-4688.png
-- sim003-correlation-results.png
-- sim003-alert-fired.png
+Add the following to the screenshots/ folder:
+- `sim003-security-4688.png`
+- `sim003-correlation-results.png`
+- `sim003-alert-fired.png`
+- `sim003-sysmon-processcreate.png (optional)`
 
 ---
 
@@ -191,10 +185,9 @@ Add the following files to screenshots/:
 
 Update the SIM-003 checklist in README.md:
 - ✅ Steps executed
-- ✅ Sysmon telemetry captured
-- ✅ Security logs captured
+- ✅ Security logs captured (4688)
+- ⚠️ Sysmon telemetry (supplemental)
 - ✅ Detection queries validated
 - ✅ Alert triggered
 - ✅ Screenshots saved
 - ✅ Detection matrix updated
-      
