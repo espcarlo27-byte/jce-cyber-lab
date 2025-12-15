@@ -1,13 +1,11 @@
 # SIM-003 – Privilege Escalation (T1055) – SPL Queries
 
 This file documents all Splunk searches used to detect, validate, and correlate
-**local privilege escalation behavior** on a Windows 11 endpoint.
+**local privilege escalation behavior** on a Windows 11 endpoint (**Windows11Pro**).  
 
-The detection is based on:
-- Elevated process creation
-- Abnormal parent/child relationships
-- High-integrity execution contexts
-- Correlation between Sysmon and Windows Security logs
+This simulation reflects **real-world Windows logging behavior**, where
+**Windows Security Event ID 4688** is the authoritative source for process creation,
+and **Sysmon telemetry is supplemental enrichment** when available.
 
 ---
 
@@ -17,23 +15,6 @@ The detection is based on:
 Establish normal, non-privileged process execution for comparison.
 
 ```spl
-index=winevent_sysmon EventCode=1 host="Windows11Pro"
-| table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel
-| sort -_time
-```
-
-What This Confirms:
-- Normal user context (e.g. labuser)
-- Standard integrity level (Medium)
-- Expected parent/child relationships
-
----
-
-## 2. Elevated Process Creation (Primary Detection – Sysmon)
-
-Purpose:
-Detect processes launched with High or System integrity, indicating potential privilege escalation.
-```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
 | table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
@@ -41,105 +22,121 @@ index=winevent_security EventCode=4688 host="Windows11Pro"
 ```
 
 What This Confirms:
-- Elevated execution context
-- Privilege boundary crossing
-- Reliable escalation signal independent of user naming
+- Standard user context (e.g. labuser)
+- Normal parent/child relationships
+- No elevated execution
 
 ---
 
-## 3. Suspicious Parent → Child Process Chains
+## 2. Elevated Process Creation (PRIMARY DETECTION – Windows Security)
+
+Purpose:
+Detect privileged process execution via UAC elevation or administrator context.
+```spl
+index=winevent_security EventCode=4688 host="Windows11Pro"
+| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| where like(actor, "%administrator%") OR like(actor, "%system%")
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+| sort -_time
+```
+
+What This Confirms:
+- Privileged execution context
+- Clear privilege boundary crossing
+- Reliable escalation signal independent of Sysmon
+
+---
+
+## 3. Suspicious Parent → Child Process Chains (Security Logs)
 
 Purpose:
 Identify abnormal parent/child relationships commonly observed during privilege escalation.
 ```spl
-index=winevent_sysmon EventCode=1 host="Windows11Pro"
+index=winevent_security EventCode=4688 host="Windows11Pro"
+| eval actor=lower(coalesce(Account_Name, SubjectUserName))
 | where Parent_Process_Name="*cmd.exe"
 | where New_Process_Name="*powershell.exe" OR New_Process_Name="*notepad.exe"
-| table _time host User Parent_Process_Name New_Process_Name Process_Command_Line IntegrityLevel
+| table _time host actor Parent_Process_Name New_Process_Name Process_Command_Line
 | sort -_time
 ```
 
 Why This Matters:
-- Administrative shells spawning child processes are high-risk
-- Matches real-world attacker tradecraft
+- Administrative shells spawning child processes is high-risk
+- Matches real attacker tradecraft
 - Low false-positive rate in baseline environments
 
----
-
-## 4. Windows Security Log Validation (Event ID 4688)
+## 4. Supplemental Sysmon Process Creation (If Available)
 
 Purpose:
-Confirm process creation at the native Windows Security auditing layer.
+Provide additional context using Sysmon process creation events.
 
-> ⚠️ Field Mapping Note:   
-> ***Event ID 4688 does not reliably populate the user field.
-> Windows instead records the executing account under fields such as:
-> Account_Name and SubjectUserName.***
+> ⚠️ Sysmon events are ingested into index=winlog in this lab environment.
 ```spl
-index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+index=winlog EventCode=1 host="Windows11Pro"
+| table _time host User Image ParentImage CommandLine IntegrityLevel
 | sort -_time
 ```
-What This Confirms:
-- OS-level acknowledgement of process creation
-- Elevated execution context
-- Timeline alignment with Sysmon events
+
+What This Adds:
+- IntegrityLevel confirmation (High / System)
+- Clear parent/child lineage
+- Additional confidence when correlating with Security logs
 
 ---
 
-## 5. Cross-Source Correlation (Sysmon + Security)
+## 5. Cross-Source Correlation (Security + Sysmon)
 
 Purpose:
-Correlate elevated Sysmon process creation with Windows Security confirmation.
+Correlate Windows Security process creation with Sysmon telemetry for higher confidence.
 ```spl
 (
-  index=winevent_sysmon EventCode=1 host="Windows11Pro"
-  (IntegrityLevel="High" OR IntegrityLevel="System")
+  index=winevent_security EventCode=4688 host="Windows11Pro"
 )
 OR
 (
-  index=winevent_security EventCode=4688 host="Windows11Pro"
+  index=winlog EventCode=1 host="Windows11Pro"
 )
 | eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
 | eval simulation_id="SIM-003"
 | eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel simulation_id symbolic_id
+| table _time host actor New_Process_Name Image Parent_Process_Name ParentImage Process_Command_Line CommandLine IntegrityLevel simulation_id symbolic_id
 | sort -_time
 ```
 
 What This Proves:
 - Privilege escalation occurred
-- Confirmed at multiple telemetry layers
-- Strong, alert-ready detection signal
-
----
+- Confirmed at one or more telemetry layers
+- Alert-ready detection signal
 
 ## 6. ✅ PRIMARY ALERT QUERY (FINAL)
 
 Purpose:
-This is the exact query used to trigger the Splunk alert.
+This is the exact query used to trigger the Splunk alert for SIM-003.
 ```spl
-index=winevent_sysmon EventCode=1 host="Windows11Pro"
-| where IntegrityLevel="High" OR IntegrityLevel="System"
+index=winevent_security EventCode=4688 host="Windows11Pro"
+| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| where like(actor, "%administrator%") OR like(actor, "%system%")
 | eval simulation_id="SIM-003"
 | eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel simulation_id symbolic_id
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line simulation_id symbolic_id
 | sort -_time
 ```
 
 Expected Outcome:
 - One or more results → alert fires
-- Elevated integrity level present
-- Symbolic ID populated:  ***LAB-SIM-003-PRIVESC-ALERT***
+- Privileged execution confirmed
+- Symbolic ID present: `LAB-SIM-003-PRIVESC-ALERT`
 
-**✅ Interpretation Guide**  
-| Result                    | Meaning                    |   
-|---------------------------|----------------------------|   
-| High/System integrity     | Privilege escalation       |    
-| Abnormal parent chain     | Suspicious behavior        |   
-| Sysmon + Security match   | High-confidence detection  |   
-| Alert fires               | Detection validated        |   
+---
 
-***This file represents the finalized detection engineering logic for SIM-003 and
-reflects real-world Windows logging behavior observed during execution.***
+✅ Interpretation Guide   
+| Result                      |	Meaning                     |
+|-----------------------------|-----------------------------|
+| Privileged actor detected	  | Escalation occurred         |
+| Abnormal parent/child chain	| Suspicious behavior         |
+| Security 4688 present       |	Authoritative confirmation  |
+| Sysmon enrichment present	  | Higher confidence           |
+| Alert fires	                | Detection validated         |
+
+> This file represents the finalized detection engineering logic for SIM-003
+> and accurately reflects the telemetry and constraints observed in the lab.
