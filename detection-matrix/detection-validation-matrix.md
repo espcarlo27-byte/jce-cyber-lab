@@ -1,38 +1,63 @@
-# Detection Validation Matrix
+# 📊 Detection Validation Matrix
 
-This matrix provides a **1:1 mapping** between simulated attack scenarios and their validated detections across endpoint and network telemetry.
+This matrix tracks the **validation status of all detection scenarios** in the JCE Cyber Lab.  
+Each simulation listed below has a **1:1 mapped folder** containing:
 
-Each row links directly to a **hands-on simulation folder** containing:
 - Reproducible steps
-- Symbolic and real logs
-- Detection queries
+- Symbolic + real logs
+- SPL detection queries
 - Alert configurations
 - Screenshots as evidence
 
-This matrix serves as the **authoritative validation record** for the JCE Cyber Lab.
+> ✅ A scenario is considered **Validated** only when detection logic, alerting, and evidence are complete.
 
 ---
 
-## 🧪 Detection Validation Matrix
+## 🧪 Simulation Coverage Matrix
 
-| SIM ID  | Scenario Name            | MITRE ATT&CK | Tactic                | Data Sources                              | Detection Tools            | Alert Symbolic ID                  | Status        | Evidence |
-|--------:|--------------------------|--------------|------------------------|-------------------------------------------|----------------------------|-----------------------------------|---------------|----------|
-| SIM-001 | Phishing Email (Link)    | T1566.002    | Initial Access         | Sysmon, Suricata, HTTP                    | Splunk, Security Onion     | LAB-SIM-001-PHISHING-ALERT         | ✅ Validated  | [View](../simulations/SIM-001-Phishing-Email/) |
-| SIM-002 | DNS Tunneling            | T1071.004    | Command & Control      | DNS Logs, Network Traffic                 | Zeek, Suricata, Splunk     | LAB-SIM-002-DNS-TUNNEL-ALERT       | ⚠️ Partial    | [View](../simulations/SIM-002-DNS-Tunneling/) |
-| SIM-003 | Privilege Escalation     | T1055        | Privilege Escalation   | Sysmon, Windows Security (4688)           | Splunk                     | LAB-SIM-003-PRIVESC-ALERT          | ✅ Validated  | [View](../simulations/SIM-003-Privilege-Escalation/) |
-| SIM-004 | SQL Injection            | T1190        | Initial Access         | Web / HTTP Logs                           | Suricata, Splunk           | TBD                               | ⏳ Planned    | — |
-| SIM-005 | Unauthorized File Access | T1070        | Defense Evasion        | Windows Logs, Sysmon                      | Splunk                     | TBD                               | ⏳ Planned    | — |
-| SIM-006 | Sysmon ProcessCreate     | T1059        | Execution              | Sysmon                                    | Splunk                     | TBD                               | ⏳ Planned    | — |
-| SIM-007 | Sysmon FileCreate        | T1105        | Command & Control      | Sysmon                                    | Splunk                     | TBD                               | ⏳ Planned    | — |
-| SIM-008 | PowerShell Download      | T1059.001    | Execution              | Sysmon, Network                           | Splunk, Suricata           | TBD                               | ⏳ Planned    | — |
+| SIM ID | Scenario | MITRE ATT&CK | Data Sources | Detection Logic | Alert | Evidence | Status |
+|------|---------|--------------|-------------|----------------|-------|----------|--------|
+| **SIM-001** | Phishing Email (Link) | T1566.002 | Sysmon, Network | SPL Correlation | ✅ | Screenshots | **Validated** |
+| **SIM-002** | DNS Tunneling | T1071.004 | DNS, Network | SPL + Pattern Analysis | ⚠️ Partial | Screenshots | **Partial** |
+| **SIM-003** | Privilege Escalation | T1055 | Sysmon, Security | SPL Integrity Analysis | ✅ | Screenshots | **Validated** |
+| SIM-004 | SQL Injection | T1190 | Web / HTTP Logs | Planned | ⏳ | ⏳ | Planned |
+| SIM-005 | Unauthorized File Access | T1070 | Windows Logs | Planned | ⏳ | ⏳ | Planned |
+| SIM-006 | Sysmon ProcessCreate | T1059 | Sysmon | Planned | ⏳ | ⏳ | Planned |
+| SIM-007 | Sysmon FileCreate | T1105 | Sysmon | Planned | ⏳ | ⏳ | Planned |
+| SIM-008 | PowerShell Download | T1059.001 | Sysmon, Network | Planned | ⏳ | ⏳ | Planned |
 
 ---
 
-## 🧠 Status Legend
+## 🔗 Simulation References
 
-- ✅ **Validated** — Simulation executed, logs captured, detection confirmed, alert fired, screenshots saved  
-- ⚠️ **Partial** — Simulation executed with documented environmental limitations  
-- ⏳ **Planned** — Simulation structure created, execution pending  
+| SIM ID | Link |
+|-----|-----|
+| SIM-001 | [SIM-001 – Phishing Email](../simulations/SIM-001-Phishing-Email/) |
+| SIM-002 | [SIM-002 – DNS Tunneling](../simulations/SIM-002-DNS-Tunneling/) |
+| SIM-003 | [SIM-003 – Privilege Escalation](../simulations/SIM-003-Privilege-Escalation/) |
+| SIM-004 | [SIM-004 – SQL Injection](../simulations/SIM-004-SQL-Injection/) |
+| SIM-005 | [SIM-005 – Unauthorized File Access](../simulations/SIM-005-Unauthorized-File-Access/) |
+| SIM-006 | [SIM-006 – Sysmon ProcessCreate](../simulations/SIM-006-Sysmon-ProcessCreate/) |
+| SIM-007 | [SIM-007 – Sysmon FileCreate](../simulations/SIM-007-Sysmon-FileCreate/) |
+| SIM-008 | [SIM-008 – PowerShell Download](../simulations/SIM-008-PowerShell-Download/) |
+
+---
+
+## 🧠 Status Definitions
+
+| Status | Meaning |
+|------|--------|
+| **Validated** | Detection logic, alert, and evidence confirmed |
+| **Partial** | Detection logic exists but blocked by environment constraints |
+| **Planned** | Folder structure exists; execution pending |
+
+---
+
+## 📌 Notes
+
+- **SIM-002** is marked **Partial** due to Security Onion Elastic limitations in evaluation mode.
+- **SIM-001** and **SIM-003** are **fully validated** with alerts firing and screenshots captured.
+- All future simulations will follow the **same evidence-driven workflow**.
 
 ---
 
@@ -61,6 +86,7 @@ This matrix serves as the **authoritative validation record** for the JCE Cyber 
 > - Alerted  
 > - Evidenced  
 
-This matrix reflects **real lab execution**, not theoretical coverage.
+> **This matrix represents real detection engineering work, not theoretical coverage.**  
+> Each “Validated” entry is backed by logs, queries, alerts, and screenshots.
 
 ---
