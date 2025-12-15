@@ -28,11 +28,12 @@ This alert uses the **primary detection query** finalized in `queries.md` and re
 real-world Windows logging behavior observed during execution.
 
 ```spl
-index=winevent_sysmon EventCode=1 host=WIN11*
-| where IntegrityLevel="High" OR IntegrityLevel="System"
+index=winevent_sysmon EventCode=1 host="Windows11Pro"
+(IntegrityLevel="High" OR IntegrityLevel="System")
+| eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
 | eval simulation_id="SIM-003"
 | eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel simulation_id symbolic_id
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel simulation_id symbolic_id
 | sort -_time
 ```
 
@@ -40,7 +41,7 @@ Detection Notes:
 - Sysmon Event ID 1 provides the most reliable signal for integrity level elevation
 - User attribution may vary due to UAC context switching
 - Elevated activity is validated by integrity level rather than username alone
-
+- Actor is derived using coalesce() to ensure consistent user attribution across Security and Sysmon telemetry.
 ---
 
 ## ⏱️ Scheduling Configuration
@@ -97,7 +98,7 @@ These fields support:
 ## 🧾 Example Alert Output (Symbolic)
 ``` text
 _time: 2025-03-05 14:18:42
-host: WIN11-LAB
+host: Windows11Pro
 User: administrator
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
 Parent_Process_Name: C:\Windows\System32\cmd.exe
