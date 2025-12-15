@@ -20,6 +20,19 @@ used to validate detection logic in `queries.md` and alerting in `alert-config.m
 
 ---
 
+## Field Normalization Notes
+
+During validation, the following field mappings were confirmed as reliable in this environment:
+
+- `New_Process_Name`
+- `Parent_Process_Name`
+- `Process_Command_Line`
+- `Account_Name` / `SubjectUserName` (normalized using `coalesce()`)
+
+Legacy aliases (e.g., `NewProcessName`) were not consistently populated and were excluded from final detections.
+
+---
+
 ## 1. Baseline Process Creation (Non-Elevated User)
 
 **Source:** Sysmon  
@@ -29,7 +42,7 @@ used to validate detection logic in `queries.md` and alerting in `alert-config.m
 
 ```text
 Time: 2025-03-05 14:05:11
-Host: WIN11-LAB
+Host: Windows11Pro
 User: local.lab\labuser
 New_Process_Name: C:\Windows\System32\cmd.exe
 Parent_Process_Name: C:\Windows\explorer.exe
@@ -51,7 +64,7 @@ User Context: administrator
 Integrity Level: High
 ```text
 Time: 2025-03-05 14:18:42
-Host: WIN11-LAB
+Host: Windows11Pro
 User: administrator
 New_Process_Name: C:\Windows\System32\cmd.exe
 Parent_Process_Name: C:\Windows\explorer.exe
@@ -72,7 +85,7 @@ Event ID: 1
 Integrity Level: High
 ```text
 Time: 2025-03-05 14:19:07
-Host: WIN11-LAB
+Host: Windows11Pro
 User: administrator
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
 Parent_Process_Name: C:\Windows\System32\cmd.exe
@@ -93,7 +106,7 @@ Event ID: 4688
 Account Context: administrator
 ```text
 Time: 2025-03-05 14:18:42
-Host: WIN11-LAB
+Host: Windows11Pro
 Account_Name: administrator
 NewProcessName: C:\Windows\System32\cmd.exe
 ParentProcessName: C:\Windows\explorer.exe
