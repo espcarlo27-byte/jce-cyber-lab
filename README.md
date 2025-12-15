@@ -19,20 +19,26 @@ This cyber lab demonstrates my ability to design, deploy, and operate a full det
 
 ---
 
-## 📊 Detection Validation Matrix (Aligned 1:1)
+## 📊 Detection Validation Matrix (Authoritative)
 
-Each scenario has a matching `/simulations/SIM-00X-*` folder containing: steps, logs, queries, alerts, and screenshots.
+This lab uses a **1:1 mapping** between detection scenarios and hands-on simulations.
+Each simulation contains full evidence: steps, logs, queries, alerts, and screenshots.
 
-| SIM ID       | Scenario                 | MITRE ATT&CK | Data Source                          | Detection Tools                | Status        |
-| ------------ | ------------------------ | ------------ | ------------------------------------ | ------------------------------ | ------------- |
-| SIM-001      | Phishing Email           | T1566.002    | Windows Security 4688 + Network      | Splunk, Suricata               | ✅ Validated  |
-| SIM-002      | DNS Tunneling            | T1071.004    | DNS + Network                        | Suricata, Zeek, tcpdump        | ✅ Validated (Sensor-Level) |
-| SIM-003      | Privilege Escalation     | T1055        | Windows + Sysmon                     | Wazuh, Splunk                  | Ready         |
-| SIM-004      | SQL Injection            | T1190        | Web/HTTP Logs                        | Suricata, Splunk               | Ready         |
-| SIM-005      | Unauthorized File Access | T1070        | Windows Logs                         | Splunk                         | Ready         |
-| SIM-006      | Sysmon ProcessCreate     | T1059        | Sysmon                               | Sysmon, Splunk                 | Ready         |
-| SIM-007      | Sysmon FileCreate        | T1105        | Sysmon                               | Sysmon, Splunk                 | Ready         |
-| SIM-008      | PowerShell Download      | T1059.001    | Sysmon + Network                     | Sysmon, Suricata, Splunk       | Ready         |
+➡️ **[Detection Validation Matrix – Live Status](detection-matrix/detection-validation-matrix.md)**
+
+### Summary Coverage
+| Area | Coverage |
+|-----|---------|
+| Initial Access | Phishing, DNS abuse |
+| Execution | Sysmon process telemetry |
+| Privilege Escalation | UAC & elevated execution |
+| Command & Control | DNS tunneling |
+| Detection Engineering | SPL, correlation, alerting |
+| Validation Evidence | Logs + screenshots per SIM |
+
+> 📌 **Note:**  
+> The matrix above is the *single source of truth* for simulation status and validation.
+> Individual simulation folders contain the supporting technical artifacts.
 
 ---
 
