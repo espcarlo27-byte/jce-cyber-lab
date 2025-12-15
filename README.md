@@ -21,10 +21,16 @@ This cyber lab demonstrates my ability to design, deploy, and operate a full det
 
 ## 📊 Detection Validation Matrix (Authoritative)
 
-This lab uses a **1:1 mapping** between detection scenarios and hands-on simulations.
-Each simulation contains full evidence: steps, logs, queries, alerts, and screenshots.
+This lab follows a **1:1 mapping model** between detection scenarios and hands-on simulations.
+Each simulation folder contains full technical evidence:
 
-➡️ **[Detection Validation Matrix – Live Status](detection-matrix/detection-validation-matrix.md)**
+- Reproducible execution steps
+- Symbolic and real log evidence
+- SPL detection queries
+- Alert configurations
+- Screenshots proving detection and alerting
+
+➡️ **[View the Detection Validation Matrix](detection-matrix/detection-validation-matrix.md)**
 
 ### Summary Coverage
 | Area | Coverage |
@@ -36,9 +42,9 @@ Each simulation contains full evidence: steps, logs, queries, alerts, and screen
 | Detection Engineering | SPL, correlation, alerting |
 | Validation Evidence | Logs + screenshots per SIM |
 
-> 📌 **Note:**  
-> The matrix above is the *single source of truth* for simulation status and validation.
-> Individual simulation folders contain the supporting technical artifacts.
+> 📌 **Important:**  
+> The Detection Validation Matrix is the **authoritative source of truth** for scenario status.  
+> Individual simulation folders contain the supporting artifacts and evidence.
 
 ---
 
