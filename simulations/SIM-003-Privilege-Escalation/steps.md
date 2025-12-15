@@ -100,14 +100,22 @@ index=winevent_sysmon EventCode=1 host="Windows11Pro"
 | sort -_time
 ```
 
-Confirm:
-- IntegrityLevel = High or System
-- Child processes such as:
-   - cmd.exe
-   - powershell.exe
-   - notepad.exe
+Expected outcome (environment-dependent):
+- If Sysmon ProcessCreate logging is enabled:
+   - `IntegrityLevel` = High or System
+   - Child processes such as:
+      - cmd.exe
+      - powershell.exe
+      - notepad.exe
+- If no results appear:
+   - This indicates Sysmon ProcessCreate events are not enabled or filtered in the current configuration.
+> Note: In this environment, Sysmon Event ID 1 did not capture elevated process creation.
+> Windows Security Event ID 4688 was used as the authoritative telemetry source.
 
-📸 Take screenshot: ***sim003-sysmon-processcreate.png***
+📸 Screenshot handling:
+- If results appear → save as ***sim003-sysmon-processcreate.png***
+- If no results appear → do not fabricate evidence
+   - Proceed to Step 6
 
 ---
 
