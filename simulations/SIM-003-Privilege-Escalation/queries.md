@@ -17,7 +17,7 @@ The detection is based on:
 Establish normal, non-privileged process execution for comparison.
 
 ```spl
-index=winevent_sysmon EventCode=1 host=WIN11*
+index=winevent_sysmon EventCode=1 host="Windows11Pro"
 | table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel
 | sort -_time
 ```
@@ -34,9 +34,9 @@ What This Confirms:
 Purpose:
 Detect processes launched with High or System integrity, indicating potential privilege escalation.
 ```spl
-index=winevent_sysmon EventCode=1 host=WIN11*
-| where IntegrityLevel="High" OR IntegrityLevel="System"
-| table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel
+index=winevent_security EventCode=4688 host="Windows11Pro"
+| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -52,7 +52,7 @@ What This Confirms:
 Purpose:
 Identify abnormal parent/child relationships commonly observed during privilege escalation.
 ```spl
-index=winevent_sysmon EventCode=1 host=WIN11*
+index=winevent_sysmon EventCode=1 host="Windows11Pro"
 | where Parent_Process_Name="*cmd.exe"
 | where New_Process_Name="*powershell.exe" OR New_Process_Name="*notepad.exe"
 | table _time host User Parent_Process_Name New_Process_Name Process_Command_Line IntegrityLevel
@@ -76,9 +76,9 @@ Confirm process creation at the native Windows Security auditing layer.
 > Windows instead records the executing account under fields such as:
 > Account_Name and SubjectUserName.***
 ```spl
-index=winevent_security EventCode=4688 host=WIN11*
+index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| table _time host actor NewProcessName ParentProcessName
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
 | sort -_time
 ```
 What This Confirms:
@@ -94,20 +94,17 @@ Purpose:
 Correlate elevated Sysmon process creation with Windows Security confirmation.
 ```spl
 (
-  index=winevent_sysmon EventCode=1 host=WIN11*
-  | where IntegrityLevel="High" OR IntegrityLevel="System"
-  | eval source="sysmon"
+  index=winevent_sysmon EventCode=1 host="Windows11Pro"
+  (IntegrityLevel="High" OR IntegrityLevel="System")
 )
 OR
 (
-  index=winevent_security EventCode=4688 host=WIN11*
-  | eval actor=lower(coalesce(Account_Name, SubjectUserName))
-  | where actor="administrator"
-  | eval source="security"
+  index=winevent_security EventCode=4688 host="Windows11Pro"
 )
+| eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
 | eval simulation_id="SIM-003"
 | eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host source actor User New_Process_Name NewProcessName Parent_Process_Name ParentProcessName IntegrityLevel simulation_id symbolic_id
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel simulation_id symbolic_id
 | sort -_time
 ```
 
@@ -123,7 +120,7 @@ What This Proves:
 Purpose:
 This is the exact query used to trigger the Splunk alert.
 ```spl
-index=winevent_sysmon EventCode=1 host=WIN11*
+index=winevent_sysmon EventCode=1 host="Windows11Pro"
 | where IntegrityLevel="High" OR IntegrityLevel="System"
 | eval simulation_id="SIM-003"
 | eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
