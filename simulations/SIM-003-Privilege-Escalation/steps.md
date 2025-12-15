@@ -50,8 +50,8 @@ On Windows 11, logged in as the standard domain user:
       ```bat
       cmd.exe
       ```
-      ***⚠️ Note: Running cmd.exe inside an existing command prompt will not open a new window.
-This is expected behavior and still generates process telemetry.***
+>      ⚠️ Note: Running cmd.exe inside an existing command prompt will not open a new window.   
+>      This is expected behavior and still generates process telemetry.
 
 ***This establishes normal, non-privileged process creation.***
 
@@ -95,7 +95,7 @@ This creates:
 
 Run the following search:
 ```spl
-index=winevent_sysmon EventCode=1 host=WIN11*
+index=winevent_sysmon EventCode=1 host="Windows11Pro"
 | table _time host User New_Process_Name Parent_Process_Name Process_Command_Line IntegrityLevel
 | sort -_time
 ```
@@ -115,11 +115,13 @@ Confirm:
 
 Run:
 ```spl
-index=winevent_security EventCode=4688 host=WIN11*
+index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| table _time host actor NewProcessName ParentProcessName
+| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
 | sort -_time
 ```
+> Note: Field names were validated against live telemetry.
+> New_Process_Name, Parent_Process_Name, and Process_Command_Line were used instead of legacy field aliases to ensure reliable detection.
 
 Confirm:
 - Non-elevated events show labuser
