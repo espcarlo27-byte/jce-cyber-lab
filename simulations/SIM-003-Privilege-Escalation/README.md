@@ -1,18 +1,17 @@
 # SIM-003 – Privilege Escalation (T1055)
 
-## 🎯 Simulation Overview
+## 🎯 Goal
 
-This simulation demonstrates **local privilege escalation detection** on a Windows 11 endpoint by observing
-process creation under elevated (Administrator or SYSTEM) context.
+Simulate and detect **local privilege escalation** on a Windows 11 endpoint by validating that:
 
-The objective is to validate that:
-- A standard user can elevate privileges via UAC
-- Windows Security logs record the escalation accurately
-- Splunk detects and alerts on the privileged process creation
-- The activity is documented with reproducible evidence
+- A standard user executes processes normally (baseline)
+- Privileged execution occurs via UAC elevation
+- Elevated processes spawn child processes
+- Telemetry is captured in **Windows Security (4688)** and **Sysmon**
+- Splunk detects and alerts on elevated integrity execution
 
-This simulation aligns with **enterprise SOC detection workflows**, where Windows Security logs
-(Event ID 4688) serve as the primary authoritative telemetry source.
+This simulation validates the **Privilege Escalation** row in the
+[Detection Validation Matrix](../../detection-matrix/detection-validation-matrix.md).
 
 ---
 
@@ -25,106 +24,116 @@ This simulation aligns with **enterprise SOC detection workflows**, where Window
 
 ## 🏗 Lab Components Used
 
-- **Windows 11 Endpoint**
-  - Hostname: **Windows11Pro**
-  - Standard domain user (`labuser`)
-  - UAC-enabled privilege escalation
-  - Windows Security auditing enabled
-  - Sysmon installed (supplemental telemetry)
+| Component | Role |
+|---------|-----|
+| **Windows 11 Endpoint** (`Windows11Pro`) | Victim host |
+| **Standard User** (`local.lab\labuser`) | Initial execution |
+| **Administrator (UAC)** | Privileged execution |
+| **Splunk Enterprise (Ubuntu)** | SIEM / Detection |
+| **Windows Server** | SOC console (Splunk UI access) |
 
-- **Splunk Enterprise (Ubuntu – 10.0.0.60)**
-  - Primary SIEM
-  - Ingests Windows Security logs
-  - Generates alerts
-
-- **Windows Server (SOC Console)**
-  - Used to access Splunk Web UI
-
-> ❌ Security Onion, Kali, and pfSense are **not required** for SIM-003.
+> ❌ Kali, Security Onion, and pfSense are **not required** for this simulation.
 
 ---
 
-## 📂 Files in This Simulation
+## 📂 Simulation Files
 
 | File | Purpose |
-|----|----|
-| `steps.md` | Step-by-step execution of the privilege escalation |
-| `queries.md` | SPL detection and correlation queries |
+|----|--------|
+| `steps.md` | Exact, reproducible execution steps |
+| `queries.md` | SPL detection and correlation logic |
 | `alert-config.md` | Splunk alert definition |
-| `logs.md` | Symbolic and representative log evidence |
+| `logs.md` | Symbolic + representative log evidence |
 | `screenshots/` | Visual proof of detection and alerting |
+
+---
+
+## 🧪 What Was Simulated
+
+1. **Baseline execution**
+   - `labuser` runs standard processes (cmd.exe)
+   - Integrity level remains **Medium**
+
+2. **Privilege escalation**
+   - User launches Command Prompt via **Run as Administrator**
+   - UAC elevation approved
+   - Execution occurs under **administrator** context
+
+3. **Post-escalation behavior**
+   - Elevated `cmd.exe` spawns:
+     - `powershell.exe`
+     - `notepad.exe`
+   - High-integrity child processes created
 
 ---
 
 ## 🔍 Detection Strategy
 
-### Primary Detection
+Detection is based on **behavior**, not username alone.
+
+### Primary Signals
 - **Windows Security Event ID 4688**
-- Detects process creation under elevated account context
-- Reliable across Windows environments
-- Independent of Sysmon availability
+- **Sysmon Event ID 1**
+- **IntegrityLevel = High or System**
+- Abnormal parent → child relationships
 
-### Supplemental Enrichment
-- **Sysmon Event ID 1** (if available)
-- Provides integrity level and detailed parent/child relationships
-- Used for additional context, not dependency
-
----
-
-## 📸 Evidence Collected
-
-### Required Screenshots
-- **sim003-security-4688.png** – Privileged process creation
-- **sim003-correlation-results.png** – Correlated escalation activity
-- **sim003-alert-config.png** – Alert configuration
-- **sim003-alert-fired.png** – Alert successfully triggered
-
-### Optional Screenshot
-- **sim003-sysmon-processcreate.png** – Supplemental Sysmon telemetry
-
-All screenshots are stored in:  'simulations/SIM-003-Privilege-Escalation/screenshots/'
+### Key Detection Principles
+- UAC elevation often logs activity under `administrator`
+- Username alone is unreliable
+- Integrity level and process lineage are authoritative
 
 ---
 
-## 🚨 Alert Details
+## 🚨 Alert Summary
 
 - **Alert Name:** LAB-SIM-003-PRIVESC-ALERT
 - **Severity:** High
-- **Trigger Condition:** ≥ 1 privileged process creation event
+- **Trigger:** ≥ 1 elevated process execution
 - **Schedule:** Every 5 minutes (last 15 minutes)
-- **Telemetry Source:** Windows Security (Event ID 4688)
+
+The alert fired successfully during live execution.
 
 ---
 
-## 🧠 Analyst Takeaways
+## 📸 Evidence Captured
 
-This simulation demonstrates:
-- Detection of privilege escalation without reliance on Sysmon
-- Proper handling of UAC context switching
-- Field normalization for reliable user attribution
-- Alerting based on behavior, not assumptions
-- Troubleshooting ingestion vs detection-layer issues
+The following screenshots were collected and stored in `screenshots/`:
 
-These are **real-world SOC analyst skills**, not lab-only techniques.
-
----
-
-## ✅ Simulation Status
-
-- [x] Steps executed successfully
-- [x] Windows Security logs captured (4688)
-- [x] Detection queries validated
-- [x] Alert triggered and verified
-- [x] Evidence screenshots collected
-- [x] Logs documented
-- [x] Detection matrix updated
+- `sim003-elevated-cmd.png` – Elevated Command Prompt
+- `sim003-security-4688.png` – Windows Security process creation
+- `sim003-sysmon-processcreate.png` – Sysmon elevated execution
+- `sim003-correlation-results.png` – SPL detection results
+- `sim003-alert-fired.png` – Alert firing confirmation
 
 ---
 
-## 🏁 Final Status
+## ✅ Success Criteria
 
-**SIM-003 is complete, validated, and portfolio-ready.**
+| Requirement | Status |
+|-----------|-------|
+| Baseline activity observed | ✅ |
+| Privileged execution detected | ✅ |
+| Sysmon telemetry captured | ✅ |
+| Security 4688 events captured | ✅ |
+| SPL queries validated | ✅ |
+| Alert triggered | ✅ |
+| Screenshots captured | ✅ |
+| Detection matrix updated | ✅ |
 
-This simulation accurately reflects how privilege escalation is detected and investigated
-in enterprise SOC environments.
+---
 
+## 🧠 Key Takeaways
+
+- Privilege escalation detection must rely on **integrity level**, not usernames
+- Windows logs elevated activity under effective security context
+- Sysmon + Security logs together provide **high-confidence detection**
+- Real-world detection requires adapting to actual telemetry, not assumptions
+
+---
+
+## 🏁 Status
+
+**Simulation Status:** ✅ **Validated**
+
+This simulation is complete, documented, and suitable for
+**SOC analyst / detection engineering portfolio presentation**.
