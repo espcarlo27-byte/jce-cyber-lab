@@ -161,7 +161,7 @@ Every simulation contains:
 
 * ✅ [SIM-001 – Phishing Email (Validated)](simulations/SIM-001-Phishing-Email/)  
 * ✅ [SIM-002 – DNS Tunneling (Validated)](simulations/SIM-002-DNS-Tunneling/)  
-* [SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)  
+* ✅ [SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)  
 * [SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)  
 * [SIM-005 – Unauthorized File Access](simulations/SIM-005-Unauthorized-File-Access/)  
 * [SIM-006 – Sysmon ProcessCreate](simulations/SIM-006-Sysmon-ProcessCreate/)  
