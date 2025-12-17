@@ -1,284 +1,257 @@
 # SIM-003 – Privilege Escalation (T1055)
-## ⚠️ Issues Encountered & Resolutions
-
-This document captures **real issues encountered during execution of SIM-003**
-and the **exact steps used to diagnose and resolve them**.
-
-The intent is to document troubleshooting methodology, not just final success.
+## ⚠️ Issues & Resolutions (Standardized Format)
+This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
 
 ---
 
-## *Issue 1: No Sysmon Events Appearing in `winevent_sysmon` Index*
+### ***Issue 1: No Sysmon Events Appearing in winevent_sysmon Index***
+**Description**  
+During SIM-003 execution, Sysmon Process Creation events (Event ID 1) were expected to appear in the winevent_sysmon index but returned no results in Splunk searches.
 
-### Symptoms
-- SPL searches returned no results:
-  ```spl
-  index=winevent_sysmon EventCode=1 host="Windows11Pro"
-  ```
-- Sysmon appeared to be running on Windows 11
-- Baseline events were expected but missing
+**Impact**
+- Detection queries failed to return results
+- Screenshots could not be captured for Sysmon validation steps
+- Alert logic appeared broken despite Sysmon running correctly
+This blocked validation of privilege escalation telemetry.
 
-### Root Cause
+**Root Cause**  
+The Splunk Universal Forwarder was ingesting Sysmon logs into the winlog index, not winevent_sysmon.
+Although inputs.conf was later modified, historical Sysmon data remained in the original index, causing queries to fail.
 
-The Splunk Universal Forwarder input was configured to ingest Sysmon logs
-into the `winlog` index, not `winevent_sysmon`.   
+**Resolution**  
+All SIM-003 SPL queries were updated to reference the actual ingestion index:
+```spl
+index=winlog EventCode=1 host="Windows11Pro"
+```
+Detection logic was aligned with observed ingestion behavior, not assumed index names.
 
-Although `inputs.conf` was updated later, historical Sysmon events remained
-in the original index.   
-
-### Evidence Used
+**Validation**  
+The following query confirmed Sysmon Event ID 1 data was present:
 ```spl
 index=winlog host="Windows11Pro"
 | stats count by EventCode
 ```
+Results confirmed:
+- Sysmon Event ID 1 existed
+- Data ingestion was functioning correctly
 
-This query confirmed:
-- Sysmon Event ID 1 was present
-- Events existed under index=winlog
-
-### Resolution
-Detection queries were updated to use the actual data source:
-```spl
-index=winlog EventCode=1 host="Windows11Pro"
-```
-All SIM-003 SPL queries were revised to reflect this.
-
-### Lesson Learned
-> Detection logic must align with actual ingestion paths, not assumed index names.
+**Lessons Learned**  
+> Detection engineering must always align with real ingestion paths, not expected or planned index names.
 
 ---
 
-## *Issue 2: Incorrect Host Filtering (WIN11* *vs Actual Hostname)*
-### Symptoms
-- Searches using:
-   ```spl
-   host=WIN11*
-   ```
-returned no results
+### ***Issue 2: Incorrect Host Filtering (WIN11* vs Actual Hostname)***
+**Description**  
+Initial SPL searches used wildcard host filters (host=WIN11*) but returned no events.
 
-### Root Cause
-The Windows 11 endpoint hostname was:
-```ngix
+**Impact** 
+- All detection and validation queries failed
+- Misleading indication that logs were missing
+- Delayed troubleshooting and validation
+
+**Root Cause**  
+The actual hostname of the Windows 11 endpoint was:
+```text
 Windows11Pro
 ```
-not WIN11-LAB or WIN11*.
+The wildcard pattern `WIN11*` did not match the host value used by Splunk.
 
-### Evidence Used
-```spl
-index=winlog
-| stats count by host
-```
-
-### Resolution
-All queries were updated to:
+**Resolution**  
+All SIM-003 queries were updated to explicitly reference the correct hostname:
 ```spl
 host="Windows11Pro"
 ```
 
-### Lesson Learned
-> Always validate host values using live data before writing detection logic.
+**Validation**  
+The following query verified the correct hostname value:
+```spl
+index=winlog
+| stats count by host
+```
+Events were successfully returned for Windows11Pro.
+
+**Lessons Learned**  
+> Hostnames must always be validated from live data before finalizing detection logic.
 
 ---
 
-## *Issue 3: Expected Child Processes Not Appearing for Standard User*
-### Symptoms
-- Running `cmd.exe` and `notepad.exe` as `labuser` did not produce expected elevated events
-- Sysmon results showed activity only after elevation
+### ***Issue 3: Expected Child Processes Not Appearing for Standard User***
+**Description**  
+Executing ***cmd.exe*** and ***notepad.exe*** as the standard user (labuser) did not produce elevated process events.
 
-### Root Cause
-SIM-003 focuses on privilege escalation.   
-Child process creation under a non-admin context does not produce:
-- High integrity level
-- Elevated parent/child chains
-This was expected behavior.
+**Impact**
+- Confusion during Sysmon validation steps
+- Concern that Sysmon was misconfigured
+- Delayed confirmation of expected behavior
 
-### Evidence Used
+**Root Cause**  
+SIM-003 specifically detects privilege escalation, not standard process execution.
+Processes launched under a non-admin context:
+- Run at Medium integrity
+- Do not generate elevated parent/child chains
+- Should not trigger escalation detections
+
+**Resolution**
+Simulation steps were clarified to explicitly distinguish:
+- Baseline activity (non-elevated)
+- Detection activity (post-UAC elevation only)
+Detection logic remained focused on High/System integrity transitions.
+
+**Validation**  
+Baseline Sysmon events were confirmed:
 ```spl
 index=winlog EventCode=1 host="Windows11Pro"
 | table User Image IntegrityLevel
 ```
+Only elevated executions produced detection-relevant telemetry.
 
-### Resolution
-Simulation steps were clarified:
-- Baseline activity = non-elevated
-- Detection = elevated execution only
-
-### Lesson Learned
-> Baseline noise is essential for contrast, but detection should focus on privileged transitions.
+**Lessons Learned**  
+> Baseline noise is essential for contrast, but detections must focus on privileged state transitions.
 
 ---
 
-## *Issue 4: User Attribution Confusion After UAC Elevation*
-### Symptoms
-- Searches filtering on `labuser` returned no elevated events
-- Elevated processes appeared under `administrator`
+### ***Issue 4: User Attribution Confusion After UAC Elevation***
+**Description**  
+Filtering searches on labuser returned no elevated process events after UAC approval.
 
-### Root Cause
-Windows logs UAC-approved processes under the effective security context
-(`administrator`), not the originating domain user.
+**Impact**
+- Elevated activity appeared “missing”
+- Confusion over user attribution
+- Risk of incorrect detection assumptions
 
-### Evidence Used
+**Root Cause**  
+Windows logs UAC-approved processes under the effective security context (administrator), not the originating domain user.
+This is standard Windows security behavior.
+
+**Resolution**  
+Detection logic was updated to normalize user attribution using multiple fields:
+```spl
+| eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
+```
+Detections now rely primarily on:
+- IntegrityLevel
+- Process lineage
+- Privileged execution context
+
+**Validation**  
+Security Event ID 4688 confirmed elevated execution:
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | table SubjectUserName Account_Name New_Process_Name
 ```
-
-### Resolution
-Queries were updated to normalize user attribution:
-```spl
-| eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
-```
-
-Detection logic now relies on:
-- IntegrityLevel
-- Process lineage
-- Privilege context
-  
-### Lesson Learned
-> Username alone is unreliable; integrity level + process lineage are authoritative.
+**Lessons Learned**
+> Username alone is unreliable — integrity level and process lineage are authoritative.
 
 ---
 
-## *Issue 5: Accidental Overwrite of sysmonconfig.xml*
-### Symptoms
-- Sysmon behavior changed unexpectedly
-- Expected events were missing
+### ***Issue 5: Accidental Overwrite of sysmonconfig.xml***
+**Description**  
+Sysmon behavior changed unexpectedly after modifying configuration files.
 
-### Root Cause
-The active `sysmonconfig.xml` was accidentally overwritten instead of using
-a simulation-specific configuration file.
+**Impact**
+- Missing or altered Sysmon telemetry
+- Required revalidation of event generation
+- Risk of affecting other simulations
 
-### Evidence Used
+**Root Cause**  
+The active sysmonconfig.xml was accidentally overwritten instead of using a simulation-specific configuration file.
+
+**Resolution**
+- Restored a known-good Sysmon configuration
+- Verified active configuration with:
 ```bat
 sysmon -c
 ```
+- Re-executed SIM-003 steps to regenerate telemetry
 
-### Resolution
-- Restored known-good Sysmon configuration
-- Revalidated Event ID 1 generation
-- Re-executed simulation steps
+**Validation**  
+Sysmon Event ID 1 resumed normal generation and appeared in Splunk.
 
-### Lesson Learned
-> Maintain simulation-specific Sysmon configs to avoid global telemetry impact.
+**Lessons Learned**
+> Always maintain simulation-specific Sysmon configs to avoid global telemetry impact.
 
 ---
 
-## *Issue 6: Disk Space Exhaustion Blocking Splunk Searches*
-### Symptoms
-- Splunk UI error:
-```spl
+### ***Issue 6: Disk Space Exhaustion Blocking Splunk Searches***
+**Description**  
+Splunk searches failed with the error:
+```text
 Search not executed: minimum free disk space reached
 ```
-- Saved searches and alerts would not run
-- Only basic searches occasionally worked
 
-### Root Cause
-Splunk enforces a **minimum free disk space threshold** to protect index integrity.
-When available disk space drops below this threshold, Splunk **blocks searches and indexing**.
+**Impact**
+- Searches and alerts were blocked
+- Detection validation stalled
+- Only limited basic searches executed
 
-In this lab environment, disk space was exhausted due to:
+**Root Cause**  
+Splunk enforces a minimum free disk space threshold to protect index integrity.
+Disk exhaustion was caused by:
 - Accumulated indexed data
 - Log files
 - Package caches
-- Temporary files
+- Temporary system files
 
-### Evidence Used (Verification Commands)
+**Resolution**  
+Disk space was reclaimed using the following commands:  
 ```bash
 df -h
 ```
+> Identified low disk space
 
-### Purpose:
-Displays disk usage by filesystem in human-readable format.
-
-### What it showed:
-- Root (/) filesystem below Splunk’s minimum free space requirement
-- Confirmed the cause of search blocking
-
-### Resolution Steps (Cleanup Commands Used)
-### *1. Identify Large Directories*
 ```bash
 du -h /opt/splunk | sort -hr | head -20
 ```
-### What this does:
-   - Scans Splunk directories
-   - Sorts by largest disk usage
-   - Helps identify which paths consume the most space
+> Located largest directories
 
-### *2. Clear Linux Package Cache*
 ```bash
 sudo apt clean
 ```
-### What this does:
-   - Removes cached .deb packages
-   - Frees space without impacting installed applications
-   - Safe to run in all Ubuntu systems
+> Cleared package cache
 
-### *3. Remove Old / Unused Log Files*
 ```bash
 sudo journalctl --vacuum-time=7d
 ```
-### What this does:
-   - Removes system logs older than 7 days
-   - Retains recent logs for troubleshooting
-   - Frees disk space safely
+> Removed old system logs
 
-### *4. Remove Temporary Files*
 ```bash
 sudo rm -rf /tmp/*
 ```
-### What this does:
-   - Deletes temporary runtime files
-   - These files are recreated automatically if needed
+> Deleted temporary files
 
-### *5. Restart Splunk Services*
 ```bash
 sudo /opt/splunk/bin/splunk restart
 ```
-### What this does:
-   - Forces Splunk to re-evaluate available disk space
-   - Re-enables searches and alert execution once space is sufficient
+> Re-enabled search execution
 
-### Post-Resolution Verification
+**Validation**
 ```bash
 df -h
 ```
 Confirmed:
-   - Free disk space above Splunk threshold
-   - Searches executed successfully
-   - Alerts resumed normal operation
+- Free disk space above Splunk threshold
+- Searches and alerts resumed normally
 
-### Lesson Learned
-> Disk capacity directly affects detection availability.
-> Monitoring storage health is a core SOC operational responsibility, even in lab environments.
-
-This issue reinforced the importance of:
-   - Resource monitoring
-   - Log retention awareness
-   - Understanding SIEM safety mechanisms
-     
----
-
-## 🧠 Overall Takeaways
-SIM-003 surfaced real-world detection engineering challenges, including:
-- Index mismatches
-- Field normalization
-- User context confusion
-- Telemetry assumptions
-- Resource constraints
-
-Each issue was:
-- Identified using evidence
-- Proven with commands or SPL
-= Resolved systematically
-- Documented transparently
+**Lessons Learned**
+> SIEM availability depends on resource health.
+> Disk monitoring is a core SOC operational responsibility.
 
 ---
 
-## 🏁 Status
+### ***🧠 Overall Lessons Learned***
+SIM-003 reinforced real-world detection engineering principles:
+- Always validate ingestion paths
+- Normalize fields defensively
+- Separate baseline behavior from detection signals
+- Expect OS security behaviors (UAC context switching)
+- Monitor SIEM resource health continuously
+
+---
+
+### ***🏁 Status***
 - Issues fully documented
-- Resolutions applied
+- Resolutions validated
 - Detection logic corrected
-- Alert validated and firing
+- Alert firing successfully
 
 > SIM-003 remains marked as ✅ Validated
-> in the Detection Validation Matrix.
