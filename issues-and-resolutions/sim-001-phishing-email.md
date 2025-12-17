@@ -1,5 +1,5 @@
 # Simulation 1 – Phishing Email  
-## Issues & Resolutions
+## ⚠️ Issues & Resolutions
 This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
 
 ---
