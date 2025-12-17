@@ -46,13 +46,98 @@ This simulation validates the **LAB-SIM-002** entry in the detection validation 
 
 ---
 
-## ✅ Status
+## ⚠️ Known Limitations & Environment Constraints
 
-- ✅ DNS traffic generated and captured
-- ✅ Packet-level visibility validated
-- ✅ Security Onion sensor confirmed operational
-- ❌ Suricata → Elastic ingest blocked due to authentication failure
-- ✅ SIEM outage documented
-- ✅ Fallback detection successfully executed
-- ✅ Screenshots captured
+SIM-002 (DNS Tunneling) was executed in a **constrained lab environment** using the
+Security Onion **Evaluation** deployment. While partial telemetry was successfully
+observed, full end-to-end validation was not achievable due to platform limitations.
+
+This section documents those constraints transparently.
+
+---
+
+### 1. Security Onion Evaluation Mode Limitations
+
+The Security Onion instance used in this lab is running in **Evaluation mode**, which
+introduced the following constraints during execution:
+
+- Elasticsearch services were intermittently unavailable
+- Zeek DNS logs were not consistently indexed
+- SO Grid components reported partial readiness
+- Docker containers were running, but data ingestion was incomplete
+
+As a result:
+- DNS tunneling activity could not be reliably queried via Zeek dashboards
+- DNS logs were not forwarded consistently to Splunk
+
+---
+
+### 2. Elasticsearch Authentication & Indexing Issues
+
+During validation, the following issues were observed:
+
+- Elasticsearch returned `401 Unauthorized` responses
+- Elastic credentials could not be reset using standard SO utilities
+- Several Security Onion helper commands were unavailable or not present
+- Index creation and retention could not be verified
+
+These issues prevented confirmation of:
+- Zeek DNS event indexing
+- Long-term DNS telemetry persistence
+
+---
+
+### 3. Partial Detection Coverage Achieved
+
+Despite the above constraints, the following **partial validation** was successful:
+
+- Network traffic generation consistent with DNS tunneling was executed
+- Suricata containers were operational
+- Windows-based DNS telemetry was available in Splunk
+- SPL detection logic for DNS anomalies was authored and tested where data existed
+
+This confirms that **detection logic is sound**, but telemetry ingestion was incomplete.
+
+---
+
+### 4. Why This Simulation Is Marked “Partial”
+
+SIM-002 is intentionally marked as **⚠️ Partial** in the Detection Validation Matrix because:
+
+- Detection logic exists
+- Simulation steps were executed
+- Alerts were defined
+- **But** full evidence (Zeek DNS logs + alerts firing) could not be captured
+
+This reflects **real-world SOC conditions**, where:
+- Tooling limitations exist
+- Not all detections can be validated immediately
+- Analysts must document blockers clearly
+
+---
+
+### 5. Planned Remediation
+
+This simulation will be revalidated once one of the following is implemented:
+
+- Full Security Onion (non-evaluation) deployment
+- Stable Elasticsearch indexing confirmed
+- Zeek DNS logs reliably available
+- Alternate DNS telemetry source integrated
+
+At that point, SIM-002 will be upgraded from **Partial → Validated**.
+
+---
+
+## 🧠 Analyst Takeaway
+
+Documenting incomplete detection coverage is a **professional SOC practice**.
+
+Rather than forcing false validation, this simulation demonstrates:
+- Honest assessment of tooling limits
+- Strong troubleshooting effort
+- Clear documentation of blockers
+- A defensible reason for partial status
+
+This approach prioritizes **accuracy over optics**, which is critical in security operations.
 
