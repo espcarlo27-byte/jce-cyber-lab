@@ -1,5 +1,5 @@
 # Simulation 2 – DNS Tunneling  
-## Issues & Resolutions
+## ⚠️ Issues & Resolutions
 
 ---
 
