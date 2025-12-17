@@ -95,6 +95,22 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 
 ---
 
+## ⚠️ Issues & Resolutions
+
+During execution of SIM-001, several real-world SOC and detection engineering
+issues were encountered, including log ingestion failures, forwarder authentication
+errors, missing Windows audit events, and incomplete network telemetry.
+
+Each issue was investigated, root-caused, and resolved using standard
+SOC troubleshooting techniques.
+
+➡️ **[View detailed Issues & Resolutions](issues-and-resolutions.md)**
+
+This strengthens the simulation by demonstrating real analyst workflow
+and operational problem-solving.
+
+---
+
 ## ✅ FINAL STATUS
 
 **SIM-001 – Phishing Email Detection is COMPLETE, VALIDATED, and PRODUCTION-READY.**
