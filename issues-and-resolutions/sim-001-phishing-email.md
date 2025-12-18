@@ -28,6 +28,10 @@ The Splunk Universal Forwarder on the Windows 11 endpoint was either:
 **Validation:**  
 After these corrections, Windows Security logs and related process execution events appeared correctly in Splunk, allowing the phishing detection to be fully validated.
 
+**Lessons Learned:**  
+> Log ingestion must always be validated before testing detection logic.  
+> Endpoint activity alone is not sufficient—SOC visibility depends entirely on reliable telemetry flow into the SIEM.
+
 ---
 
 ### ***Issue 2: Forwarder Authentication Failure When Connecting to Splunk***
@@ -71,6 +75,10 @@ In this case, the issue resulted from a mismatch between the Splunk Web credenti
 **Validation:**  
 After correcting the authentication configuration, the forwarder successfully registered with the Splunk server, and endpoint logs began flowing consistently.
 
+**Lessons Learned:**  
+> Splunk authentication is platform-specific and separate from OS credentials.  
+> Forwarder management issues can masquerade as detection failures if authentication is not validated early.
+
 ---
 
 ### ***Issue 3: Phishing Simulation Did Not Execute Expected Payload or Generate Artifacts***
@@ -106,6 +114,10 @@ The phishing payload or attachment did not execute due to one or more of the fol
 
 **Validation:**   
 Once the payload was properly executed, Windows Security and Sysmon logs generated the expected process creation events. Splunk detections then triggered successfully, confirming the phishing scenario was executed end-to-end.
+
+**Lessons Learned:**  
+> A detection cannot trigger if the attack never truly executes.  
+> Simulations must explicitly generate telemetry—symbolic artifacts require deliberate execution to be useful.
 
 ---
 
@@ -145,6 +157,10 @@ On a default installation, Event ID 4688 may be missing due to:
 
 **Validation:**  
 Event ID 4688 began appearing consistently in both Event Viewer and Splunk searches, enabling the phishing simulation's detections to trigger successfully.
+
+**Lessons Learned:**  
+> Detection engineering depends on proper audit policy configuration.  
+> Even common security events like 4688 are not guaranteed without explicit enablement.
 
 ---
 
@@ -191,6 +207,10 @@ Security Onion’s Eval mode places restrictions and structured paths on where l
 **Validation:**   
 Correct log paths were confirmed, and Suricata events were successfully located, allowing network-side validation of the phishing simulation to proceed.
 
+**Lessons Learned:**  
+> Network telemetry storage paths and behavior differ across platforms and modes (e.g., Security Onion Eval).  
+> Analysts must understand where and how network data is written before assuming visibility gaps.
+
 ---
 
 ### ***Issue 6: Splunk Search Returned No Results Due to Incorrect Time Range or Index Selection***
@@ -233,6 +253,10 @@ The issue was caused by incorrect Splunk search filters, specifically:
 **Validation:**   
 Once the correct time range and index were selected, Splunk displayed the expected 4688 events and related telemetry. This confirmed that the ingestion pipeline was functioning correctly and that prior “no results” responses were not ingestion failures but search configuration issues.
 
+**Lessons Learned:**  
+> “No results” does not always mean “no data.”  
+> Time range, index selection, and search scope are critical skills in SOC investigations.
+
 ---
 
 ### ***Issue 7: Endpoint Network Connectivity or DNS Resolution Prevented Expected Callback Activity***
@@ -267,3 +291,31 @@ The issue was caused by network or name-resolution constraints within the lab en
 
 **Validation:**   
 After confirming network connectivity and understanding the simulation’s intended behavior, endpoint and network visibility were correctly interpreted. This clarified that the absence of network callbacks was due to environment constraints or simulation scope rather than a logging failure.
+
+**Lessons Learned:**  
+> Not all simulations produce full kill-chain telemetry.  
+> Understanding simulation scope and environmental constraints is essential to correct detection interpretation.
+
+---
+
+### ***🧠 Overall Takeaways***
+SIM-001 highlighted foundational SOC and detection engineering realities, including:
+- The importance of **log ingestion validation**
+- The dependency of detections on **correct audit policy and endpoint configuration**
+- The distinction between **symbolic simulations** and **telemetry-producing executions**
+- The need to interpret results within **environmental and design constraints**
+- The value of troubleshooting methodology over “happy-path” execution
+
+Each issue reinforced that effective detection work is as much about **environment readiness** as it is about SPL logic.
+
+---
+
+### ***🏁 Status***
+- Issues fully documented  
+- Root causes identified  
+- Resolutions validated  
+- Detection logic confirmed  
+- Simulation executed end-to-end  
+
+> **SIM-001 is marked as ✅ Validated**  
+> and is suitable for portfolio and interview discussion.
