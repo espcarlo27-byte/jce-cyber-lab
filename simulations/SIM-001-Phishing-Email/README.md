@@ -95,19 +95,22 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 
 ---
 
-## ⚠️ Issues & Resolutions
+## ⚠️ Issues Encountered & Resolutions
 
-During execution of SIM-001, several real-world SOC and detection engineering
-issues were encountered, including log ingestion failures, forwarder authentication
-errors, missing Windows audit events, and incomplete network telemetry.
+During execution of this simulation, multiple real-world operational and
+detection engineering challenges were encountered and resolved.
+
+These issues include:
+- Log ingestion failures
+- Forwarder authentication problems
+- Missing audit policies
+- Endpoint execution gaps
+- Network visibility constraints
 
 Each issue was investigated, root-caused, and resolved using standard
 SOC troubleshooting techniques.
-
-➡️ **[View detailed Issues & Resolutions](issues-and-resolutions.md)**
-
-This strengthens the simulation by demonstrating real analyst workflow
-and operational problem-solving.
+👉 **Full technical breakdown:**  
+[SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing.md)
 
 ---
 
