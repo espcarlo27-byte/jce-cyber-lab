@@ -108,7 +108,7 @@ These issues include:
 - Network visibility constraints
 
 Each issue was investigated, root-caused, and resolved using standard
-SOC troubleshooting techniques.
+SOC troubleshooting techniques.  
 👉 **Full technical breakdown:**  
 [SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing-email.md)
 
