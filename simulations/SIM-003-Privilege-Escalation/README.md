@@ -133,22 +133,21 @@ The following screenshots were collected and stored in `screenshots/`:
 
 ## ⚠️ Issues & Resolutions
 
-During execution of SIM-003, several **real-world detection engineering issues**
-were encountered, including:
+During execution of SIM-002, multiple **real-world operational and platform-related issues**
+were encountered that affected full detection validation.
 
+These issues included:
 - Index mismatches (`winlog` vs `winevent_sysmon`)
 - Hostname filtering errors
 - UAC user context attribution
 - Sysmon configuration overwrite
 - Disk space exhaustion blocking Splunk searches
 
-Each issue was investigated, proven with commands or SPL, and resolved
-using SOC-standard troubleshooting methods.
+All issues were **investigated, documented, and resolved where possible** within
+the constraints of the lab environment.
 
-➡️ **[View Issues & Resolutions](issues-and-resolutions.md)**
-
-This documentation reflects actual analyst workflow and reinforces
-the validity of this simulation.
+👉 **Full technical breakdown:**  
+[SIM-003 – Issues & Resolutions](../../issues-and-resolutions/sim-003-privilege-escalation.md)
 
 ---
 
