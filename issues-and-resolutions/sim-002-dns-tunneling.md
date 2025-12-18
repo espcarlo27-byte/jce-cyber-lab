@@ -33,6 +33,9 @@ The issue occurred because network **visibility existed without detection logic*
 **Validation:**  
 DNS tunneling activity was successfully confirmed at the network sensor level. This validated proper sensor placement and log generation, providing a foundation for future detection engineering and alert development.
 
+**Lessons Learned:**  
+> Visibility alone does not equal detection. Sensors must be paired with purpose-built detection logic to generate actionable alerts.
+
 ---
 
 ### ***Issue 2: DNS Tunneling Queries Appeared Legitimate and Did Not Trigger Detection***
@@ -67,6 +70,9 @@ Default IDS rules and basic SIEM searches often fail to flag this behavior witho
 **Validation:**  
 DNS tunneling behavior was successfully confirmed through manual analysis and sensor visibility. This validated the presence of tunneling activity and highlighted the need for custom or heuristic-based detection rules.
 
+**Lessons Learned:**  
+> Advanced threats intentionally mimic legitimate traffic; effective detection requires behavioral analysis, not signature reliance.
+
 ---
 
 ### ***Issue 3: DNS Logs Present but Not Properly Parsed or Searchable in Splunk***
@@ -98,6 +104,9 @@ As a result, DNS telemetry existed but was not normalized for effective analysis
 
 **Validation:**  
 After confirming the presence of DNS data and identifying usable fields, DNS tunneling activity could be queried and analyzed in Splunk. This enabled further detection tuning and correlation efforts.
+
+**Lessons Learned:**  
+> Ingested data is only valuable when it is parsed, normalized, and searchable.
 
 ---
 
@@ -132,6 +141,9 @@ As a result, the tunneling traffic blended into normal DNS patterns.
 
 **Validation:**  
 After adjusting detection thresholds and analysis logic, suspicious DNS query patterns consistent with tunneling behavior could be identified. This confirmed that detection effectiveness depended on proper tuning rather than sensor visibility alone.
+
+**Lessons Learned:**  
+> Detection effectiveness depends on tuning informed by environmental baselines.
 
 ---
 
@@ -168,5 +180,29 @@ Without correlation, tunneling behavior appeared as low-risk noise.
 **Validation:**  
 When DNS indicators were evaluated together rather than individually, tunneling behavior could be identified with higher confidence. This confirmed that effective DNS tunneling detection depends on multi-factor correlation rather than single-event alerts.
 
+**Lessons Learned:**  
+> High-confidence detections require correlation across multiple weak signals.
+
 ---
+
+## 🧠 Overall Takeaways
+
+SIM-002 reinforced that DNS tunneling detection requires:
+- Sensor visibility
+- Proper parsing
+- Baseline awareness
+- Threshold tuning
+- Multi-indicator correlation
+
+Each issue demonstrated real-world detection engineering challenges
+commonly faced in SOC environments.
+
+---
+
+## 🏁 Status
+
+- Issues fully documented  
+- Root causes identified  
+- Detection gaps understood  
+- Simulation limitations clearly defined  
 
