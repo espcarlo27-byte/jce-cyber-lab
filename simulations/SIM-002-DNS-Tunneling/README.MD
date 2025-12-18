@@ -129,10 +129,11 @@ At that point, SIM-002 will be upgraded from **Partial → Validated**.
 
 ---
 
-## ⚠️ Issues Encountered & Resolutions
+## ⚠️ Issues Encountered & Resolutions with Environment Constraints
 
-During execution of SIM-002, multiple **real-world operational and platform-related issues**
-were encountered that affected full detection validation.
+SIM-002 was executed in a constrained lab environment using Security Onion
+Evaluation mode. While detection logic was developed, full validation was not
+possible due to platform limitations.
 
 These issues included:
 - DNS telemetry visible at the sensor but not indexed
@@ -141,11 +142,13 @@ These issues included:
 - Partial SIEM ingestion preventing alert confirmation
 - Detection logic existing without reliable telemetry
 
-All issues were **investigated, documented, and resolved where possible** within
-the constraints of the lab environment.
+All observed issues, limitations, and planned remediation steps are documented here:  
 
 👉 **Full technical breakdown:**  
 [SIM-002 – DNS Tunneling Issues & Resolutions](../../issues-and-resolutions/sim-002-dns-tunneling.md)
+
+This simulation is intentionally marked as **Partial** to reflect real SOC
+conditions where tooling limitations must be documented transparently.
 
 ---
 
