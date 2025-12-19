@@ -164,3 +164,11 @@ Rather than forcing false validation, this simulation demonstrates:
 
 This approach prioritizes **accuracy over optics**, which is critical in security operations.
 
+---
+
+## 🏁 Status
+
+Simulation Status: ✅ Validated (IDS Layer)  
+
+SQL injection execution and detection were successfully validated at the network intrusion detection layer. SIEM ingestion was intentionally excluded and documented as a known limitation.
+
