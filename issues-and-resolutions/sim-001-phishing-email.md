@@ -298,7 +298,7 @@ After confirming network connectivity and understanding the simulation’s inten
 
 ---
 
-### ***🧠 Overall Takeaways***
+## 🧠 Overall Takeaways
 SIM-001 highlighted foundational SOC and detection engineering realities, including:
 - The importance of **log ingestion validation**
 - The dependency of detections on **correct audit policy and endpoint configuration**
@@ -310,7 +310,7 @@ Each issue reinforced that effective detection work is as much about **environme
 
 ---
 
-### ***🏁 Status***
+## 🏁 Status
 - Issues fully documented  
 - Root causes identified  
 - Resolutions validated  
