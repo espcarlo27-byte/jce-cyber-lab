@@ -1,142 +1,210 @@
-# SIM-004 – SQL Injection (T1190) – Logs & Telemetry
+# SIM-004 – SQL Injection (T1190) – Log Evidence
 
-This document describes the actual telemetry generated during SIM-004 execution, including what evidence was observed, where it originated, and what was not available due to lab design.
+This file contains **symbolic and representative telemetry** captured during
+SIM-004, demonstrating **successful SQL injection exploitation** against a
+deliberately vulnerable web application (DVWA).
 
----
+The logs and observations below reflect **actual behavior observed during execution**
+and are used to validate:
+- Network-based detection logic
+- IDS alerting behavior
+- Detection effectiveness in the absence of SIEM correlation
 
-## 1. Telemetry Sources in Scope
-
-The following log sources were available and evaluated during this simulation:
-
-✅ Network / IDS Telemetry (PRIMARY)
-- Security Onion
-   - Suricata (ET rule set)
-   - HTTP traffic inspection
-   - Inline packet visibility via ens192
-
-- ❌ SIEM Telemetry (NOT PRESENT)
-- Splunk Enterprise
-   - No Suricata events ingested
-   - No Splunk Universal Forwarder installed on Security Onion
-   - SIEM correlation intentionally out of scope
+Network and IDS telemetry are treated as the **primary authoritative sources**
+for this simulation due to lab design constraints.
 
 ---
 
-## 2. Application-Layer Behavior (DVWA)
+## 🧾 Log Sources Used
 
-Although application logs were not directly collected, observable behavior confirmed SQL injection execution.
+- **Network / IDS Telemetry (Primary)**
+  - Security Onion
+  - Suricata (ET ruleset)
+  - Inline HTTP traffic inspection via `ens192`
 
-**Observed Behavior**
-- Baseline input:
-   ```text
-   1
-   ```
-     - Returned a single database record
-- Injection payloads:
-   ```pgsql
-   1' OR '1'='1
-   1' OR 1=1-- -
-   1' UNION SELECT user, password FROM users-- -
-  ```
-     - Returned multiple user records
-     - Confirmed backend query manipulation
+- **Application Behavior (Observed)**
+  - DVWA response behavior (black-box testing)
 
-**Payloads That Did NOT Work**
-- Numeric-based payload:
-   ```csharp
-   1 OR 1=1#
-   ```
-     - Did not alter application behavior
-     - Indicates SQL injection point operates in a string-based context
+- **SIEM Telemetry**
+  - ❌ Not present by design (no forwarder installed)
 
-📸 Evidence:
-- `sim004-dvwa-baseline-query.png`
-- `sim004-dvwa-sqli-success.png`
+> ⚠️ **Important Design Note**  
+> This simulation intentionally operates under a **network-centric detection model**.
+> Absence of endpoint, database, or SIEM logs does not invalidate detection when
+> exploit behavior is observable and alertable at the network layer.
 
 ---
 
-## 3. Network Traffic Observed (Inline Visibility)
-**Packet-Level Visibility**
-Traffic between Kali and DVWA was observed traversing Security Onion’s monitoring interface.
-- Source IP: 10.0.0.30 (Kali)
-- Destination IP: 10.0.0.60 (DVWA)
-- Protocol: HTTP
-- Payloads contained SQL operators and comment markers
+## 🔄 Field Normalization Notes
 
-This confirms correct sensor placement and network-level observability.
+The following fields were reliably observed via network inspection and IDS alerts:
 
-📸 Evidence:
-- `sim004-securityonion-traffic-visible.png (optional)`
+### Network / IDS Telemetry
+- `src_ip`
+- `dest_ip`
+- `protocol`
+- `http.method`
+- `http.payload`
+- `signature`
+- `severity`
 
----
-
-## 4. IDS Detection (Suricata)
-**Alert Type Observed**
-- Signature: ET WEB_SERVER
-- Classification: Generic web policy violation
-- Severity: Medium
-- Detection Timing: Immediately following SQL injection execution
-
-Although the alert was not explicitly labeled “SQL Injection,” the timing, payload content, and IP attribution confirm detection of exploit-related activity.
-
-📸 Evidence:
-- `sim004-suricata-alert.png`
-
---- 
-
-## 5. Alert Attribution & Context
-Alert detail view confirmed:
-- Source IP: 10.0.0.30 (Attacker – Kali)
-- Destination IP: 10.0.0.60 (Victim – DVWA)
-- HTTP context present
-- Payload indicators consistent with SQL injection logic
-
-This validates attacker → victim attribution at the network layer.
-
-📸 Evidence:
-- `sim004-suricata-alert-details.png`
+Application-layer logs were not collected; validation was performed via
+observable response behavior.
 
 ---
 
-## 6. Telemetry NOT Present (By Design)
+## 1. Baseline Application Behavior (Non-Injection Input)
 
-The following artifacts were not available during this simulation:
+**Source:** DVWA Application  
+**Input Context:** User-supplied ID parameter
 
-| Artifact                | Reason         |
-|-------------------------|----------------|
-| Windows Security Logs	  | Linux-based application |
-| Sysmon                  | No endpoint malware or Windows host |
-| Database audit logs     |	Out of scope    |
-| Application source logs	| Black-box testing model |
-| Splunk SIEM events	    | No forwarder installed |
+```text
+Input: 1
+Result: Single database record returned
+```
 
-These gaps were identified, validated, and documented, not ignored.
+Interpretation:
+- Normal application behavior
+- No query manipulation
+- Establishes baseline response pattern
 
----
-
-## 7. Detection Confidence Assessment
-| Layer                | Confidence |
-|----------------------|------------|
-| Application behavior | High       |
-| Network visibility   | High       |
-| IDS detection	High   | High       |
-| SIEM correlation     | Not applicable |
-
-Detection confidence is based on correlated application behavior and network alerts, not signature naming alone.
+📸 Evidence:  
+`sim004-dvwa-baseline-query.png`
 
 ---
 
-## 8. Key Observations
-- SQL injection detection occurred via generic web alerts
-- Payload effectiveness depended on string-based query context
-- Network architecture was critical to visibility
-- Detection existed even without SIEM ingestion
+## 2. SQL Injection Execution (Application-Layer Exploitation)
+
+Source: DVWA Application
+Attack Context: Crafted user input
+```text
+Payloads:
+1' OR '1'='1
+1' OR 1=1-- -
+1' UNION SELECT user, password FROM users-- -
+```
+
+Observed Behavior:
+- Multiple database records returned
+- Disclosure of user credential data
+- Confirms backend SQL query manipulation
+
+Interpretation:
+- Successful SQL injection
+- Injection point operates in a string-based context
+
+📸 Evidence:  
+`sim004-dvwa-sqli-success.png`
 
 ---
 
-## 9. Log Summary
-- SQL injection execution confirmed via DVWA behavior
+## 3. Payload Validation (Non-Effective Injection Attempt)
+
+Source: DVWA Application
+Attack Context: Numeric-based payload
+```text
+Payload:
+1 OR 1=1#
+```
+
+Interpretation:
+- No change in application response
+- Indicates injection point does not evaluate numeric-only logic
+- Confirms SQL context specificity
+
+---
+
+## 4. Network Traffic Observed (Inline Visibility)
+
+Source: Security Onion Sensor
+Protocol: HTTP
+```text
+Source IP: 10.0.0.30 (Kali)
+Destination IP: 10.0.0.60 (DVWA)
+Protocol: HTTP
+Observed Payloads: SQL operators and comment markers
+```
+
+Interpretation:
 - Malicious HTTP traffic observed inline
-- Suricata detected exploit-related activity
-- Attacker attribution validated
-- SIEM ingestion gap documented intentionally
+- Confirms correct sensor placement
+- Network path visibility validated
+
+📸 Evidence:  
+`sim004-securityonion-traffic-visible.png`
+
+---
+
+## 5. IDS Detection (Suricata Alert)
+
+Source: Suricata
+Signature Category: ET WEB_SERVER
+Classification: Generic Web Policy Violation
+Severity: Medium
+
+Interpretation:
+- Alert fired immediately following injection execution
+- Signature not explicitly labeled “SQL Injection”
+- Payload content, timing, and attribution confirm exploit detection
+
+📸 Evidence:  
+`sim004-suricata-alert.png`
+
+---
+
+## 6. Alert Attribution & Context Validation
+
+Source: Suricata Alert Details
+```text
+Source IP: 10.0.0.30 (Attacker – Kali)
+Destination IP: 10.0.0.60 (Victim – DVWA)
+Context: HTTP request containing SQL operators
+```
+
+Interpretation:
+- Accurate attacker → victim attribution
+- Clear exploit context at the network layer
+- Supports investigative confidence despite generic signature naming
+
+📸 Evidence:  
+`sim004-suricata-alert-details.png`
+
+---
+
+## 🔗 Correlated Exploitation Timeline
+```text
+Baseline input submitted → single record returned
+Injection payload submitted → multiple records disclosed
+Malicious HTTP payload observed inline
+Suricata alert triggered immediately post-execution
+```
+
+Conclusion:
+Application response behavior, network payload inspection, and IDS alerting
+collectively confirm a validated SQL injection exploitation scenario.
+
+---
+
+## 🧠 Detection Relevance
+These observations directly support:
+- Network-based SQL injection detection
+- IDS alerting effectiveness
+- Validation of detection in SIEM-absent conditions
+
+Detection confidence is derived from:
+- Observable application impact
+- Inline network visibility
+- Timely IDS alerting
+   - —not from signature naming alone.
+
+---
+
+## 🏁 Status
+
+- [x] SQL injection behavior confirmed
+- [x] Application impact validated
+- [x] Network traffic observed inline
+- [x] IDS alert triggered
+- [x] Attacker attribution confirmed
+- [x] SIEM correlation (out of scope by design)
+- [x] Simulation complete
