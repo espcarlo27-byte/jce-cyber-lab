@@ -169,8 +169,7 @@ Look for:
 http://10.0.0.30:8080
 ```
 
-Take screenshot:
-- sim001-splunk-url-detection.png
+***📸 Take screenshot:***  `sim001-splunk-url-detection.png`
 
 ---
 
@@ -186,7 +185,7 @@ Process_Command_Line="*http*"
 | sort - _time
 ~~~
 
-***Take screenshot:***  sim001-splunk-correlation.png
+***📸 Take screenshot:***  `sim001-splunk-correlation.png`
 
 This confirms:
 ***“User clicked phishing link → browser executed → URL captured → detection validated.”***
