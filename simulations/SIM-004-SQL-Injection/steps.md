@@ -98,3 +98,84 @@ On Kali Linux:
 This establishes normal application behavior.
 
 ***📸 Take screenshot:*** `sim004-dvwa-baseline-query.png`
+
+---
+
+## 6. Execute SQL Injection Payload
+1. In the User ID field, enter:
+   ```csharp
+   1 OR 1=1#
+   ```
+2. Click Submit
+3. Observe that multiple database records are returned
+
+This confirms successful SQL injection execution.
+
+***📸 Take screenshot:*** ` sim004-dvwa-sqli-success.png`
+
+---
+
+## 7. Validate Inline Traffic Visibility (IDS)
+
+On Security Onion:
+1. Confirm Kali → DVWA traffic is visible on the monitoring interface:
+   ```spl
+   sudo tcpdump -i ens192 -nn
+   ```
+2. Refresh the DVWA page once from Kali if needed
+3. Observe HTTP traffic from 10.0.0.30 to 10.0.0.60
+
+***📸 Optional screenshot:*** `sim004-securityonion-traffic-visible.png`
+
+This confirms IDS visibility and correct network placement.
+
+--- 
+
+## 8. Validate SQL Injection Detection (PRIMARY)
+
+In the Security Onion Web UI:
+1. Navigate to:
+   ```nginx
+   Alerts
+   ```
+2. Set time range to Last 15 minutes
+3. Locate the ET WEB_SERVER alert corresponding to the SQL injection attempt
+
+***📸 Take screenshot:*** `sim004-suricata-alert.png`
+
+---
+
+## 9. Validate Alert Attribution (DETAIL VIEW)
+1. Click the ET WEB_SERVER alert
+2. Expand alert details
+3. Confirm:
+   - Source IP = 10.0.0.30 (Kali)
+   - Destination IP = 10.0.0.60 (DVWA)
+   - HTTP context present
+
+***📸 Take screenshot:*** `sim004-suricata-alert-details.png`
+
+---
+
+## 10. Save Evidence
+Add the following files to the screenshots/ directory:
+- sim004-dvwa-login-page.png
+- sim004-dvwa-security-level-low.png
+- sim004-dvwa-baseline-query.png
+- sim004-dvwa-sqli-success.png
+- sim004-suricata-alert.png
+- sim004-suricata-alert-details.png
+- sim004-securityonion-traffic-visible.png (optional)
+
+---
+
+## 11. Mark Simulation Completion
+Update the SIM-004 checklist in README.md:
+- ✅ SQL injection executed successfully
+- ✅ Baseline behavior observed
+- ✅ Inline IDS visibility confirmed
+- ✅ Suricata alert generated
+- ✅ Attacker attribution validated
+- ⚠️ SIEM ingestion intentionally excluded
+- ✅ Screenshots captured
+- ✅ Detection matrix updated
