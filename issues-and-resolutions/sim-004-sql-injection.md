@@ -1,4 +1,4 @@
-# Simulation 4-SQL Injection (T1190)
+# Simulation 4 – SQL Injection (T1190)
 ## ⚠️ Issues & Resolutions
 This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
 
