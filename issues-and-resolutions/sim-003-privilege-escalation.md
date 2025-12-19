@@ -4,7 +4,7 @@ This document captures real operational issues encountered during SIM-003 and th
 
 ---
 
-### ***Issue 1: No Sysmon Events Appearing in winevent_sysmon Index***
+### ***🧩 Issue 1: No Sysmon Events Appearing in winevent_sysmon Index***
 **Description**  
 During SIM-003 execution, Sysmon Process Creation events (Event ID 1) were expected to appear in the winevent_sysmon index but returned no results in Splunk searches.
 
@@ -40,7 +40,7 @@ Results confirmed:
 
 ---
 
-### ***Issue 2: Incorrect Host Filtering (WIN11* vs Actual Hostname)***
+### ***🧩 Issue 2: Incorrect Host Filtering (WIN11* vs Actual Hostname)***
 **Description**  
 Initial SPL searches used wildcard host filters (host=WIN11*) but returned no events.
 
@@ -75,7 +75,7 @@ Events were successfully returned for Windows11Pro.
 
 ---
 
-### ***Issue 3: Expected Child Processes Not Appearing for Standard User***
+### ***🧩 Issue 3: Expected Child Processes Not Appearing for Standard User***
 **Description**  
 Executing ***cmd.exe*** and ***notepad.exe*** as the standard user (labuser) did not produce elevated process events.
 
@@ -110,7 +110,7 @@ Only elevated executions produced detection-relevant telemetry.
 
 ---
 
-### ***Issue 4: User Attribution Confusion After UAC Elevation***
+### ***🧩 Issue 4: User Attribution Confusion After UAC Elevation***
 **Description**  
 Filtering searches on labuser returned no elevated process events after UAC approval.
 
@@ -144,7 +144,7 @@ index=winevent_security EventCode=4688 host="Windows11Pro"
 
 ---
 
-### ***Issue 5: Accidental Overwrite of sysmonconfig.xml***
+### ***🧩 Issue 5: Accidental Overwrite of sysmonconfig.xml***
 **Description**  
 Sysmon behavior changed unexpectedly after modifying configuration files.
 
@@ -172,7 +172,7 @@ Sysmon Event ID 1 resumed normal generation and appeared in Splunk.
 
 ---
 
-### ***Issue 6: Disk Space Exhaustion Blocking Splunk Searches***
+### ***🧩 Issue 6: Disk Space Exhaustion Blocking Splunk Searches***
 **Description**  
 Splunk searches failed with the error:
 ```text
