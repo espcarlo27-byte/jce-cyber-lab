@@ -145,7 +145,7 @@ These issues included:
 All observed issues, limitations, and planned remediation steps are documented here:  
 
 👉 **Full technical breakdown:**  
-[SIM-002 – DNS Tunneling Issues & Resolutions](../../issues-and-resolutions/sim-002-dns-tunneling.md)
+[SIM-002 – Issues & Resolutions](../../issues-and-resolutions/sim-002-dns-tunneling.md)
 
 This simulation is intentionally marked as **Partial** to reflect real SOC
 conditions where tooling limitations must be documented transparently.
