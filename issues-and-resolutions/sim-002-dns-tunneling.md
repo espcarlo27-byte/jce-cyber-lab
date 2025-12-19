@@ -1,4 +1,4 @@
-# Simulation 2 – DNS Tunneling  
+# Simulation 2 – DNS Tunneling (T1071.004)
 ## ⚠️ Issues & Resolutions
 This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
 
