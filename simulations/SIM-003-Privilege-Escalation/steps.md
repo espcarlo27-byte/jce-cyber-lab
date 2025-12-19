@@ -119,7 +119,7 @@ Confirm:
    - notepad.exe
 - Parent/child relationships reflect escalation
 
-📸 Take screenshot: `sim003-security-4688.png`
+***📸 Take screenshot:*** `sim003-security-4688.png`
 
 ---
 
@@ -136,7 +136,7 @@ Confirm:
 - IntegrityLevel = High or System
 - Child processes match privileged activity
 
-📸 Optional screenshot: `sim003-sysmon-processcreate.png`
+***📸 Optional screenshot:*** `sim003-sysmon-processcreate.png`
 
 > ⚠️ If no Sysmon events appear, proceed without this step.
 > Security Event 4688 is the authoritative validation source for this simulation.
@@ -150,7 +150,7 @@ Run the correlation query from `queries.md`.
 Expected conclusion:
 > “A privileged account spawned child processes inconsistent with baseline user activity.”
 
-📸 Take screenshot: `sim003-correlation-results.png`
+***📸 Take screenshot:*** `sim003-correlation-results.png`
 
 ---
 
@@ -167,7 +167,7 @@ Alert setting requirements:
 
 ***Re-run Steps 3–4 to force the alert if needed.***
 
-📸 Take screenshot: `sim003-alert-fired.png`
+***📸 Take screenshot:*** `sim003-alert-fired.png`
 
 ---
 
