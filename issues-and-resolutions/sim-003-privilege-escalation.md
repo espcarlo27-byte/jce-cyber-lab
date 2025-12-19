@@ -1,4 +1,4 @@
-# SIM-003 – Privilege Escalation (T1055)
+# Simulation 3 – Privilege Escalation (T1055)
 ## ⚠️ Issues & Resolutions (Standardized Format)
 This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
 
