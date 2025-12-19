@@ -2,9 +2,11 @@
 
 ## 🎯 Goal
 
-This simulation demonstrates how attackers exploit insecure web applications using **SQL Injection** to bypass authentication and gain unauthorized access. The objective is to validate that **network and web-layer telemetry** (IDS and SIEM) can detect SQL Injection activity against a vulnerable application.
+This simulation demonstrates how attackers exploit insecure web applications using **SQL Injection** to bypass authentication and gain unauthorized access. The objective is to validate that **network and web-layer telemetry** (IDS) can detect SQL Injection activity against a vulnerable application.
 
 From a defender’s perspective, this simulation focuses on **visibility and detection**, not exploitation depth.
+
+> ⚠️ Note: SIEM correlation was evaluated and documented, but full IDS-to-SIEM ingestion was not implemented for this simulation.
 
 ---
 
@@ -24,11 +26,11 @@ SQL Injection is a common real-world initial access vector against poorly secure
 
 ### Simple Explanation
 
-A web application accepts user input (such as a login form) and sends it to a database. If the application does not properly validate that input, an attacker can insert SQL commands instead of normal text. The database then executes the attacker’s logic.
+A web application accepts user input and sends it to a database. If that input is not properly validated, an attacker can inject SQL logic instead of normal data. The database executes the injected logic, potentially bypassing authentication or exposing data.
 
 ### Defender Explanation
 
-The application dynamically constructs SQL queries using unsanitized user input. Logical operators, SQL keywords, and comment markers alter the intended query behavior, allowing authentication bypass or data disclosure. Defenders typically observe **malicious payloads in HTTP requests**, not the SQL query itself.
+The application dynamically constructs SQL queries using unsanitized user input. Logical operators and SQL comment markers alter query execution. Defenders typically observe **malicious payloads within HTTP requests**, rather than the SQL query itself, making network-layer visibility critical.
 
 ---
 
@@ -42,6 +44,9 @@ The application dynamically constructs SQL queries using unsanitized user input.
   * Credential theft
   * Data exfiltration
   * Database destruction
+  * Data disclosure
+  * Credential harvesting
+  * Backend database compromise
 
 SOC teams regularly investigate SQLi alerts originating from public-facing and internal applications.
 
@@ -55,33 +60,33 @@ SOC teams regularly investigate SQLi alerts originating from public-facing and i
 | Vulnerable App | Ubuntu + DVWA     | Intentionally vulnerable web app |
 | Database       | MySQL (local)     | SQL backend for DVWA             |
 | Firewall       | pfSense           | Traffic routing and visibility   |
-| IDS            | Security Onion    | Detect SQLi payloads             |
-| SIEM           | Splunk Enterprise | Log ingestion and correlation    |
+| IDS            | Security Onion    | Inline network-based detection   |
+| SIEM           | Splunk Enterprise | Not integrated for this simulation    |
 
-DVWA and MySQL are hosted on the same Ubuntu VM to minimize complexity.
+> DVWA and MySQL are hosted on the same Ubuntu VM to reduce application complexity.
 
 ---
 
 ## 🌐 Network Placement
+- DVWA resides on the internal lab network
+- Kali and DVWA share the same LAN segment
+- Security Onion is placed inline by forcing Kali’s default gateway
+- All SQL injection traffic traverses Security Onion’s monitoring interface (ens192)
+- pfSense remains the upstream gateway
 
-* DVWA resides on the internal lab network
-* All traffic passes through pfSense
-* Security Onion monitors HTTP traffic
-* Splunk ingests IDS and web-related logs
-
-Although the application is internal, the traffic patterns and detections mirror real-world public-facing attacks.
+This design ensured deterministic IDS visibility without relying on port mirroring.
 
 ---
 
 ## 🔁 Attack Flow
-
-1. Attacker accesses DVWA login page from Kali
-2. Malicious SQL payload is submitted via login form
-3. Application constructs unsafe SQL query
-4. Database evaluates injected logic
-5. Authentication is bypassed
-6. HTTP and IDS logs are generated
-7. Security Onion and Splunk detect and correlate activity
+1. Attacker accesses DVWA SQL Injection page from Kali
+2. Malicious SQL payload is submitted via application input
+3. DVWA constructs an unsafe SQL query
+4. Backend database evaluates injected logic
+5. Application returns multiple records (authentication bypass behavior)
+6. HTTP traffic traverses inline Security Onion
+7. Suricata generates a web policy alert
+8. Detection is validated at the IDS layer
 
 This flow mirrors how SOC analysts reconstruct web-based intrusion attempts.
 
@@ -93,38 +98,37 @@ This flow mirrors how SOC analysts reconstruct web-based intrusion attempts.
 
 * DVWA security level: **Low**
 * Payload example:
-
 ```sql
-' OR '1'='1
+1 OR 1=1#
 ```
 
-This payload forces the database condition to always evaluate as true, allowing login without valid credentials.
+This payload exploits numeric input handling and SQL comment behavior, resulting in multiple database records being returned.
+
+> Earlier textbook payloads (' OR '1'='1) did not execute due to application context and security level state.
 
 This method was selected because it:
-
-* Is reliable
-* Produces clear network artifacts
-* Is easy to explain and validate
+- Worked reliably in the actual lab
+- Altered application behavior visibly
+- Generated observable network artifacts
 
 ---
 
-## 📊 Expected Telemetry
+## 📊 Observed Telemetry
 
-### Web Server Logs
-
-* HTTP POST requests to login endpoint
-* Suspicious parameters containing SQL keywords
-* Successful responses following malformed input
+### Web Application Behavior
+- HTTP requests containing SQL logic operators
+- Application returned multiple records after malformed input
+- No application-layer error messages displayed
 
 ### IDS (Suricata)
-
-* SQL Injection signature alerts
-* Detection of SQL keywords and encoded characters
+- ET WEB_SERVER alert triggered
+- Alert classified as generic web policy violation
+- Source and destination IPs confirmed in alert details
 
 ### SIEM (Splunk)
-
-* Correlation of source IP, payload patterns, and HTTP success
-* Repeated attack attempts from same host
+- ❌ No Suricata events ingested
+- Splunk Universal Forwarder not installed on Security Onion
+- SIEM integration gap documented intentionally
 
 ---
 
@@ -133,9 +137,10 @@ This method was selected because it:
 | Missing Artifact        | Reason                           |
 | ----------------------- | -------------------------------- |
 | Windows Event Logs      | Linux-based application          |
-| Sysmon                  | No endpoint malware              |
+| Sysmon                  | No endpoint malware or Windows host              |
 | Database audit logs     | Out of scope for this simulation |
 | Application source code | Black-box detection model        |
+| SIEM Correlation        | IDS-to-Siem Integration not configured by design |
 
 These limitations are intentional and reflect real-world SOC visibility constraints.
 
@@ -145,34 +150,35 @@ These limitations are intentional and reflect real-world SOC visibility constrai
 
 This simulation emphasizes:
 
-* Identification of SQL keywords in HTTP payloads
-* Detection of malformed parameters
-* Correlation of malicious input with successful responses
-* Understanding why alerts matter, not just that they fire
+* Identification of SQL-related logic in HTTP payloads
+* Understanding generic web alerts as potential exploit indicators
+* Validating IDS visibility through correct network placement
+* Recognizing detection vs. ingestion boundaries
 
 ---
 
-## ⚠️ Known Issues & Considerations
+## ⚠️ Issues & Resolutions
 
-Common issues encountered during this simulation may include:
+Multiple real-world operational and architectural issues were encountered during SIM-004, including:
+- DVWA security level reverting unexpectedly
+- Initial lack of inline traffic visibility
+- Ambiguity in alert classification
+- Absence of IDS-to-SIEM forwarding
+All issues were investigated, documented, and resolved or formally recorded.
 
-* DVWA database not initialized
-* Incorrect DVWA security level configuration
-* Apache or MySQL permission issues
-* IDS rule noise requiring tuning
-
-These issues are documented in the Issues & Resolutions log for learning and reuse.
+👉 Full technical breakdown:  
+[SIM-004 – Issues & Resolutions](../../issues-and-resolutions/sim-004-sql-injection.md)
 
 ---
 
-## ✅ Why This Simulation Matters
+## 🔍 Overall Takeaway
 
-This simulation demonstrates the ability to:
+SIM-004 demonstrated that SQL injection detection depends heavily on network architecture, application context, and telemetry interpretation rather than exploit complexity. Even without SIEM integration, validated IDS detection provides meaningful security insight and mirrors real SOC investigative workflows.
 
-* Understand common web attack techniques
-* Identify realistic detection points
-* Analyze network and application-layer telemetry
-* Document limitations and lessons learned
-* Validate security tooling in a SOC-style workflow
+---
 
-This aligns with real-world detection engineering and SOC analyst responsibilities.
+## 🏁 Status
+
+Simulation Status: ✅ Validated (IDS Layer)  
+
+SQL injection execution and detection were successfully validated at the network intrusion detection layer. SIEM ingestion was intentionally excluded and documented as a known limitation.
