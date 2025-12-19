@@ -122,15 +122,6 @@ The following screenshots were collected and stored in `screenshots/`:
 
 ---
 
-## 🧠 Key Takeaways
-
-- Privilege escalation detection must rely on **integrity level**, not usernames
-- Windows logs elevated activity under effective security context
-- Sysmon + Security logs together provide **high-confidence detection**
-- Real-world detection requires adapting to actual telemetry, not assumptions
-
----
-
 ## ⚠️ Issues & Resolutions
 
 During execution of SIM-002, multiple **real-world operational and platform-related issues**
@@ -148,6 +139,15 @@ the constraints of the lab environment.
 
 👉 **Full technical breakdown:**  
 [SIM-003 – Issues & Resolutions](../../issues-and-resolutions/sim-003-privilege-escalation.md)
+
+---
+
+## 🧠 Key Takeaways
+
+- Privilege escalation detection must rely on **integrity level**, not usernames
+- Windows logs elevated activity under effective security context
+- Sysmon + Security logs together provide **high-confidence detection**
+- Real-world detection requires adapting to actual telemetry, not assumptions
 
 ---
 
