@@ -1,7 +1,5 @@
 # SIM-002 – DNS Tunneling (T1071.004) – Steps
 
----
-
 ## 1. Prerequisites
 
 Before starting, verify the following systems are online:
