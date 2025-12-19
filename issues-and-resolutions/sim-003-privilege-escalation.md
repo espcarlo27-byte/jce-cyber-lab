@@ -238,7 +238,7 @@ Confirmed:
 
 ---
 
-### ***🧠 Overall Lessons Learned***
+## 🧠 Overall Takeaways
 SIM-003 reinforced real-world detection engineering principles:
 - Always validate ingestion paths
 - Normalize fields defensively
@@ -248,7 +248,7 @@ SIM-003 reinforced real-world detection engineering principles:
 
 ---
 
-### ***🏁 Status***
+## 🏁 Status
 - Issues fully documented
 - Resolutions validated
 - Detection logic corrected
