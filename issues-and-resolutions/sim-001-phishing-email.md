@@ -4,7 +4,7 @@ This document captures real operational issues encountered during SIM-003 and th
 
 ---
 
-### ***Issue 1: Logs Not Appearing in Splunk***
+### ***🧩 Issue 1: Logs Not Appearing in Splunk***
 
 **Description:**  
 During the initial execution of the phishing email simulation, expected Windows Security and endpoint logs were not appearing in Splunk searches, despite the attack process being executed on the Windows 11 endpoint.
@@ -34,7 +34,7 @@ After these corrections, Windows Security logs and related process execution eve
 
 ---
 
-### ***Issue 2: Forwarder Authentication Failure When Connecting to Splunk***
+### ***🧩 Issue 2: Forwarder Authentication Failure When Connecting to Splunk***
 
 **Description:**  
 While configuring the Splunk Universal Forwarder on the Windows 11 endpoint, the forwarder repeatedly failed to authenticate when attempting to connect to the Splunk Enterprise server. Even when using the same credentials that successfully logged into the Splunk Web UI, the CLI returned a “login failed” error.
@@ -81,7 +81,7 @@ After correcting the authentication configuration, the forwarder successfully re
 
 ---
 
-### ***Issue 3: Phishing Simulation Did Not Execute Expected Payload or Generate Artifacts***
+### ***🧩 Issue 3: Phishing Simulation Did Not Execute Expected Payload or Generate Artifacts***
 
 **Description:**  
 During the phishing simulation, the payload embedded in the test email did not execute as expected. Although the phishing message was delivered or simulated, no child process, script execution, or suspicious activity was generated on the Windows 11 endpoint. As a result, the simulation produced incomplete or missing telemetry.
@@ -121,7 +121,7 @@ Once the payload was properly executed, Windows Security and Sysmon logs generat
 
 ---
 
-### ***Issue 4: Windows Event ID 4688 (Process Creation) Not Logging***
+### ***🧩 Issue 4: Windows Event ID 4688 (Process Creation) Not Logging***
 
 **Description:**  
 During the phishing email simulation, the expected Windows Event ID **4688 (Process Creation)** did not appear in Splunk or in the local Windows Event Viewer. This event is required to capture the executed payload or script associated with the phishing activity.
@@ -164,7 +164,7 @@ Event ID 4688 began appearing consistently in both Event Viewer and Splunk searc
 
 ---
 
-### ***Issue 5: Expected Network Evidence (EVE.json / Packet Logs) Not Found During Validation***
+### ***🧩 Issue 5: Expected Network Evidence (EVE.json / Packet Logs) Not Found During Validation***
 
 **Description:**  
 While validating the phishing email simulation, expected network artifacts such as **Suricata EVE.json events** or packet captures were not found in the expected directories on the Security Onion sensor. Commands such as:
@@ -213,7 +213,7 @@ Correct log paths were confirmed, and Suricata events were successfully located,
 
 ---
 
-### ***Issue 6: Splunk Search Returned No Results Due to Incorrect Time Range or Index Selection***
+### ***🧩 Issue 6: Splunk Search Returned No Results Due to Incorrect Time Range or Index Selection***
 
 **Description:**  
 After executing the phishing simulation and confirming that logs were being generated on the Windows endpoint, Splunk searches continued to return **“No results found.”** This occurred even though telemetry was confirmed to be present locally on the host and the Splunk Universal Forwarder was running.
@@ -259,7 +259,7 @@ Once the correct time range and index were selected, Splunk displayed the expect
 
 ---
 
-### ***Issue 7: Endpoint Network Connectivity or DNS Resolution Prevented Expected Callback Activity***
+### ***🧩 Issue 7: Endpoint Network Connectivity or DNS Resolution Prevented Expected Callback Activity***
 
 **Description:**  
 During the phishing email simulation, the payload executed successfully and endpoint logs were generated; however, no expected outbound network activity or callback behavior was observed from the Windows 11 endpoint. This made it unclear whether the simulated phishing payload attempted any external communication.
