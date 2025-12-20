@@ -1,4 +1,4 @@
-## SIM-004 – SQL Injection (T1190) – Detection Queries
+# SIM-004 – SQL Injection (T1190) – Detection Queries
 
 This document outlines the queries and detection logic relevant to SIM-004.
 Due to lab design, network-based detection via Security Onion is the authoritative source.
