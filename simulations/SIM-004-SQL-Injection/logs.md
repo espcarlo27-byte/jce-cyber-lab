@@ -137,9 +137,9 @@ Interpretation:
 
 ## 5. IDS Detection (Suricata Alert)
 
-Source: Suricata
-Signature Category: ET WEB_SERVER
-Classification: Generic Web Policy Violation
+Source: Suricata  
+Signature Category: ET WEB_SERVER  
+Classification: Generic Web Policy Violation   
 Severity: Medium
 
 Interpretation:
