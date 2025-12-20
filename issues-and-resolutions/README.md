@@ -20,18 +20,20 @@ Each simulation has a dedicated Issues & Resolutions document with:
 issues-and-resolutions/
 ├── sim-001-phishing-email.md
 ├── sim-002-dns-tunneling.md
-└── sim-003-privilege-escalation.md
+├── sim-003-privilege-escalation.md
+└── sim-004-sql-injection.md
 ```
 
 ---
 
 ## 📋 Simulation Issue Index
 
-| Simulation ID | Scenario                         | Status        | Key Issue Themes                                 | Link |
-|---------------|----------------------------------|---------------|--------------------------------------------------|------|
-| SIM-001       | T1566.002 - Phishing Email       | ✅ Resolved   | Forwarder config, logging gaps, audit policy, network visibility  | [View](sim-001-phishing-email.md) |
-| SIM-002       | T1071.004 - DNS Tunneling        | ⚠️ Partial    | SO Eval limits, Elasticsearch auth, DNS parsing, telemetry gaps | [View](sim-002-dns-tunneling.md) |
-| SIM-003       | T1055 - Privilege Escalation     | ✅ Resolved   | Sysmon indexing, host mismatch, UAC context, disk exhaustion  | [View](sim-003-privilege-escalation.md) |
+| Simulation ID | Scenario                   | Status        | Key Issue Themes                                                                 | Link |
+|---------------|----------------------------|---------------|----------------------------------------------------------------------------------|------|
+| SIM-001       | T1566.002 – Phishing Email | ✅ Resolved   | Forwarder config, logging gaps, audit policy, network visibility                  | [View](sim-001-phishing-email.md) |
+| SIM-002       | T1071.004 – DNS Tunneling  | ⚠️ Partial    | SO Eval limits, Elasticsearch auth failure, DNS ingest gaps, SIEM degradation    | [View](sim-002-dns-tunneling.md) |
+| SIM-003       | T1055 – Privilege Escalation | ✅ Resolved | Sysmon indexing, host mismatch, UAC context, disk exhaustion                      | [View](sim-003-privilege-escalation.md) |
+| SIM-004       | T1190 – SQL Injection      | ✅ Resolved   | Network-only detection, generic IDS alerts, lack of SIEM logs, black-box testing | [View](sim-004-sql-injection.md) |
 
 ---
 
