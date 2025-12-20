@@ -1,8 +1,8 @@
 # SIM-004 – SQL Injection Detection Alert
 
-**Symbolic ID:** LAB-SIM-004-SQLI-ALERT
-**MITRE Technique:** T1190 – Exploit Public-Facing Application
-**Severity:** Medium
+**Symbolic ID:** LAB-SIM-004-SQLI-ALERT  
+**MITRE Technique:** T1190 – Exploit Public-Facing Application  
+**Severity:** Medium  
 **Status:** Validated (IDS Layer)
 
 ---
