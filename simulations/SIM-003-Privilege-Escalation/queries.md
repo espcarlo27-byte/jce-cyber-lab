@@ -108,6 +108,8 @@ What This Proves:
 - Confirmed at one or more telemetry layers
 - Alert-ready detection signal
 
+---
+
 ## 6. ✅ PRIMARY ALERT QUERY (FINAL)
 
 Purpose:
