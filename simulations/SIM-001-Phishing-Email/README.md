@@ -84,6 +84,32 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 
 ---
 
+## 🧪 Final Validation
+
+End-to-end validation was performed to confirm that phishing-related network and endpoint activity was successfully captured, correlated, and surfaced through the detection pipeline.
+
+During initial setup, network visibility limitations were identified within the Security Onion deployment. To establish a clean and reliable sensor baseline, **Security Onion was redeployed**, after which monitoring interfaces, traffic visibility, and Zeek/Suricata ingestion were revalidated.
+
+- **Traffic Validation:**  
+  Phishing link clicks generated HTTP traffic from the Windows 11 endpoint to the Kali Linux host (`10.0.0.30`), confirming network-level activity associated with the attack.
+
+- **Sensor Validation:**  
+  Network traffic was observed on the Security Onion monitor interface, confirming passive packet capture and sensor visibility.
+
+- **Endpoint Validation:**  
+  Windows Security EventCode **4688** with command-line logging confirmed browser execution and URL invocation on the victim endpoint.
+
+- **Correlation Validation:**  
+  Splunk successfully correlated endpoint execution events with observed network traffic, producing a validated detection and alert.
+
+- **Alert Validation:**  
+  The detection alert (`LAB-SIM-001-PHISHING-ALERT`) fired as expected and was confirmed with supporting screenshots and symbolic logs.
+
+**Result:**  
+Following redeployment and validation, the Security Onion and Splunk pipeline reliably captured, correlated, and alerted on phishing activity, confirming full end-to-end detection functionality.
+
+---
+
 ## 🧾 Status Checklist (Final)
 
 - [x] Steps executed  
