@@ -2,173 +2,124 @@
 
 ## 🎯 Goal
 
-Simulate DNS tunneling traffic to validate zeek-based DNS anomaly detection, Suricata DNS rules, and Splunk correlation for covert command-and-control channels.
+Simulate DNS-based command-and-control–style traffic to validate **Zeek DNS telemetry visibility**, anomaly identification, and analyst-level investigation using **Security Onion Hunt**.
 
-This simulation validates the **LAB-SIM-002** entry in the detection validation matrix.
+This simulation validates the **LAB-SIM-002** entry in the Detection Validation Matrix through **end-to-end packet capture, indexing, and UI-based analysis**.
 
 ---
 
 ## 🧩 MITRE ATT&CK Mapping
 
-- **Technique:** T1071.004 – Application Layer Protocol: DNS
+- **Technique:** T1071.004 – Application Layer Protocol: DNS  
 - **Tactic:** Command and Control (TA0011)
 
 ---
 
 ## 🏗 Lab Components Used
 
-- **Attacker:** Kali Linux (10.0.0.30)
-- **Victim Host:** Windows 11 (10.0.0.50) *(optional DNS tunneling client)*
-- **Network Sensor:** Security Onion (Zeek + Suricata)
-- **SIEM:** Splunk Enterprise (Ubuntu – 10.0.0.60)
-- **Gateway:** pfSense (10.0.0.1)
+- **Attacker:** Kali Linux  
+- **Endpoints:** Windows 11, Ubuntu  
+- **Network Sensor:** Security Onion (Zeek)  
+- **Gateway / DNS Resolver:** pfSense  
+- **Network:** Single broadcast domain (LAN tap via pfSense)
 
 ---
 
 ## 📂 Files in This Simulation
 
-- `steps.md` – Full DNS tunneling execution steps
-- `logs.md` – Symbolic Zeek + Suricata + Splunk events
-- `queries.md` – SPL detection logic
-- `alert-config.md` – Splunk alert configuration
-- `screenshots/` – Visual detection evidence
+- `steps.md` – DNS traffic generation and simulation steps  
+- `queries.md` – KQL queries used in Security Onion Hunt  
+- `screenshots/` – Zeek DNS Hunt evidence and timelines  
+- `issues-and-resolutions/` – Troubleshooting and remediation history  
 
 ---
 
-## ✅ Success Criteria
+## 🧪 Simulation Overview
 
-- Abnormally long or encoded DNS queries generated
-- Zeek logs detect suspicious DNS behavior
-- Suricata flags DNS anomalies (if enabled)
-- Splunk correlates events
-- Symbolic alert fires:
-    LAB-SIM-002-DNS-TUNNEL
+This simulation was executed in **two phases**:
 
----
+### Phase 1 – Baseline DNS Activity
+Normal DNS queries were generated from Kali Linux to establish expected DNS behavior patterns, including:
+- Standard domain lengths
+- Low entropy query names
+- Typical query frequency
 
-## ⚠️ Known Limitations & Environment Constraints
-
-SIM-002 (DNS Tunneling) was executed in a **constrained lab environment** using the
-Security Onion **Evaluation** deployment. While partial telemetry was successfully
-observed, full end-to-end validation was not achievable due to platform limitations.
-
-This section documents those constraints transparently.
+### Phase 2 – Suspicious DNS Behavior
+High-frequency DNS queries with long, randomized subdomains were generated to emulate **DNS tunneling–like behavior**, enabling analysis of:
+- Query length anomalies
+- Repeated base domains
+- Abnormal request volume
 
 ---
 
-### 1. Security Onion Evaluation Mode Limitations
+## 🔎 Detection & Validation
 
-The Security Onion instance used in this lab is running in **Evaluation mode**, which
-introduced the following constraints during execution:
+### Zeek DNS Telemetry
+- DNS traffic was successfully captured by Zeek
+- DNS logs were written to `dns.log`
+- Events were indexed into Security Onion’s Elastic backend
 
-- Elasticsearch services were intermittently unavailable
-- Zeek DNS logs were not consistently indexed
-- SO Grid components reported partial readiness
-- Docker containers were running, but data ingestion was incomplete
+### Hunt Verification (KQL)
+DNS telemetry was confirmed in Security Onion Hunt using ECS-aware queries:
+```so
+event.dataset: "zeek.dns"
+```
 
-As a result:
-- DNS tunneling activity could not be reliably queried via Zeek dashboards
-- DNS logs were not forwarded consistently to Splunk
-
----
-
-### 2. Elasticsearch Authentication & Indexing Issues
-
-During validation, the following issues were observed:
-
-- Elasticsearch returned `401 Unauthorized` responses
-- Elastic credentials could not be reset using standard SO utilities
-- Several Security Onion helper commands were unavailable or not present
-- Index creation and retention could not be verified
-
-These issues prevented confirmation of:
-- Zeek DNS event indexing
-- Long-term DNS telemetry persistence
+Additional pivots included:
+- `dns.question.name`
+- `source.ip`
+- `destination.port`
+- `network.transport`
 
 ---
 
-### 3. Partial Detection Coverage Achieved
+## ✅ Success Criteria (Met)
 
-Despite the above constraints, the following **partial validation** was successful:
-
-- Network traffic generation consistent with DNS tunneling was executed
-- Suricata containers were operational
-- Windows-based DNS telemetry was available in Splunk
-- SPL detection logic for DNS anomalies was authored and tested where data existed
-
-This confirms that **detection logic is sound**, but telemetry ingestion was incomplete.
+- Abnormal DNS query patterns generated  
+- Zeek captured and logged DNS telemetry  
+- DNS events indexed and visible in Hunt  
+- Analyst-level investigation performed using KQL  
+- Evidence captured and documented  
 
 ---
 
-### 4. Why This Simulation Is Marked “Partial”
+## ⚠️ Issues Encountered & Resolutions
 
-SIM-002 is intentionally marked as **⚠️ Partial** in the Detection Validation Matrix because:
+During initial execution, DNS telemetry was visible at the Zeek sensor but **not immediately discoverable in Hunt** due to incorrect query methods.
 
-- Detection logic exists
-- Simulation steps were executed
-- Alerts were defined
-- **But** full evidence (Zeek DNS logs + alerts firing) could not be captured
+### Root Cause
+Security Onion 2.x stores Zeek logs in **ECS-compliant Elastic data streams**. Free-text searches (e.g., `zeek.dns`) do not return results unless ECS fields or KQL syntax are used.
 
-This reflects **real-world SOC conditions**, where:
-- Tooling limitations exist
-- Not all detections can be validated immediately
-- Analysts must document blockers clearly
+### Resolution
+DNS telemetry was successfully queried using:
+```so
+event.dataset: "zeek.dns"
+```
 
----
+This restored full visibility in the Hunt interface.
 
-### 5. Planned Remediation
-
-This simulation will be revalidated once one of the following is implemented:
-
-- Full Security Onion (non-evaluation) deployment
-- Stable Elasticsearch indexing confirmed
-- Zeek DNS logs reliably available
-- Alternate DNS telemetry source integrated
-
-At that point, SIM-002 will be upgraded from **Partial → Validated**.
-
----
-
-## ⚠️ Issues Encountered & Resolutions with Environment Constraints
-
-SIM-002 was executed in a constrained lab environment using Security Onion
-Evaluation mode. While detection logic was developed, full validation was not
-possible due to platform limitations.
-
-These issues included:
-- DNS telemetry visible at the sensor but not indexed
-- Elasticsearch authentication and indexing failures
-- Zeek DNS logs not consistently available in Evaluation mode
-- Partial SIEM ingestion preventing alert confirmation
-- Detection logic existing without reliable telemetry
-
-All observed issues, limitations, and planned remediation steps are documented here:  
-
-👉 **Full technical breakdown:**  
-[SIM-002 – Issues & Resolutions](../../issues-and-resolutions/sim-002-dns-tunneling.md)
-
-This simulation is intentionally marked as **Partial** to reflect real SOC
-conditions where tooling limitations must be documented transparently.
+Full technical breakdown:  
+`../../issues-and-resolutions/sim-002-dns-tunneling.md`
 
 ---
 
 ## 🧠 Analyst Takeaway
 
-Documenting incomplete detection coverage is a **professional SOC practice**.
+This simulation highlights an important SOC reality:
 
-Rather than forcing false validation, this simulation demonstrates:
-- Honest assessment of tooling limits
-- Strong troubleshooting effort
-- Clear documentation of blockers
-- A defensible reason for partial status
+Detection capability depends not only on telemetry collection, but also on analyst familiarity with the underlying data model.
 
-This approach prioritizes **accuracy over optics**, which is critical in security operations.
+Key lessons:
+- Zeek can be fully operational while data remains invisible without ECS-aware queries  
+- Understanding Elastic data streams is critical in modern SOC environments  
+- Proper documentation of investigation blockers is as important as detection success  
 
 ---
 
 ## 🏁 Status
 
-Simulation Status: ✅ Validated (IDS Layer)  
+**Simulation Status:** ✅ Validated
 
-SQL injection execution and detection were successfully validated at the network intrusion detection layer. SIEM ingestion was intentionally excluded and documented as a known limitation.
+DNS telemetry was successfully captured, indexed, queried, and analyzed within Security Onion Hunt.  
+SIM-002 is fully reproducible and defensible as a completed detection scenario.
 
