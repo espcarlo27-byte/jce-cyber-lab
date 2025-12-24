@@ -1,0 +1,161 @@
+# Network Topology
+
+This document describes the **network topology and system roles** used in the
+JCE Cyber Lab. The topology is intentionally designed to reflect
+**real-world enterprise and SOC environments**, with a clear separation
+between infrastructure components, endpoints, and security monitoring.
+
+---
+
+## 🖧 High-Level Topology Overview
+
+The lab is built around a **single routed internal network** protected and
+managed by a central firewall. All traffic flows through **pfSense**, which
+provides routing, NAT, DHCP, and traffic mirroring for security monitoring.
+
+Core design goals:
+- Centralized network control
+- Passive network monitoring
+- Realistic endpoint behavior
+- Clear detection and log visibility
+
+---
+
+## 📐 Network Topology Diagram
+
+```mermaid
+flowchart TB
+    Internet["Internet"]
+
+    pfSense["pfSense Firewall\n10.0.0.1\nWAN / LAN"]
+
+    AD["Windows Server 2025\nActive Directory + DNS\n10.0.0.10 (Static)"]
+    SO["Security Onion\nZeek | Suricata | PCAP\n10.0.0.11 (Static)"]
+    Kali["Kali Linux\nAttack VM\nDHCP"]
+    Splunk["Ubuntu Server\nSplunk Enterprise SIEM\nDHCP"]
+    Win11["Windows 11 Endpoint\nUser Workstation\nDHCP"]
+
+    Internet --> pfSense
+
+    pfSense --> AD
+    pfSense --> SO
+    pfSense --> Kali
+    pfSense --> Splunk
+    pfSense --> Win11
+```
+
+---
+
+## 🧱 System Roles & Responsibilities
+**pfSense Firewall (10.0.0.1)**
+- Acts as the network gateway for all systems
+- Provides:
+   - Routing and NAT
+   - DHCP services for endpoints
+   - Firewall logging
+   - Traffic mirroring to Security Onion
+- Serves as the choke point for all ingress and egress traffic
+
+---
+
+**Windows Server 2025 – Active Directory (10.0.0.10)**
+- Provides identity and authentication services
+- Hosts:
+   - Active Directory
+   - DNS
+   - Group Policy
+- Uses a static IP to ensure:
+   - Reliable authentication
+   - Predictable DNS resolution
+   - Consistent log correlation
+
+---
+
+**Security Onion – Network Security Monitoring (10.0.0.11)**
+- Passively monitors mirrored traffic from pfSense
+- Provides:
+   - Zeek for protocol and session analysis
+   - Suricata for IDS signatures
+   - PCAP for packet-level evidence
+- Uses a static IP for management and analyst access
+- Does not sit inline with traffic (non-intrusive)
+
+---
+
+**Windows 11 Endpoint (DHCP)**
+- Represents a standard enterprise user workstation
+- Generates:
+   - Sysmon telemetry
+   - Windows Security Event logs
+- IP address assigned dynamically via DHCP
+- Detection logic relies on:
+   - Hostname
+   - User context
+   - Process behavior
+   - Log metadata (not fixed IPs)
+
+---
+
+**Kali Linux – Attack Simulation Host (DHCP)**
+- Used to simulate:
+   - Phishing activity
+   - DNS tunneling
+   - Privilege escalation attempts
+   - Web attacks
+- IP address assigned dynamically
+- Reflects adversary infrastructure that is:
+   - Ephemeral
+   - Non-persistent
+   - Not trusted by design
+  
+---
+
+**Ubuntu Server – Splunk Enterprise SIEM (DHCP)**
+- Hosts Splunk Enterprise
+- Serves as the central correlation and analysis platform
+- Ingests logs from:
+   - Windows endpoints
+   - Active Directory
+   - pfSense
+   - Security Onion metadata
+- Uses DHCP to mirror:
+   - Cloud-hosted SIEM deployments
+   - Dynamic infrastructure common in modern SOCs
+
+---
+
+## 🔁 IP Addressing Strategy Summary
+
+| System               | Addressing Type | Reason                                   |
+|----------------------|-----------------|------------------------------------------|
+| pfSense              | Static          | Core routing and firewall control        |
+| Windows Server 2025  | Static          | Identity, DNS, authentication stability  |
+| Security Onion       | Static          | Predictable sensor management            |
+| Windows 11           | DHCP            | Realistic endpoint behavior              |
+| Kali Linux           | DHCP            | Ephemeral attacker modeling              |
+| Ubuntu (Splunk)      | DHCP            | SIEM flexibility and realism             |
+
+---
+
+## 🧠 Design Rationale
+
+This topology reinforces several SOC best practices:
+- Infrastructure components remain stable and predictable
+- Endpoints and attackers are dynamic and transient
+- Detections rely on telemetry and behavior, not static IPs
+- Network monitoring is passive and non-disruptive
+- The firewall serves as both a control point and observation point
+
+This design ensures that all simulations are:
+- Reproducible
+- Defensible
+- Representative of real-world SOC operations
+
+---
+
+## 🏁 Status
+- Network topology validated
+- All systems reachable and monitored
+- Traffic successfully mirrored to Security Onion
+- Topology actively used in SIM-001 through SIM-004
+  
