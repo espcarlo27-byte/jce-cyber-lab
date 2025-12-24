@@ -32,13 +32,6 @@ Use the links below to quickly navigate the JCE Cyber Lab and supporting artifac
 - ✅ **[SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)**
 - ✅ **[SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)**
 
-### 🛠 Supporting Material
-- 🗂 **[Diagrams](diagrams/)** – Network topology and log flow visuals  
-- 📁 **[Splunk Queries](splunk-queries/)** – SPL detection logic  
-- 🚨 **[Alerts](alerts/)** – Alert definitions and symbolic IDs  
-- 📊 **[Dashboards](dashboards/)** – SOC-style dashboards  
-- 🧪 **[Troubleshooting](troubleshooting/)** – Lab fixes and experiments  
-
 ---
 
 ## 🔧 Lab Topology
