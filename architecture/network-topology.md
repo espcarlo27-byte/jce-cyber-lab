@@ -27,13 +27,13 @@ Core design goals:
 flowchart TB
     Internet["Internet"]
 
-    pfSense["pfSense Firewall\n10.0.0.1\nWAN / LAN"]
+    pfSense["pfSense Firewall \ 10.0.0.1 \ WAN/LAN"]
 
-    AD["Windows Server 2025\nActive Directory + DNS\n10.0.0.10 (Static)"]
-    SO["Security Onion\nZeek | Suricata | PCAP\n10.0.0.11 (Static)"]
-    Kali["Kali Linux\nAttack VM\nDHCP"]
-    Splunk["Ubuntu Server\nSplunk Enterprise SIEM\nDHCP"]
-    Win11["Windows 11 Endpoint\nUser Workstation\nDHCP"]
+    AD["Windows Server 2025 \ Active Directory \ 10.0.0.10 (Static)"]
+    SO["Security Onion (Eval) \ Zeek | Suricata | PCAP \ 10.0.0.11 (Static)"]
+    Kali["Kali Linux \ Attacker VM \ DHCP"]
+    Splunk["Ubuntu Server \ Splunk Enterprise SIEM \ DHCP"]
+    Win11["Windows 11 Endpoint \ User Workstation \ DHCP"]
 
     Internet --> pfSense
 
@@ -43,7 +43,6 @@ flowchart TB
     pfSense --> Splunk
     pfSense --> Win11
 ```
-
 ---
 
 ## 🧱 System Roles & Responsibilities
