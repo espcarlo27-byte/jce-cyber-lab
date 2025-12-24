@@ -55,8 +55,7 @@ Each simulation listed below has a **1:1 mapped folder** containing:
 
 ## 📌 Notes
 
-- **SIM-002** is marked **Partial** due to Security Onion Elastic limitations in evaluation mode.
-- **SIM-001**, **SIM-003**, and **SIM-004** are **fully validated** with alerts firing and screenshots captured.
+- **SIM-001**, **SIM-002**, **SIM-003**, and **SIM-004** are **fully validated** with alerts firing and screenshots captured.
 - All future simulations will follow the **same evidence-driven workflow**.
 
 ---
