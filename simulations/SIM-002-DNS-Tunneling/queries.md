@@ -1,16 +1,16 @@
 # SIM-002 – DNS Tunneling (T1071.004) – Detection Queries
 
-This file documents the detection logic and investigative queries relevant to
-SIM-002, which demonstrates **DNS tunneling–related activity** under a
-**SIEM ingestion outage scenario**.
+This file documents the detection logic and investigative queries used during
+SIM-002, which demonstrates **DNS tunneling–style activity** using
+**Zeek DNS telemetry indexed in Security Onion**.
 
-This simulation reflects a **real-world SOC degradation condition**, where:
-- **Packet-level sensor visibility** is the authoritative source
-- **Suricata → Elastic → Hunt** ingestion is unavailable (HTTP 401)
-- **SIEM-based correlation is deferred**, not invalidated
+This simulation reflects a **realistic SOC detection workflow**, where:
+- Network metadata (Zeek) is the primary detection signal
+- DNS payloads are opaque, but behavior is observable
+- Detection is based on **query structure, length, entropy, and frequency**
 
-Detection logic is therefore documented across **baseline validation,
-primary detection, and future alert readiness**.
+Detection logic is documented across **baseline validation,
+primary detection, and alert readiness**.
 
 ---
 
@@ -20,132 +20,164 @@ primary detection, and future alert readiness**.
 Establish expected DNS traffic patterns prior to tunneling detection.
 
 Baseline Characteristics:
-- Standard domain names
-- Low entropy query strings
+- Human-readable domain names
+- Short query lengths
+- Low entropy
 - Normal query frequency
 
-Baseline validation was performed via **direct packet inspection** at the sensor
-layer due to SIEM unavailability.
-
-```text
-Example Query:
-google.com
-```
-
-What This Confirms:
-- DNS resolution functioning normally
-- Endpoint → DNS server path is healthy
-- Establishes baseline behavior for comparison
-
----
-
-## 2. PRIMARY Detection – Sensor-Level DNS Validation (Authoritative)
-
-Purpose:  
-Confirm DNS activity at the network layer during SIEM ingestion failure.
-
-Authoritative Detection Method:  
-Packet capture using tcpdump on the Security Onion sensor.
-```bash
-sudo tcpdump -i any -n port 53
-```
-
-What This Confirms:
-- DNS traffic is reaching the sensor
-- Source system is actively generating queries
-- Destination DNS server is responding
-- Query contents are observable in plaintext
-
-This represents the primary detection signal for SIM-002 under degraded
-visibility conditions.
-
----
-
-## 3. Planned IDS Detection – Suricata DNS Events (Post-Recovery)
-
-Purpose:  
-Define the detection logic that will be used once Elastic ingestion is restored.
+### Hunt Query
 ```lucene
-event.dataset:"suricata.dns"
+event.dataset:"zeek.dns"
 ```
 
-Intended Usage:
-- Security Onion → Hunt
-- Identification of anomalous DNS patterns
-- Foundation for tunneling-specific analysis (length, entropy, frequency)
+Example Baseline Observation
+```text
+dns.query.name: www.google-analytics.com
+dns.query.length: 24
+dns.response.code_name: NOERROR
+```
+
+What This Confirms:
+- DNS resolution is functioning normally
+- Endpoint → DNS server path is healthy
+- Establishes a behavioral baseline for comparison
+
+---
+
+## 2. PRIMARY Detection – High-Entropy DNS Queries (Zeek)
+
+Purpose:  
+Detect DNS queries indicative of tunneling or covert C2 behavior.
+
+Threat Characteristics:
+- Randomized subdomains
+- Elevated query length
+- Repeated queries in short time windows
+- Legitimate DNS responses (NOERROR)
+
+### Hunt Query – Suspicious DNS Queries
+```lucene
+event.dataset:"zeek.dns"
+AND dns.query.length >= 35
+```
+
+What This Detects:
+- Encoded or randomized DNS subdomains
+- Data-carrying DNS requests
+- DNS tunneling–style behavior
+
+---
+
+## 3. Frequency-Based DNS Anomaly Detection
+
+Purpose:  
+Identify high-volume DNS query patterns originating from a single host.
+
+### Hunt Query – DNS Burst Behavior
+```lucene
+event.dataset:"zeek.dns"
+```
+
+Hunt Aggregation Strategy:
+- Group by source.ip
+- Observe rapid increases in DNS volume
+- Correlate with elevated query length
 
 Why This Matters:
-- Detection logic is preserved and ready
-- SIEM outage does not invalidate detection design
-- Enables rapid reactivation post-recovery
+- DNS tunneling often relies on volume + entropy
+- Frequency amplifies confidence in malicious intent
 
 ---
 
-## 4. Supplemental Endpoint DNS Telemetry (Optional)
+## 4. Domain Structure & Subdomain Analysis
 
 Purpose:  
-Provide endpoint-level context if Windows DNS logging is enabled.
-```spl
-index=winevent_system EventCode=22
-| table _time host QueryName QueryStatus
-| sort -_time
+Analyze DNS query composition for tunneling indicators.
+
+Hunt Fields of Interest
+- `dns.query.name`
+- `dns.subdomain`
+- `dns.highest_registered_domain`
+- `dns.subdomain_length`
+
+Indicators:
+- Long subdomains
+- Randomized character distribution
+- Repeated queries to the same parent domain
+
+This confirms behavioral misuse of DNS, not simple resolution.
+
+---
+
+## 5. Traffic Generation Alignment (Kali Linux)
+
+Traffic Generation Command Used:
+```bash
+for i in {1..50}; do nslookup $(head /dev/urandom | tr -dc a-z | head -c 25).example.com; done
 ```
 
-What This Adds:
-- Endpoint confirmation of DNS queries
-- Useful for correlation with network telemetry
-- Not required for primary detection validity
+Expected Zeek Observations:
+- Multiple DNS queries per second
+- Randomized subdomains under example.com
+- Consistent destination DNS server
+- UDP/53 transport
+- `dns.response.code_name: NOERROR`
 
-> ⚠️ This telemetry was unavailable during SIM-002 due to downstream ingest blockage.
-
----
-
-## 5. Cross-Layer Correlation Logic (Conceptual)
-
-Purpose:  
-Describe how signals would be correlated in a fully operational SOC environment.
-
-Correlation Approach:
-- Packet-level DNS validation (sensor)
-- IDS-based DNS event detection (Suricata)
-- Endpoint DNS confirmation (Windows logs)
-- SIEM correlation and alerting (Splunk / Elastic)
-
-This mirrors real-world SOC workflows during recovery from data pipeline outages.
+This confirms direct alignment between attacker activity and observed telemetry.
 
 ---
 
-## 6. ✅ PRIMARY ALERT QUERY (FINAL – POST-RECOVERY)
+## 6. Correlation-Ready Detection Logic (Symbolic)
 
 Purpose:  
-Define the alert-ready query once SIEM ingestion is restored.
-```lucene
-event.dataset:"suricata.dns"
+Define a symbolic detection identifier for SOC tracking.
+
+**Detection Metadata**
+```text
+Simulation ID: SIM-002
+Symbolic ID: LAB-SIM-002-DNS-TUNNEL
+Technique: T1071.004 – Application Layer Protocol: DNS
 ```
 
-Expected Outcome:
-- DNS events returned → alert logic activates
-- Suspicious patterns investigated
-- Symbolic detection restored without redesign
+This detection is metadata-driven, allowing correlation with:
+- Alerts
+- Case management
+- Detection matrices
 
 ---
 
-## ✅ Interpretation Guide
-| Result                    | Meaning |
-|---------------------------|----------------------|
-| DNS visible via tcpdump	  | Network-layer detection confirmed |
-| Suricata Hunt empty	      | Elastic ingest failure |
-| Endpoint DNS logs absent  |	Downstream ingestion blocked |
-| SIEM restored             |	Detection immediately reactivatable |
+## 7. Alert Readiness (Conceptual)
+
+Alert Conditions:
+- DNS query length ≥ 35
+- High-frequency queries from same source
+- Randomized subdomain patterns
+
+**Severity:** High
+**Tactic:** Command and Control
+**Technique:** DNS Tunneling
+
+This logic is alert-ready without redesign.
+
+---
+
+✅ Interpretation Guide
+| Observation	| Meaning |
+|--------------|----------|
+| Short, readable domains | Normal DNS behavior |
+| Long randomized subdomains	| Potential DNS tunneling |
+| High query volume from one host	| C2 / exfil attempt |
+| NOERROR responses |	DNS used as transport |
+| Zeek metadata sufficient |	Payload not required|
 
 ---
 
 ## 🏁 Query Summary
-- Packet capture served as the authoritative detection method
-- DNS activity was conclusively validated at the sensor layer
-- Suricata and SIEM queries are preserved for post-recovery use
-- Detection engineering intent remains intact despite outage
+- Zeek DNS telemetry provided full detection visibility
+- DNS tunneling was detected via behavioral analysis
+- Queries align with real-world SOC detection methods
+- Detection logic is reusable and alert-ready
 
-> This file represents the finalized detection logic documentation for SIM-002
-> and accurately reflects the telemetry, constraints, and SOC decision-making
-> observed during the simulation.
+> This file represents the finalized detection query documentation for SIM-002
+> and accurately reflects the telemetry, analysis, and SOC decision-making
+> observed during execution.
