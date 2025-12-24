@@ -136,25 +136,72 @@ flowchart TB
 
 ---
 
-## 🧠 Design Rationale
+## 🔁 DHCP vs Static IP Design Rationale
 
-This topology reinforces several SOC best practices:
-- Infrastructure components remain stable and predictable
-- Endpoints and attackers are dynamic and transient
-- Detections rely on telemetry and behavior, not static IPs
-- Network monitoring is passive and non-disruptive
-- The firewall serves as both a control point and observation point
+This lab intentionally uses a **hybrid IP addressing strategy** to mirror
+real-world enterprise and SOC environments.
 
-This design ensures that all simulations are:
-- Reproducible
-- Defensible
-- Representative of real-world SOC operations
+---
+
+### 🔒 Static IP Assignments (Infrastructure Components)
+
+The following systems use **static IP addresses**:
+- **pfSense Firewall**
+- **Windows Server 2025 (Active Directory)**
+- **Security Onion**
+
+**Rationale:**
+- These systems provide **core infrastructure services**
+- Static addressing ensures:
+  - Reliable log forwarding targets
+  - Consistent detection and correlation
+  - Predictable sensor placement and management
+- Reflects standard enterprise design for:
+  - Firewalls
+  - Identity services
+  - Network security monitoring
+
+---
+
+### 🔄 DHCP Addressing (Endpoints & Tooling)
+
+The following systems use **DHCP**:
+- **Windows 11 Endpoint**
+- **Kali Linux (Attack VM)**
+- **Ubuntu Server (Splunk Enterprise SIEM)**
+
+**Rationale:**
+- Endpoints commonly receive IPs dynamically in production environments
+- DHCP enables:
+  - Realistic host churn
+  - Accurate testing of detection logic that relies on **behavior**, not fixed IPs
+  - SOC workflows that track hosts by:
+    - Hostname
+    - User
+    - Process
+    - Log context (not hard-coded IPs)
+- Demonstrates analyst adaptability to dynamic environments
+
+---
+
+## 🧠 Detection Engineering Impact
+
+This addressing and topology design reinforces **best practices in SOC detection engineering**:
+- Detections avoid brittle IP-based logic
+- Correlation relies on:
+  - Host identity
+  - Process behavior
+  - Network patterns
+- Simulations remain reproducible even as IPs change
+
+> 💡 Infrastructure is stable, endpoints are dynamic, and detections must adapt —  
+> this mirrors how detections are built and maintained in production SOCs.
 
 ---
 
 ## 🏁 Status
+
 - Network topology validated
 - All systems reachable and monitored
 - Traffic successfully mirrored to Security Onion
-- Topology actively used in SIM-001 through SIM-004
-  
+- Topology actively used in **SIM-001 through SIM-004**
