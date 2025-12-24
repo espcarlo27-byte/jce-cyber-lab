@@ -1,32 +1,46 @@
-# JCE Cyber Lab 🛡️ 
+# JCE Cyber Lab 🛡️
 
 ## Executive Summary
 
-This cyber lab demonstrates my ability to design, deploy, and operate a full detection engineering and SOC workflow across network, endpoint, and identity layers. It contains end-to-end attack simulations, symbolic and real log evidence, Splunk detections, alerting pipelines, and MITRE-aligned validation. Each detection scenario has a **dedicated simulation folder (1:1 mapping)** to show reproducible, hands-on results.
+The JCE Cyber Lab demonstrates my ability to **design, deploy, operate, and validate**
+a full **SOC detection engineering workflow** across **network, endpoint, and identity
+layers**.
+
+The lab contains **end-to-end attack simulations** with:
+- Reproducible execution steps
+- Real and symbolic log evidence
+- Detection logic and alert definitions
+- MITRE ATT&CK–aligned validation
+- Documented issues, resolutions, and analyst takeaways
+
+Each detection scenario has a **dedicated simulation folder (1:1 mapping)** to ensure
+results are **repeatable, auditable, and defensible**.
 
 ---
 
 ## 🔧 Lab Topology
 
-* **pfSense** (10.0.0.1) – Firewall, NAT, VPN, TAP/SPAN mirroring  
-* **Windows Server 2025** (10.0.0.10) – AD, DNS, GPO, MS SQL Server  
-* **Security Onion (Eval)** (10.0.0.20) – Suricata, Zeek, Wazuh, Syslog  
-* **Kali Linux** (10.0.0.30) – Red-team simulations and tooling  
-* **Windows 11 Endpoint** (10.0.0.50) – Windows Security Auditing, Splunk Universal Forwarder  
-* **Ubuntu VM** (10.0.0.60) – Splunk Enterprise SIEM  
+* **pfSense** (10.0.0.1) – Firewall, NAT, routing, traffic mirroring, **DHCP server**  
+* **Windows Server 2025** (10.0.0.10) – Active Directory, DNS, GPO (static IP)  
+* **Security Onion** (10.0.0.11) – Zeek, Suricata, PCAP, Hunt (static IP)  
+* **Windows 11 Endpoint** – DHCP-assigned IP (Sysmon, Windows Security Auditing)  
+* **Kali Linux** – DHCP-assigned IP (attack simulation and adversary tooling)  
+* **Ubuntu Server** – DHCP-assigned IP (Splunk Enterprise SIEM)  
+
+---
 
 ### Network Diagram
 ```mermaid
 flowchart TB
-    Internet((Internet / Web))
-    
-    pfSense[pfSense Firewall<br/>10.0.0.1<br/>WAN / LAN]
+    Internet["Internet"]
 
-    AD[Windows Server 2025<br/>Active Directory<br/>10.0.0.10]
-    SO[Security Onion<br/>NSM / IDS<br/>10.0.0.20]
-    Kali[Kali Linux<br/>Attacker VM<br/>10.0.0.30]
-    Splunk[Ubuntu Server<br/>Splunk Enterprise<br/>10.0.0.40]
-    Win11[Windows 11 Endpoint<br/>User + Splunk Forwarder<br/>10.0.0.50]
+    pfSense["pfSense Firewall\n10.0.0.1\nWAN / LAN"]
+
+    AD["Windows Server 2025\nActive Directory\n10.0.0.10 (Static)"]
+    SO["Security Onion (Eval)\nZeek | Suricata | PCAP\n10.0.0.11 (Static)"]
+    Kali["Kali Linux\nAttacker VM\nDHCP"]
+    Splunk["Ubuntu Server\nSplunk Enterprise SIEM\nDHCP"]
+    Win11["Windows 11 Endpoint\nUser Workstation\nDHCP"]
 
     Internet --> pfSense
 
@@ -37,136 +51,165 @@ flowchart TB
     pfSense --> Win11
 ```
 
+---
+
 ### Network & Log Flow Architecture
 ```mermaid
 flowchart LR
-    Win11[Windows 11 Endpoint<br/>Sysmon + Security Logs]
-    AD[Windows Server 2025<br/>AD / Authentication Logs]
-    pfSense[pfSense Firewall<br/>Firewall + Network Logs]
-    SO[Security Onion<br/>Zeek · Suricata · Wazuh]
-    Splunk[Splunk Enterprise<br/>Central SIEM]
-    Kali[Kali Linux<br/>Attack Simulation]
-    Internet((Internet))
+    Kali["Kali Linux\nAttack Traffic (DHCP)"]
+    pfSense["pfSense Firewall"]
+    Win11["Windows 11 Endpoint\nSysmon + Security Logs (DHCP)"]
+    AD["Windows Server 2025\nAD / Identity Logs"]
+    SO["Security Onion\nZeek | Suricata | PCAP"]
+    Splunk["Splunk Enterprise SIEM\nUbuntu (DHCP)"]
+    Internet["Internet"]
 
-    %% Network traffic
-    Internet --> pfSense
-    Kali --> pfSense
-    Win11 --> pfSense
-    AD --> pfSense
-
-    %% Log flows
-    Win11 -- Sysmon / Windows Events --> Splunk
-    AD -- Security / Auth Logs --> Splunk
-
-    pfSense -- Firewall / Netflow --> Splunk
-    pfSense -- Traffic Mirror --> SO
-
-    Kali -- Attack Traffic --> pfSense
+    Kali --> pfSense --> Internet
     pfSense --> Win11
     pfSense --> AD
 
-    SO -- Alerts / PCAP Metadata --> Splunk
+    Win11 --> Splunk
+    AD --> Splunk
+    pfSense --> Splunk
+    pfSense --> SO
+    SO --> Splunk
 ```
 
-### 🔍 What This Diagram Is Showing (Plain English)
-*1️⃣ Endpoint & Identity Logs*
-- Windows 11
-   - Sysmon (process creation, privilege escalation, persistence)
-   - Windows Security logs
-- Windows Server 2025 (AD)
-   - Logons (4624 / 4625)
-   - Privilege changes
-   - Kerberos activity
-*Both forward ➡️ logs directly to Splunk*
-> This mirrors real SOC environments — endpoints don’t send logs through the firewall.
+---
 
-*2️⃣ Network & Firewall Visibility*
-- pfSense
-   - Firewall allow/deny logs
-   - Network session metadata
-   - Internet ingress/egress
-Logs go to:
-   - Splunk (correlation + dashboards)
-   - Security Onion (deep packet inspection)
-This gives you:
-   - Control plane (Splunk)
-   - Data plane (Security Onion)
+**🔁 DHCP vs Static IP Design Rationale**  
 
-*3️⃣ Security Onion’s Role*
-Security Onion observes traffic passively:
-- Zeek → protocol & session analysis
-- Suricata → IDS signatures
-- PCAP → packet-level evidence
-➡️ Alerts + metadata forwarded to Splunk
-➡️ PCAP stays local for investigation
+This lab intentionally uses a hybrid IP addressing strategy to mirror
+real-world enterprise and SOC environments.
 
-*4️⃣ Attack Simulation Flow*
-- Kali Linux
-   - Generates malicious traffic
-   - Executes exploits
-- Traffic passes through pfSense
-- Hits Windows 11 or AD
-- Detected by:
+> 💡 Endpoints and attacker systems intentionally use **DHCP** to mirror real
+> enterprise networks and ensure detections rely on **telemetry and behavior**
+> rather than static IP assumptions.
+
+---
+
+**🔒 Static IP Assignments (Infrastructure Components)**  
+
+The following systems use static IP addresses:
+- pfSense Firewall (10.0.0.1)
+- Windows Server 2025 (Active Directory) (10.0.0.10)
+- Security Onion (Eval) (10.0.0.11)
+**Rationale:**  
+- These systems provide core infrastructure services  
+- Static addressing ensures:
+   - Reliable log forwarding targets
+   - Consistent detection and correlation
+   - Predictable sensor placement and visibility
+- Reflects standard enterprise design for:
+   - Firewalls
+   - Identity services
+   - Network security monitoring
+
+---
+
+**🔄 DHCP Addressing (Endpoints & Tooling)**  
+
+The following systems use DHCP:
+- Windows 11 Endpoint
+- Kali Linux (Attack VM)
+- Ubuntu Server (Splunk Enterprise SIEM)
+**Rationale:**  
+- Endpoints commonly receive IPs dynamically in real environments
+- DHCP enables:
+   - Realistic host churn
+   - Accurate testing of detection logic that relies on behavior, not fixed IPs
+   - SOC workflows that track hosts by:
+      - Hostname
+      - User
+      - Process
+      - Log context (not hard-coded IPs)
+- Demonstrates analyst adaptability to dynamic environments
+
+---
+
+**🧠 Detection Engineering Impact**  
+
+This design reinforces best practices in SOC detection engineering:
+- Detections avoid brittle IP-based logic
+- Correlation relies on:
+   - Host identity
+   - Process behavior
+   - Network patterns
+- Simulations remain reproducible even as IPs change
+
+> 💡 This reflects how detections are built in production SOCs—
+> infrastructure is stable, endpoints are dynamic, and detections must adapt.
+
+---
+
+## 🔍 What This Architecture Demonstrates
+**1️⃣ Endpoint & Identity Visibility**
+- Sysmon and Windows Security logs from Windows 11
+- Authentication and privilege activity from Active Directory
+- Logs forwarded directly to Splunk (SOC-realistic)
+
+**2️⃣ Network & IDS Visibility**
+- pfSense provides firewall and session context
+- Security Onion passively inspects mirrored traffic:
+    - Zeek → protocol metadata
+    - Suricata → IDS signatures
+    - PCAP → packet-level evidence
+
+**3️⃣ Detection Engineering Flow**
+- Attacks generated from Kali
+- Traffic traverses pfSense
+- Telemetry captured by:
    - Sysmon (endpoint)
-   - Zeek/Suricata (network)
-   - Correlated in Splunk
+   - Zeek / Suricata (network)
+- Detections validated in Hunt and correlated in Splunk
 
-> 💡 This is end-to-end detection engineering, not just log collection.
-
-*All telemetry is centrally correlated in Splunk, with Security Onion providing deep packet and IDS visibility.*
+> 💡 This lab emphasizes detection engineering, not just log collection.
 
 ---
 
 ## 📊 Detection Validation Matrix (Authoritative)
 
-This lab follows a **1:1 mapping model** between detection scenarios and hands-on simulations.
-Each simulation folder contains full technical evidence:
-
-- Reproducible execution steps
-- Symbolic and real log evidence
-- SPL detection queries
-- Alert configurations
-- Screenshots proving detection and alerting
+The lab follows a 1:1 mapping between simulations and detections.
+Each simulation folder contains complete technical evidence.
 
 ➡️ **[View the Detection Validation Matrix](detection-matrix/detection-validation-matrix.md)**
 
-### Summary Coverage
-| Area | Coverage |
-|-----|---------|
-| Initial Access | Phishing, DNS abuse |
-| Execution | Sysmon process telemetry |
-| Privilege Escalation | UAC & elevated execution |
-| Command & Control | DNS tunneling |
-| Detection Engineering | SPL, correlation, alerting |
-| Validation Evidence | Logs + screenshots per SIM |
+**Summary Coverage**
+| Area	| Coverage |
+|-------|-----------|
+| Initial Access	| Phishing |
+| Execution	| Sysmon process telemetry |
+| Privilege Escalation	| UAC / elevated execution |
+| Command & Control	| DNS tunneling |
+| Network Attacks	| SQL injection |
+| Detection Engineering	| Queries, alerts, correlation |
+| Validation Evidence	| Logs + screenshots |
 
-> 📌 **Important:**  
-> The Detection Validation Matrix is the **authoritative source of truth** for scenario status.  
-> Individual simulation folders contain the supporting artifacts and evidence.
+> 📌 The Detection Validation Matrix is the single source of truth for simulation status.
 
 ---
 
 ## 🧪 Simulations (Hands-On Evidence)
 
-Every simulation contains:
+Each simulation includes:
+- `README.md` – Objective and scope
+- `steps.md` – Reproducible execution
+- `logs.md` – Real and symbolic evidence
+- `queries.md` – Detection logic
+- `alert-config.md` – Alert design
+- `screenshots/` – Proof of validation
 
-* `README.md` – Summary + expected outcome  
-* `steps.md` – Full reproducible steps  
-* `logs.md` – Symbolic and real logs  
-* `queries.md` – SPL detection logic  
-* `alert-config.md` – Alert definition + symbolic ID  
-* `screenshots/` – Evidence of hits and alerts  
+Validated Simulations
+- ✅ SIM-001 – Phishing Email
+- ✅ SIM-002 – DNS Tunneling
+- ✅ SIM-003 – Privilege Escalation
+- ✅ SIM-004 – SQL Injection
 
-### Available Simulations
-
-* ✅ [SIM-001 – Phishing Email (Validated)](simulations/SIM-001-Phishing-Email/)  
-* ✅ [SIM-002 – DNS Tunneling (Validated)](simulations/SIM-002-DNS-Tunneling/)  
-* ✅ [SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)  
-* [SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)  
-* [SIM-005 – Unauthorized File Access](simulations/SIM-005-Unauthorized-File-Access/)  
-* [SIM-006 – Sysmon ProcessCreate](simulations/SIM-006-Sysmon-ProcessCreate/)  
-* [SIM-007 – Sysmon FileCreate](simulations/SIM-007-Sysmon-FileCreate/)  
-* [SIM-008 – PowerShell Download](simulations/SIM-008-PowerShell-Download/)  
+Planned / In Progress
+- SIM-005 – Unauthorized File Access
+- SIM-006 – Sysmon ProcessCreate
+- SIM-007 – Sysmon FileCreate
+- SIM-008 – PowerShell Download
 
 ---
 
@@ -177,14 +220,6 @@ jce-cyber-lab/
 ├── diagrams/
 ├── detection-matrix/
 ├── simulations/
-│   ├── SIM-001-Phishing-Email/
-│   ├── SIM-002-DNS-Tunneling/
-│   ├── SIM-003-Privilege-Escalation/
-│   ├── SIM-004-SQL-Injection/
-│   ├── SIM-005-Unauthorized-File-Access/
-│   ├── SIM-006-Sysmon-ProcessCreate/
-│   ├── SIM-007-Sysmon-FileCreate/
-│   └── SIM-008-PowerShell-Download/
 ├── splunk-queries/
 ├── alerts/
 ├── dashboards/
@@ -196,67 +231,59 @@ jce-cyber-lab/
 ---
 
 ## 📊 Detection & Response Capabilities
-
-* **SIEM:** Splunk Enterprise (Ubuntu)  
-* **NSM/IDS:** Suricata + Zeek (Security Onion)  
-* **HIDS / Telemetry:** Windows Security Auditing, Sysmon, Wazuh  
-* **Threat Hunting:** SPL dashboards, network analysis  
-* **IR Framework:** NIST 800-61  
-
----
-
-## ⚙️ Automation
-
-* n8n workflows for automated triage  
-* Python scripts for log parsing and anomaly detection  
-* Custom symbolic log tagging  
+- SIEM: Splunk Enterprise
+- NSM / IDS: Zeek + Suricata (Security Onion)
+- Endpoint Telemetry: Sysmon, Windows Security Logs
+- Threat Hunting: Hunt, SPL, dashboards
+- IR Framework: NIST 800-61
 
 ---
 
 ## 🧑‍💻 Skills Demonstrated
-
-* SIEM engineering (Splunk)
-* Detection engineering and SPL writing
-* Windows Security Auditing & command-line logging
-* Sysmon rule validation
-* Suricata/Zeek NSM analysis
-* Log ingestion + parsing pipeline design
-* MITRE ATT&CK mapping
-* Incident response workflow creation
-* Dashboard creation and alert tuning
+- Detection engineering (Zeek, Sysmon, SPL, KQL)
+- SOC investigation workflows
+- Windows and AD security logging
+- Network traffic analysis
+- IDS and packet-level inspection
+- MITRE ATT&CK mapping
+- Alert design and validation
+- Root cause analysis and documentation
 
 ---
 
 ## 📌 How to Replicate This Lab
-
-1. Deploy all VMs based on the topology diagram.  
-2. Install Splunk on Ubuntu and configure ingest from:
-   * Windows Security Logs (via Splunk UF)
-   * Sysmon (for Sysmon-based sims)
-   * Security Onion (Suricata/Zeek logs)  
-3. Configure pfSense routes + monitoring.  
-4. Run simulations in order (SIM-001 → SIM-008).  
-5. Capture logs and screenshots as evidence.  
-6. Validate detections using dashboards and alerts.  
-7. Update detection-matrix with results.  
+1. Deploy VMs according to the topology diagram
+2. Configure log ingestion into Splunk
+3. Enable traffic mirroring to Security Onion
+4. Execute simulations (SIM-001 → SIM-004)
+5. Capture logs and screenshots
+6. Validate detections
+7. Update the Detection Validation Matrix
 
 ---
 
-## 🚧 Lab Issues & Resolutions Log
+## 🚧 Issues & Resolutions Log
 
-Throughout the JCE Cyber Lab simulations, various technical challenges were encountered and resolved.
+All technical issues encountered during simulations are documented with:
+- Root cause
+- Resolution
+- Analyst takeaway
+- Final status
+
+Throughout the JCE Cyber Lab simulations, various technical challenges were encountered and resolved.  
 Click below to view simulation-specific troubleshooting details:
 
-👉 [View Issues & Resolutions Index](issues-and-resolutions/)
+👉 **[View Issues & Resolutions](issues-and-resolutions/)**
 
 ---
 
 ## 📈 Next Steps
+- Add Velociraptor for DFIR endpoint collection
+- Expand credential access and lateral movement simulations
+- Build SOC-style dashboards and metrics
+- Scale to ESXi / multi-host environment
 
-* Add Velociraptor for DFIR endpoint collection  
-* Add more credential access simulations  
-* Expand to VMware ESXi cluster  
-* Build a full SOC dashboard pack  
+---
 
-***“Every detection is documented. Every alert is validated. Every scenario is reproducible.”***
-**— Carlo**
+> “Every detection is documented. Every alert is validated. Every scenario is reproducible.”
+> — Carlo
