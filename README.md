@@ -18,6 +18,29 @@ results are **repeatable, auditable, and defensible**.
 
 ---
 
+## 🧭 Repository Navigation
+
+Use the links below to quickly navigate the JCE Cyber Lab and supporting artifacts:
+
+### 🔍 Core References
+- 📊 **[Detection Validation Matrix](detection-matrix/detection-validation-matrix.md)** – Authoritative status of all simulations  
+- 🚧 **[Issues & Resolutions](issues-and-resolutions/)** – Root causes, fixes, and analyst takeaways  
+
+### 🧪 Simulations (Validated)
+- ✅ **[SIM-001 – Phishing Email](simulations/SIM-001-Phishing-Email/)**
+- ✅ **[SIM-002 – DNS Tunneling](simulations/SIM-002-DNS-Tunneling/)**
+- ✅ **[SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)**
+- ✅ **[SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)**
+
+### 🛠 Supporting Material
+- 🗂 **[Diagrams](diagrams/)** – Network topology and log flow visuals  
+- 📁 **[Splunk Queries](splunk-queries/)** – SPL detection logic  
+- 🚨 **[Alerts](alerts/)** – Alert definitions and symbolic IDs  
+- 📊 **[Dashboards](dashboards/)** – SOC-style dashboards  
+- 🧪 **[Troubleshooting](troubleshooting/)** – Lab fixes and experiments  
+
+---
+
 ## 🔧 Lab Topology
 
 * **pfSense** (10.0.0.1) – Firewall, NAT, routing, traffic mirroring, **DHCP server**  
