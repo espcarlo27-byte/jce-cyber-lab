@@ -1,208 +1,214 @@
 # Simulation 2 – DNS Tunneling (T1071.004)
 ## ⚠️ Issues & Resolutions
-This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
+
+This document captures **real operational issues encountered during SIM-002**
+and the structured methodology used to identify, resolve, and validate each one.
+All issues documented below were encountered during execution and have since
+been **fully resolved**.
 
 ---
 
-### ***🧩 Issue 1: DNS Tunneling Traffic Visible at Sensor Level but No Detection Triggered***
+### 🧩 Issue 1: DNS Telemetry Generated but Not Initially Visible in Hunt
 
 **Description:**  
-During the DNS tunneling simulation, suspicious DNS traffic was successfully generated and observed at the network sensor level using packet inspection tools and Security Onion. However, no alerts or detections were triggered initially in the SIEM or IDS dashboards.
+During early execution of the DNS tunneling simulation, DNS traffic was
+successfully generated and confirmed at the Zeek sensor level. However, DNS
+events did not initially appear in the Security Onion Hunt interface when queried.
 
 **Impact:**  
-- DNS tunneling activity was not automatically detected  
-- Validation appeared incomplete despite confirmed traffic  
-- Analysis relied on manual inspection rather than alerting  
-- Detection effectiveness could not be confirmed  
+- DNS tunneling activity appeared invisible in the UI  
+- Initial validation relied on raw Zeek log inspection  
+- Investigation progress was delayed  
+- Detection appeared incomplete despite confirmed telemetry  
 
 **Root Cause:**  
-The issue occurred because network **visibility existed without detection logic**, caused by one or more of the following:
-- Suricata DNS tunneling rules not enabled or not tuned  
-- Zeek DNS logs generated but not mapped to alerts  
-- DNS logs not ingested or parsed correctly in Splunk  
-- Detection thresholds not met by the simulated traffic  
-- Simulation intentionally designed to demonstrate sensor visibility before detection engineering  
+The issue was caused by **incorrect query methodology** in Security Onion 2.x:
+- Zeek logs were ingested into ECS-compliant data streams  
+- Free-text searches (e.g., `zeek.dns`) did not return results  
+- ECS-aware KQL queries were required to surface telemetry  
 
 **Resolution:**  
-1. Confirmed DNS tunneling traffic using packet-level inspection tools.  
-2. Verified Zeek DNS logs were being generated correctly.  
-3. Confirmed Suricata was running and processing DNS traffic.  
-4. Reviewed existing IDS rules and SIEM searches related to DNS tunneling.  
-5. Established sensor-level visibility as a baseline before detection tuning.
+1. Confirmed Zeek DNS logs were being written at the sensor.  
+2. Verified Elastic and SOC services were healthy.  
+3. Identified the correct ECS dataset field for Zeek DNS logs.  
+4. Queried DNS telemetry using:
+   ```so
+   event.dataset:"zeek.dns"
+   ```
+5. Successfully surfaced DNS events in Hunt.
 
 **Validation:**  
-DNS tunneling activity was successfully confirmed at the network sensor level. This validated proper sensor placement and log generation, providing a foundation for future detection engineering and alert development.
+DNS telemetry became fully visible and searchable in Security Onion Hunt using
+ECS-aware KQL queries.
 
 **Lessons Learned:**  
-> Visibility alone does not equal detection. Sensors must be paired with purpose-built detection logic to generate actionable alerts.
+> Visibility issues may stem from query methodology, not telemetry failure.
 
 ---
 
-### ***🧩 Issue 2: DNS Tunneling Queries Appeared Legitimate and Did Not Trigger Detection***
+### 🧩 Issue 2: DNS Tunneling Traffic Blended Into Normal DNS Activity
 
 **Description:**  
-During the DNS tunneling simulation, DNS queries were successfully generated and captured by network sensors; however, the queries did not initially appear malicious. The traffic resembled legitimate DNS requests and blended into normal DNS activity, making it difficult to distinguish tunneling behavior through simple inspection or default alerts.
+Initial DNS tunneling-style queries appeared syntactically valid and resembled
+legitimate DNS traffic, making them difficult to distinguish using default views
+or simple inspection.
 
 **Impact:**  
-- No immediate alerts were triggered by IDS or SIEM  
-- DNS tunneling activity blended into baseline DNS traffic  
-- Manual inspection was required to identify suspicious characteristics  
-- Detection logic required deeper analysis beyond basic signatures  
+- No immediate visual distinction between normal and suspicious DNS  
+- Required deeper analysis to identify anomalies  
+- Highlighted limitations of signature-based detection  
 
 **Root Cause:**  
-DNS tunneling is designed to evade detection by:
-- Encoding data within subdomains that appear syntactically valid  
-- Using legitimate DNS request formats  
-- Maintaining normal query timing and volume  
-- Avoiding obvious indicators such as malformed packets or known malicious domains  
+DNS tunneling techniques intentionally:
+- Use valid DNS syntax  
+- Avoid malformed packets  
+- Blend into normal DNS workflows  
+- Rely on subtle behavioral indicators  
 
-Default IDS rules and basic SIEM searches often fail to flag this behavior without additional tuning.
+Default views do not flag these patterns without contextual analysis.
 
 **Resolution:**  
-1. Reviewed DNS query characteristics for tunneling indicators, including:
-   - Excessively long subdomain strings  
-   - High entropy or random-looking domain names  
-   - Repeated queries to the same domain  
-2. Analyzed Zeek DNS logs to identify anomalies in query length and frequency.  
-3. Used packet-level inspection to confirm encoded data within DNS requests.  
-4. Identified the need for custom detection logic rather than relying solely on default signatures.
+1. Established a baseline of normal DNS behavior.  
+2. Analyzed DNS queries for:
+- Elevated query length  
+- Randomized subdomain structure  
+- Repetition patterns  
+3. Compared baseline traffic against simulated tunneling behavior.  
 
 **Validation:**  
-DNS tunneling behavior was successfully confirmed through manual analysis and sensor visibility. This validated the presence of tunneling activity and highlighted the need for custom or heuristic-based detection rules.
+Suspicious DNS queries were clearly distinguishable when evaluated
+behaviorally rather than syntactically.
 
 **Lessons Learned:**  
-> Advanced threats intentionally mimic legitimate traffic; effective detection requires behavioral analysis, not signature reliance.
+> DNS tunneling detection requires behavioral analysis, not signature matching.
 
 ---
 
-### ***🧩 Issue 3: DNS Logs Present but Not Properly Parsed or Searchable in Splunk***
+### 🧩 Issue 3: Detection Logic Depended on Understanding ECS Field Mapping
 
 **Description:**  
-During the DNS tunneling simulation, DNS-related logs were confirmed to be generated by network sensors (Zeek and/or Suricata). However, when searching in Splunk, the DNS data was difficult to locate or not easily searchable due to missing, inconsistent, or unclear field extractions.
+Although DNS telemetry was indexed, meaningful detection required accurate
+understanding of ECS field names and their relationships.
 
 **Impact:**  
-- DNS tunneling indicators were not easily searchable in Splunk  
-- Detection logic could not reliably reference DNS fields such as query name, query length, or frequency  
-- Manual packet or Zeek log review was required instead of SIEM-based analysis  
-- Slowed validation of DNS tunneling behavior  
+- Initial searches were incomplete  
+- Field-level analysis was delayed  
+- Detection confidence was reduced  
 
 **Root Cause:**  
-The issue was caused by incomplete or inconsistent parsing of DNS logs in Splunk, including:
-- DNS logs being ingested as raw text without proper field extraction  
-- Incorrect or unexpected sourcetypes for Zeek or Suricata DNS logs  
-- Lack of DNS-specific CIM mapping  
-- Fields such as `query`, `qtype`, or `dns_query` not being extracted automatically  
+Security Onion 2.x relies on:
+- ECS field normalization  
+- Dataset-based indexing  
+- Structured field analysis  
 
-As a result, DNS telemetry existed but was not normalized for effective analysis.
+Without familiarity with ECS mappings, telemetry may appear incomplete.
 
 **Resolution:**  
-1. Identified the correct Splunk sourcetypes associated with DNS logs.  
-2. Inspected raw events to confirm DNS data was present.  
-3. Used Splunk field discovery to identify available DNS-related fields.  
-4. Adjusted searches to reference raw fields when normalized fields were unavailable.  
-5. Documented the need for custom field extractions or CIM mapping for DNS data.
+1. Identified relevant ECS fields, including:
+- `dns.query.name`
+- `dns.query.length`
+- `dns.subdomain`
+- `source.ip`
+2. Updated Hunt queries and detection logic to reference ECS fields directly.  
+3. Aligned queries with observed Zeek DNS telemetry.
 
 **Validation:**  
-After confirming the presence of DNS data and identifying usable fields, DNS tunneling activity could be queried and analyzed in Splunk. This enabled further detection tuning and correlation efforts.
+Field-level analysis became reliable and repeatable, enabling confident detection.
 
 **Lessons Learned:**  
-> Ingested data is only valuable when it is parsed, normalized, and searchable.
+> Effective SOC analysis depends on understanding the underlying data model.
 
 ---
 
-### ***🧩 Issue 4: Detection Thresholds and Heuristics Not Tuned to Flag DNS Tunneling Activity***
+### 🧩 Issue 4: Detection Thresholds Were Not Initially Defined
 
 **Description:**  
-After confirming that DNS logs were present and searchable in Splunk, no alerts were triggered for the DNS tunneling simulation. Although the activity exhibited tunneling characteristics, existing detection logic and thresholds were not sensitive enough to flag the behavior as suspicious.
+Early analysis lacked defined thresholds for distinguishing suspicious DNS
+behavior from normal activity.
 
 **Impact:**  
-- DNS tunneling activity went undetected by automated alerts  
-- SIEM dashboards did not surface the activity without manual analysis  
-- Detection validation remained incomplete  
-- Additional analyst effort was required to identify tunneling behavior  
+- DNS tunneling indicators appeared low confidence  
+- No clear cutoff for abnormal query length  
+- Detection relied on subjective analysis  
 
 **Root Cause:**  
-DNS tunneling detection often requires **behavioral and heuristic-based thresholds**, which were not yet tuned for this environment. Contributing factors included:
-- Thresholds for DNS query length, frequency, or entropy set too high  
-- Lack of baselined “normal” DNS behavior for comparison  
-- Reliance on default rules that do not account for subtle tunneling techniques  
-- No correlation across multiple DNS indicators (length + frequency + repetition)  
-
-As a result, the tunneling traffic blended into normal DNS patterns.
+DNS tunneling detection requires **environment-specific thresholds**, which were
+not initially established.
 
 **Resolution:**  
-1. Reviewed DNS tunneling indicators commonly associated with exfiltration, including:
-   - Unusually long DNS query names  
-   - Repeated queries to a single domain  
-   - High-entropy subdomains  
-2. Adjusted detection logic to focus on behavioral patterns rather than single events.  
-3. Lowered detection thresholds in test queries to surface suspicious DNS activity.  
-4. Documented tuning requirements and detection gaps for future refinement.  
+1. Reviewed observed baseline DNS query lengths.  
+2. Identified anomalous query lengths during tunneling simulation.  
+3. Established a practical detection threshold:
+- `dns.query.length >= 35`
+4. Incorporated threshold into detection queries and alert logic.
 
 **Validation:**  
-After adjusting detection thresholds and analysis logic, suspicious DNS query patterns consistent with tunneling behavior could be identified. This confirmed that detection effectiveness depended on proper tuning rather than sensor visibility alone.
+Suspicious DNS queries consistently exceeded the defined threshold, confirming
+the effectiveness of the heuristic.
 
 **Lessons Learned:**  
-> Detection effectiveness depends on tuning informed by environmental baselines.
+> Detection thresholds must be informed by real telemetry, not assumptions.
 
 ---
 
-### ***🧩 Issue 5: Lack of Correlation Between DNS Indicators Prevented Alert Generation***
+### 🧩 Issue 5: Correlation Was Required to Increase Detection Confidence
 
 **Description:**  
-Even after identifying suspicious DNS characteristics (such as long query names and repeated requests), no single indicator alone was sufficient to trigger an alert. DNS tunneling behavior required correlation across multiple data points, which was not initially implemented.
+Single DNS indicators alone were insufficient to confidently identify tunneling
+activity.
 
 **Impact:**  
-- DNS tunneling activity did not escalate into an alert  
-- Indicators remained isolated and required manual analysis  
-- SIEM dashboards did not surface high-confidence detections  
-- Detection validation was incomplete without correlated evidence  
+- Individual events appeared low-risk  
+- No single alert-worthy signal  
+- Required multi-factor evaluation  
 
 **Root Cause:**  
-DNS tunneling detection is rarely based on a single event. The absence of correlation logic meant:
-- Long DNS queries were not correlated with high query frequency  
-- Repeated queries were not evaluated for entropy or structure  
-- Network indicators were not combined into a single risk signal  
-- SIEM searches evaluated events in isolation rather than as patterns over time  
+DNS tunneling behavior manifests through **patterns**, not isolated events:
+- Length  
+- Frequency  
+- Repetition  
+- Structure  
 
-Without correlation, tunneling behavior appeared as low-risk noise.
+Without correlation, signals remain weak.
 
 **Resolution:**  
-1. Identified key DNS tunneling indicators suitable for correlation, including:
-   - Query length  
-   - Query frequency per host  
-   - Repeated domain usage  
-   - High-entropy subdomains  
-2. Designed detection logic to evaluate multiple indicators within a defined time window.  
-3. Documented correlation requirements for future alert development and dashboards.  
-4. Established correlation as a necessary step beyond basic visibility and parsing.  
+1. Correlated multiple DNS indicators, including:
+- Query length  
+- Repetition  
+- Frequency  
+2. Evaluated DNS behavior over time rather than per event.  
+3. Documented correlation logic for alert readiness.
 
 **Validation:**  
-When DNS indicators were evaluated together rather than individually, tunneling behavior could be identified with higher confidence. This confirmed that effective DNS tunneling detection depends on multi-factor correlation rather than single-event alerts.
+When indicators were evaluated together, DNS tunneling behavior was identified
+with high confidence.
 
 **Lessons Learned:**  
-> High-confidence detections require correlation across multiple weak signals.
+> High-confidence detections emerge from correlated weak signals.
 
 ---
 
-## 🧠 Overall Takeaways
+## 🧠 Overall Takeaway
 
-SIM-002 reinforced that DNS tunneling detection requires:
-- Sensor visibility
-- Proper parsing
-- Baseline awareness
-- Threshold tuning
-- Multi-indicator correlation
+SIM-002 demonstrated that effective DNS tunneling detection requires:
 
-Each issue demonstrated real-world detection engineering challenges
-commonly faced in SOC environments.
+- Proper sensor placement  
+- ECS-aware telemetry analysis  
+- Baseline establishment  
+- Threshold definition  
+- Behavioral correlation  
+
+Each issue reflected **real SOC detection engineering challenges**, all of which
+were successfully resolved through structured analysis and validation.
 
 ---
 
 ## 🏁 Status
 
-- Issues fully documented  
-- Root causes identified  
-- Detection gaps understood  
-- Simulation limitations clearly defined  
+- All issues resolved  
+- Telemetry validated  
+- Detection logic finalized  
+- Evidence captured  
+- Simulation fully validated  
 
+**SIM-002 Status:** ***✅ Resolved***
