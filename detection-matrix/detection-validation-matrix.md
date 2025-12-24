@@ -17,10 +17,10 @@ Each simulation listed below has a **1:1 mapped folder** containing:
 
 | SIM ID | Scenario | MITRE ATT&CK | Data Sources | Detection Logic | Alert | Evidence | Status |
 |------|---------|--------------|-------------|----------------|-------|----------|--------|
-| **SIM-001** | Phishing Email (Link) | T1566.002 | Sysmon, Network | SPL Correlation | ✅ | Screenshots | **Validated** |
-| SIM-002 | DNS Tunneling | T1071.004 | Zeek (DNS) | KQL (Query Length + Behavior) | N/A (Metadata-Based) | Hunt Screenshots + Zeek Logs | ✅ Validated |
-| **SIM-003** | Privilege Escalation | T1055 | Sysmon, Security | SPL Integrity Analysis | ✅ | Screenshots | **Validated** |
-| **SIM-004** | SQL Injection | T1190 | Web / HTTP (IDS) | Suricata Web Policy Detection | ✅ | Screenshots | **Validated (IDS Layer)** |
+| **SIM-001** | Phishing Email (Link) | T1566.002 | Sysmon, Network | SPL Correlation | ✅ | Screenshots | **✅ Validated** |
+| SIM-002 | DNS Tunneling | T1071.004 | Zeek (DNS) | KQL (Query Length + Behavior) | N/A (Metadata-Based) | Hunt Screenshots + Zeek Logs | **✅ Validated** |
+| **SIM-003** | Privilege Escalation | T1055 | Sysmon, Security | SPL Integrity Analysis | ✅ | Screenshots | **✅ Validated** |
+| **SIM-004** | SQL Injection | T1190 | Web / HTTP (IDS) | Suricata Web Policy Detection | ✅ | Screenshots | **✅ Validated (IDS Layer)** |
 | SIM-005 | Unauthorized File Access | T1070 | Windows Logs | Planned | ⏳ | ⏳ | Planned |
 | SIM-006 | Sysmon ProcessCreate | T1059 | Sysmon | Planned | ⏳ | ⏳ | Planned |
 | SIM-007 | Sysmon FileCreate | T1105 | Sysmon | Planned | ⏳ | ⏳ | Planned |
