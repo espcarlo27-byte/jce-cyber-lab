@@ -45,7 +45,9 @@ results are **repeatable, auditable, and defensible**.
 | **Ubuntu Server** | Splunk Enterprise SIEM |
 
 > 🔎 **Detailed architecture, log flow, and design rationale:**  
-> **[View Architecture Documentation](architecture/README.md)**
+> **[View Architecture Documentation](architecture/README.md)**  
+> ℹ️ End-user endpoints (e.g., Windows 11) use **DHCP** to reflect real-world environments, while core infrastructure components use **static IPs**; endpoint detections rely on **hostname and telemetry context**, not IP addresses.
+
 
 ---
 
