@@ -26,14 +26,15 @@ issues-and-resolutions/
 
 ---
 
-## 📋 Simulation Issue Index
+## 🧩 Simulation Issue Index
 
-| Simulation ID | Scenario                    | Status        | Key Issue Themes                                                                 | Link |
-|---------------|-----------------------------|---------------|----------------------------------------------------------------------------------|------|
-| SIM-001       | T1566.002 – Phishing Email  | ✅ Resolved   | Forwarder configuration, logging gaps, audit policy tuning, network visibility   | [View](sim-001-phishing-email.md) |
-| SIM-002       | T1071.004 – DNS Tunneling   | ✅ Resolved   | ECS query methodology, Zeek DNS visibility, behavioral detection, threshold tuning | [View](sim-002-dns-tunneling.md) |
-| SIM-003       | T1055 – Privilege Escalation | ✅ Resolved  | Sysmon indexing, host context mismatch, UAC elevation, disk exhaustion            | [View](sim-003-privilege-escalation.md) |
-| SIM-004       | T1190 – SQL Injection       | ✅ Resolved   | Network-only detection, IDS alert tuning, lack of app logs, black-box testing     | [View](sim-004-sql-injection.md) |
+| Simulation ID | Scenario                         | Status        | Key Issue Themes                                                                 | Link |
+|---------------|----------------------------------|---------------|----------------------------------------------------------------------------------|------|
+| SIM-001       | T1566.002 – Phishing Email       | ✅ Resolved   | Forwarder configuration, logging gaps, audit policy tuning, network visibility   | [View](sim-001-phishing-email.md) |
+| SIM-002       | T1071.004 – DNS Tunneling        | ✅ Resolved   | ECS query methodology, Zeek DNS visibility, behavioral detection, threshold tuning | [View](sim-002-dns-tunneling.md) |
+| SIM-003       | T1190 – SQL Injection            | ✅ Resolved   | Network-only detection, IDS alert tuning, lack of app logs, black-box testing     | [View](sim-003-sql-injection.md) |
+| SIM-004       | T1059 – Sysmon Process Create    | 🧪 In Progress | Baseline process noise, parent–child relationships, command-line context          | [View](sim-004-sysmon-process-create.md) |
+| SIM-005       | T1055 – Privilege Escalation     | ✅ Resolved   | Sysmon indexing, host context mismatch, UAC elevation, disk exhaustion            | [View](sim-005-privilege-escalation.md) |
 
 
 ---
