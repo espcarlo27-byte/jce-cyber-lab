@@ -1,4 +1,4 @@
-# SIM-005 – Privilege Escalation Detection Alert
+# SIM-005 – Privilege Escalation (T1055) - Detection Alert
 
 **Symbolic ID:** LAB-SIM-003-PRIVESC-ALERT  
 **MITRE Technique:** T1055 – Privilege Escalation  
