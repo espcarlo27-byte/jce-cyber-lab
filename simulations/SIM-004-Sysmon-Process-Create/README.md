@@ -2,33 +2,22 @@
 
 ## 🎯 Goal
 
-Simulate and detect **command and scripting interpreter execution**
-on a Windows 11 endpoint by validating that:
+Simulate and validate **process execution behavior** on a Windows 11 endpoint by establishing a **clean execution baseline** before privilege escalation.
 
-- Process creation events are captured via **Sysmon Event ID 1**
-- Command-line arguments are fully visible
-- Parent → child process relationships are observable
-- Splunk can reliably detect suspicious execution behavior
-- Execution telemetry establishes a baseline for post-exploitation detection
+This simulation validates that:
 
-This simulation validates the **Execution** phase of the attack lifecycle
-and serves as a foundation for subsequent privilege escalation analysis.
+- Standard user processes execute normally
+- Parent → child process relationships are visible
+- Command-line arguments are captured
+- Encoded PowerShell execution is observable
+- Telemetry is reliably ingested into Splunk via **Sysmon Event ID 1**
 
----
+This simulation intentionally serves as a **prerequisite baseline** for  
+**SIM-005 – Privilege Escalation**, ensuring elevated execution detections are
+built on understood normal behavior.
 
-## 🔗 Simulation Progression Context
-
-This simulation focuses on **baseline execution visibility**.
-
-It answers the fundamental SOC questions:
-- What executed?
-- How was it executed?
-- From which parent process?
-
-The **next simulation (SIM-005 – Privilege Escalation)** builds directly on
-this telemetry by introducing **elevated integrity context**, validating how
-the same process creation signals indicate **post-exploitation escalation**
-once security boundaries are crossed.
+This simulation validates the **Execution** row in the  
+[Detection Validation Matrix](../../detection-matrix/detection-validation-matrix.md).
 
 ---
 
@@ -43,11 +32,11 @@ once security boundaries are crossed.
 
 | Component | Role |
 |---------|-----|
-| **Windows 11 Endpoint** | Victim host |
-| **Local User** | Command execution |
-| **Sysmon** | Process creation telemetry |
+| **Windows 11 Endpoint** (`Windows11Pro`) | Execution host |
+| **Standard User** (`local.lab\labuser`) | Process execution |
+| **Sysmon** | Endpoint telemetry |
 | **Splunk Enterprise (Ubuntu)** | SIEM / Detection |
-| **Windows Server** | SOC console |
+| **Windows Server** | SOC console (Splunk UI access) |
 
 > ❌ Kali, Security Onion, and pfSense are **not required** for this simulation.
 
@@ -58,32 +47,124 @@ once security boundaries are crossed.
 | File | Purpose |
 |----|--------|
 | `steps.md` | Exact, reproducible execution steps |
-| `queries.md` | SPL detection logic |
-| `alert-config.md` | Splunk alert definition |
-| `logs.md` | Representative log evidence |
-| `screenshots/` | Visual proof of execution and detection |
+| `queries.md` | SPL queries for execution visibility |
+| `logs.md` | Symbolic + representative Sysmon events |
+| `screenshots/` | Visual proof of telemetry and validation |
+
+> ⚠️ No alert is defined in this simulation by design.  
+> Alerting is introduced in **SIM-005** after baseline behavior is established.
+
+---
+
+## 🧪 What Was Simulated
+
+1. **Baseline execution**
+   - Standard user launches `cmd.exe`
+   - Normal command execution (`whoami`)
+   - Integrity level remains **Medium**
+
+2. **Scripted execution**
+   - `cmd.exe` spawns `powershell.exe`
+   - PowerShell executes benign commands
+   - Parent → child relationship observed
+
+3. **Suspicious-looking but benign execution**
+   - PowerShell launched with `-EncodedCommand`
+   - No payload executed
+   - Telemetry generated for encoded execution patterns
+
+These steps generate **high-signal execution telemetry** without triggering alerts.
 
 ---
 
 ## 🔍 Detection Strategy
 
-Detection is based on **behavioral execution signals**, not malware signatures.
+This simulation focuses on **visibility and validation**, not alerting.
 
 ### Primary Signals
-- **Sysmon Event ID 1 – Process Create**
+- **Sysmon Event ID 1** (Process Create)
 - `Image`
-- `CommandLine`
 - `ParentImage`
+- `CommandLine`
 - `User`
+- `IntegrityLevel`
 
 ### Key Detection Principles
-- Command interpreters are high-risk by nature
-- Parent process context provides execution intent
-- Command-line visibility dramatically improves fidelity
-- Execution telemetry is foundational for later escalation detection
+- Execution context must be understood **before** escalation detection
+- Parent–child relationships are more reliable than process name alone
+- Encoded execution is observable even when benign
+- Baseline noise must be measured before alerting
+
+---
+
+## 📸 Evidence Captured
+
+The following screenshots were collected and stored in `screenshots/`:
+
+- `sim004-sysmon-cmd-baseline.png` – Baseline cmd.exe execution
+- `sim004-sysmon-parent-child.png` – cmd → powershell relationship
+- `sim004-sysmon-encoded-command.png` – Encoded PowerShell execution
+- `sim004-spl-execution-results.png` – SPL execution visibility
+
+---
+
+## ✅ Success Criteria
+
+| Requirement | Status |
+|-----------|-------|
+| Sysmon Event ID 1 captured | ✅ |
+| Parent–child execution visible | ✅ |
+| Command-line logging verified | ✅ |
+| Encoded execution observed | ✅ |
+| SPL queries validated | ✅ |
+| Screenshots captured | ✅ |
+| Detection matrix updated | ⏳ |
+
+---
+
+## ⚠️ Issues & Resolutions
+
+During execution of SIM-004, several **real-world detection engineering challenges**
+were encountered related to execution telemetry volume and signal clarity.
+
+These issues included:
+- High baseline process noise
+- Benign encoded PowerShell usage
+- Parent–child process ambiguity
+- Initial over-reliance on process names
+
+All issues were **documented and addressed** as part of the baseline tuning process.
+
+👉 **Full technical breakdown:**  
+[SIM-004 – Issues & Resolutions](../../issues-and-resolutions/sim-004-sysmon-process-create.md)
+
+---
+
+## 🧠 Key Takeaways
+
+- Execution detection requires **baseline understanding**
+- Sysmon provides rich, high-fidelity execution telemetry
+- Encoded execution is not inherently malicious
+- Parent–child relationships are foundational for escalation detection
+- Establishing execution context strengthens all downstream detections
+
+---
+
+## 🔗 Simulation Progression
+
+This simulation directly enables:
+
+➡️ **SIM-005 – Privilege Escalation (T1055)**  
+Where elevated execution and UAC behavior are detected **on top of this baseline**.
 
 ---
 
 ## 🏁 Status
 
-**Simulation Status:** 🧪 In Progress
+**Simulation Status:** 🧪 **Baseline Validated**
+
+Execution telemetry is fully captured and understood.  
+Alerting and escalation detection are introduced in **SIM-005**.
+
+This simulation is suitable for
+**SOC analyst / detection engineering portfolio presentation**.
