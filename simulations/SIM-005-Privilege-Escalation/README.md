@@ -32,7 +32,8 @@ This simulation validates the **Privilege Escalation** row in the
 | **Splunk Enterprise (Ubuntu)** | SIEM / Detection |
 | **Windows Server** | SOC console (Splunk UI access) |
 
-> ❌ Kali, Security Onion, and pfSense are **not required** for this simulation.
+> ❌ Kali and Security Onion are **not required** for this simulation.  
+> ℹ️ pfSense is present in the lab as the **DHCP gateway**, but is **not used for detection or correlation**.
 
 ---
 
