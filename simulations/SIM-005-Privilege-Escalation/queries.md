@@ -1,4 +1,4 @@
-# SIM-003 – Privilege Escalation (T1055) – SPL Queries
+# SIM-005 – Privilege Escalation (T1055) – SPL Queries
 
 This file documents all Splunk searches used to detect, validate, and correlate
 **local privilege escalation behavior** on a Windows 11 endpoint (**Windows11Pro**).  
