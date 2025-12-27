@@ -1,4 +1,4 @@
-# SIM-003 – Privilege Escalation (T1055) – Steps
+# SIM-005 – Privilege Escalation (T1055) – Steps
 
 ## 1. Prerequisites
 
