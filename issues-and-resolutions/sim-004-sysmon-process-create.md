@@ -12,4 +12,5 @@ Focused detection logic on parent–child relationships, execution paths, and co
 Baseline process telemetry is critical before building higher-fidelity detections.
 
 **Status:**  
-Open – validation in progress
+Closed – Baseline execution validated at endpoint. Alerting intentionally deferred.
+
