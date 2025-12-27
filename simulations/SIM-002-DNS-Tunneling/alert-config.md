@@ -1,4 +1,4 @@
-# SIM-002 – DNS Tunneling Detection Alert
+# SIM-002 – DNS Tunneling (T1071.004) - Detection Alert
 
 **Symbolic ID:** LAB-SIM-002-DNS-TUNNEL  
 **MITRE Technique:** T1071.004 – Application Layer Protocol: DNS  
