@@ -1,4 +1,4 @@
-# SIM-004 – SQL Injection (T1190) – Detection Queries
+# SIM-003 – SQL Injection (T1190) – Detection Queries
 
 This file documents the detection logic and investigative queries relevant to
 SIM-004, which demonstrates **SQL injection exploitation** against a vulnerable
