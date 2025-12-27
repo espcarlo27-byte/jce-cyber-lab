@@ -25,10 +25,11 @@ results are **repeatable, auditable, and defensible**.
 - 🚧 **[Issues & Resolutions](issues-and-resolutions/)** – Root causes, fixes, and lessons learned  
 
 ### 🧪 Validated Simulations
-- ✅ **[SIM-001 – Phishing Email](simulations/SIM-001-Phishing-Email/)**
-- ✅ **[SIM-002 – DNS Tunneling](simulations/SIM-002-DNS-Tunneling/)**
-- ✅ **[SIM-003 – Privilege Escalation](simulations/SIM-003-Privilege-Escalation/)**
-- ✅ **[SIM-004 – SQL Injection](simulations/SIM-004-SQL-Injection/)**
+- ✅ **[SIM-001 – Phishing Email](simulations/SIM-001-Phishing-Email/)** – Initial Access  
+- ✅ **[SIM-002 – DNS Tunneling](simulations/SIM-002-DNS-Tunneling/)** – Command & Control  
+- ✅ **[SIM-003 – SQL Injection](simulations/SIM-003-SQL-Injection/)** – Application Exploitation  
+- 🧪 **[SIM-004 – Sysmon Process Create](simulations/SIM-004-Sysmon-Process-Create/)** – Execution Baseline  
+- ✅ **[SIM-005 – Privilege Escalation](simulations/SIM-005-Privilege-Escalation/)** – Post-Exploitation  
 
 ---
 
@@ -55,8 +56,8 @@ flowchart TB
     Internet["Internet"]
     pfSense["pfSense Firewall"]
 
-    AD["Windows Server 2025\nAD / DNS"]
-    SO["Security Onion\nZeek | Suricata"]
+    AD["Windows Server 2025\AD / DNS"]
+    SO["Security Onion\Zeek | Suricata"]
     Win11["Windows 11 Endpoint"]
     Kali["Kali Linux"]
     Splunk["Splunk Enterprise"]
@@ -100,18 +101,6 @@ Each simulation includes:
 - `queries.md` – Detection logic
 - `alert-config.md` – Alert definition
 - `screenshots/` – Proof of validation
-
-### ✅ Validated
-- SIM-001 – Phishing Email
-- SIM-002 – DNS Tunneling
-- SIM-003 – Privilege Escalation
-- SIM-004 – SQL Injection
-
-### ⏳ Planned
-- SIM-005 – Unauthorized File Access
-- SIM-006 – Sysmon ProcessCreate
-- SIM-007 – Sysmon FileCreate
-- SIM-008 – PowerShell Download
 
 ---
 
