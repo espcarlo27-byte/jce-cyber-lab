@@ -139,6 +139,8 @@ Confirm fields:
 
 ***📸 Save screenshot:***  
 `sim004-sysmon-processcreate.png`
+> ℹ️ The Sysmon Process Create screenshot also demonstrates baseline execution volume,
+> as multiple benign Event ID 1 entries are visible in the Operational log.
 
 > ⚠️ Sysmon telemetry is validated at the endpoint.
 > Sysmon ingestion into Splunk is not required for simulation completion.
@@ -153,26 +155,19 @@ Expected conclusion:
 
 > “Multiple process creation events occurred consistent with command-line execution activity on a Windows endpoint.”
 
-***📸 Save screenshot:***  
-`sim004-correlation-results.png`
+> ℹ️ Baseline noise analysis was performed directly at the endpoint using the
+> Sysmon Operational log. Multiple benign Event ID 1 entries were observed,
+> establishing normal execution volume.
 
 ---
 
-## 7. Configure and Test Splunk Alert
+## 7. Optional Alert Validation
 
-Create the alert defined in `alert-config.md.`  
+Alerting is **not required** for SIM-004.
 
-Alert requirements:
-- Trigger condition: Results ≥ 1
-- Frequency: Every 5 minutes
-- Time range: Last 15 minutes
-- Severity: Medium
-- Symbolic ID: `LAB-SIM-004-PROCESSCREATE`
-
-Re-run Step 3 if needed to force alert execution.  
-
-***📸 Save screenshot:***  
-`sim004-alert-fired.png`
+This simulation focuses on establishing a reliable **execution baseline**.
+Alerting is intentionally deferred to **SIM-005 – Privilege Escalation**, where
+execution context is evaluated under elevated conditions.
 
 ---
 
@@ -182,7 +177,6 @@ Add the following to the `screenshots/` directory:
 - `sim004-security-4688.png`
 - `sim004-sysmon-processcreate.png`
 - `sim004-correlation-results.png`
-- `sim004-alert-fired.png`
 
 ---
 
@@ -197,3 +191,4 @@ Update the SIM-004 checklist in README.md:
 - ✅ Alert triggered
 - ✅ Screenshots saved
 - ✅ Detection matrix updated
+
