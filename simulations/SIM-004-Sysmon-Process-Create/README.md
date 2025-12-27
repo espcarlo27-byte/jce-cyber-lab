@@ -95,6 +95,9 @@ This simulation focuses on **visibility and validation**, not alerting.
 - Encoded execution is observable even when benign
 - Baseline noise must be measured before alerting
 
+> Sysmon Event ID 1 is available at the endpoint and used as supplemental validation.
+> Primary detection authority remains Windows Security Event ID 4688.
+
 ---
 
 ## 📸 Evidence Captured
