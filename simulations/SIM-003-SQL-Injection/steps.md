@@ -1,4 +1,4 @@
-# SIM-004 – SQL Injection (T1190) – Steps
+# SIM-003 – SQL Injection (T1190) – Steps
 
 ## 1. Prerequisites
 
