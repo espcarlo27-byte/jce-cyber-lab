@@ -1,4 +1,4 @@
-# SIM-004 – SQL Injection (T1190) – Log Evidence
+# SIM-003 – SQL Injection (T1190) – Log Evidence
 
 This file contains **symbolic and representative telemetry** captured during
 SIM-004, demonstrating **successful SQL injection exploitation** against a
