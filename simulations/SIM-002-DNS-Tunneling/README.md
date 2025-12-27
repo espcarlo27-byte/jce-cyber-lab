@@ -2,9 +2,9 @@
 
 ## 🎯 Goal
 
-Simulate DNS-based command-and-control–style traffic to validate **network-level DNS telemetry**, anomaly identification, and **analyst investigation across both Security Onion and Splunk**.
+Simulate DNS-based command-and-control–style traffic to validate **Zeek DNS telemetry visibility**, anomaly identification, and analyst-level investigation using **Security Onion Hunt**.
 
-This simulation validates the **LAB-SIM-002** entry in the Detection Validation Matrix through **end-to-end packet capture, log forwarding, indexing, and analyst-driven investigation**.
+This simulation validates the **LAB-SIM-002** entry in the Detection Validation Matrix through **end-to-end packet capture, indexing, and UI-based analysis**.
 
 ---
 
@@ -21,8 +21,6 @@ This simulation validates the **LAB-SIM-002** entry in the Detection Validation 
 - **Endpoints:** Windows 11, Ubuntu  
 - **Network Sensor:** Security Onion (Zeek)  
 - **Gateway / DNS Resolver:** pfSense  
-- **SIEM / Analysis Platform:** Splunk Enterprise  
-- **Log Forwarding:** Splunk Universal Forwarder (Zeek logs)  
 - **Network:** Single broadcast domain (LAN tap via pfSense)
 
 ---
@@ -30,54 +28,44 @@ This simulation validates the **LAB-SIM-002** entry in the Detection Validation 
 ## 📂 Files in This Simulation
 
 - `steps.md` – DNS traffic generation and simulation steps  
-- `queries.md` –  
-  - KQL queries used in Security Onion Hunt  
-  - SPL searches used for DNS analysis in Splunk  
-- `screenshots/` –  
-  - Zeek DNS evidence (Security Onion Hunt)  
-  - DNS analysis views from Splunk  
+- `queries.md` – KQL queries used in Security Onion Hunt  
+- `screenshots/` – Zeek DNS Hunt evidence and timelines  
 - `issues-and-resolutions/` – Troubleshooting and remediation history  
 
 ---
 
 ## 🧪 Simulation Overview
 
-This simulation was executed in **two phases**, with detections validated at the **network sensor** and **SIEM analysis** layers.
+This simulation was executed in **two phases**:
 
 ### Phase 1 – Baseline DNS Activity
-
-Normal DNS queries were generated to establish expected DNS behavior patterns, including:
-- Standard domain lengths  
-- Low-entropy query names  
-- Typical query frequency  
+Normal DNS queries were generated from Kali Linux to establish expected DNS behavior patterns, including:
+- Standard domain lengths
+- Low entropy query names
+- Typical query frequency
 
 ### Phase 2 – Suspicious DNS Behavior
-
 High-frequency DNS queries with long, randomized subdomains were generated to emulate **DNS tunneling–like behavior**, enabling analysis of:
-- Abnormally long DNS labels  
-- Repeated base domains  
-- Elevated request volume inconsistent with normal browsing  
+- Query length anomalies
+- Repeated base domains
+- Abnormal request volume
 
 ---
 
 ## 🔎 Detection & Validation
 
-### Zeek DNS Telemetry (Security Onion)
+### Zeek DNS Telemetry
+- DNS traffic was successfully captured by Zeek
+- DNS logs were written to `dns.log`
+- Events were indexed into Security Onion’s Elastic backend
 
-- DNS traffic was captured by Zeek  
-- DNS events written to `dns.log`  
-- Events indexed into Security Onion’s Elastic backend  
-
-### Hunt Verification (Security Onion – KQL)
-
-DNS telemetry was validated using ECS-aware KQL queries:
-
+### Hunt Verification (KQL)
+DNS telemetry was confirmed in Security Onion Hunt using ECS-aware queries:
 ```so
 event.dataset: "zeek.dns"
 ```
 
-### Key Investigation Pivots
-
+Additional pivots included:
 - `dns.question.name`
 - `source.ip`
 - `destination.port`
@@ -85,62 +73,46 @@ event.dataset: "zeek.dns"
 
 ---
 
-### SIEM Analysis (Splunk)
-
-Zeek DNS logs were forwarded from Security Onion to Splunk to support **SOC-style investigation and historical analysis**.
-
-In Splunk, DNS tunneling indicators were analyzed using SPL searches focusing on:
-- Unusually long DNS query names  
-- Repeated queries to the same external domains  
-- High query frequency from a single source host  
-
-Splunk was used as an **analysis and visibility layer**, not the primary detection engine, mirroring how many SOCs centrally consume Zeek telemetry.
-
----
-
 ## ✅ Success Criteria (Met)
 
-- Suspicious DNS tunneling–like traffic generated  
-- Zeek successfully captured DNS telemetry  
-- DNS events indexed and visible in Security Onion Hunt  
-- Zeek logs forwarded and searchable in Splunk  
-- Analyst-level investigation performed using **KQL and SPL**  
+- Abnormal DNS query patterns generated  
+- Zeek captured and logged DNS telemetry  
+- DNS events indexed and visible in Hunt  
+- Analyst-level investigation performed using KQL  
 - Evidence captured and documented  
 
 ---
 
 ## ⚠️ Issues Encountered & Resolutions
 
-### Issue: DNS Telemetry Not Immediately Visible in Hunt
+During initial execution, DNS telemetry was visible at the Zeek sensor but **not immediately discoverable in Hunt** due to incorrect query methods.
 
-DNS events were visible at the Zeek sensor but initially **not discoverable in Security Onion Hunt**.
+### Root Cause
+Security Onion 2.x stores Zeek logs in **ECS-compliant Elastic data streams**. Free-text searches (e.g., `zeek.dns`) do not return results unless ECS fields or KQL syntax are used.
 
-**Root Cause**  
-Security Onion 2.x stores Zeek logs in **ECS-compliant Elastic data streams**. Free-text searches (e.g., `zeek.dns`) do not return results without ECS-aware KQL syntax.
-
-**Resolution**
+### Resolution
+DNS telemetry was successfully queried using:
 ```so
 event.dataset: "zeek.dns"
 ```
-This restored full visibility in Hunt.
 
-**Full technical breakdown:**  
+This restored full visibility in the Hunt interface.
+
+Full technical breakdown:  
 `../../issues-and-resolutions/sim-002-dns-tunneling.md`
 
 ---
 
 ## 🧠 Analyst Takeaway
 
-This simulation demonstrates a realistic SOC workflow:
+This simulation highlights an important SOC reality:
 
-- **Zeek** provides deep protocol-level DNS visibility  
-- **Security Onion** enables rapid network-centric hunting  
-- **Splunk** centralizes DNS telemetry for scalable analysis and historical review  
+Detection capability depends not only on telemetry collection, but also on analyst familiarity with the underlying data model.
 
-**Key lessons:**
-- DNS tunneling is best detected through **behavioral analysis**, not signatures  
-- Network telemetry remains effective even without endpoint context  
-- SIEMs amplify sensor value by enabling repeatable, analyst-driven investigations  
+Key lessons:
+- Zeek can be fully operational while data remains invisible without ECS-aware queries  
+- Understanding Elastic data streams is critical in modern SOC environments  
+- Proper documentation of investigation blockers is as important as detection success  
 
 ---
 
@@ -148,5 +120,5 @@ This simulation demonstrates a realistic SOC workflow:
 
 **Simulation Status:** ✅ Validated
 
-> DNS tunneling–like activity was successfully captured, forwarded, indexed, and analyzed using **Zeek, Security Onion Hunt, and Splunk**.  
-SIM-002 is fully reproducible and defensible as a completed detection and analysis scenario.
+DNS telemetry was successfully captured, indexed, queried, and analyzed within Security Onion Hunt.  
+SIM-002 is fully reproducible and defensible as a completed detection scenario.
