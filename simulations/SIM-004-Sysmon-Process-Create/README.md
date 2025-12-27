@@ -97,6 +97,9 @@ Detection is based on **Sysmon Process Create telemetry**, not Windows Security 
   - Script abuse
   - Living-off-the-land techniques
 
+> Sysmon baseline analysis was validated at the endpoint; SIEM ingestion is treated
+> as a lab enhancement rather than a prerequisite.
+
 ---
 
 ## 🚨 Alert Summary
