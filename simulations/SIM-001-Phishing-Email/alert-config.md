@@ -1,4 +1,4 @@
-# SIM-001 – Phishing Email Detection Alert
+# SIM-001 – Phishing Email (T1566.002) - Detection Alert
 
 **Symbolic ID:** LAB-SIM-001-PHISHING-ALERT  
 **Technique:** T1566.002 – Phishing: Link  
