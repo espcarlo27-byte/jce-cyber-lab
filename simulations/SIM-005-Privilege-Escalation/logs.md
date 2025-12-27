@@ -1,4 +1,4 @@
-# SIM-003 – Privilege Escalation (T1055) – Log Evidence
+# SIM-005 – Privilege Escalation (T1055) – Log Evidence
 
 This file contains **symbolic and representative log evidence** captured during
 SIM-003, demonstrating **local privilege escalation** on a Windows 11 endpoint
