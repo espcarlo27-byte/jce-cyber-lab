@@ -1,4 +1,4 @@
-# SIM-004 – SQL Injection (T1190)
+# SIM-003 – SQL Injection (T1190)
 
 ## 🎯 Goal
 

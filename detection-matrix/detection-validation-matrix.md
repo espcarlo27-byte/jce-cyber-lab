@@ -18,13 +18,14 @@ Each simulation listed below has a **1:1 mapped folder** containing:
 | SIM ID | Scenario | MITRE ATT&CK | Data Sources | Detection Logic | Alert | Evidence | Status |
 |------|---------|--------------|-------------|----------------|-------|----------|--------|
 | **SIM-001** | Phishing Email (Link) | T1566.002 | Sysmon, Network | SPL Correlation | ✅ | Screenshots | **✅ Validated** |
-| SIM-002 | DNS Tunneling | T1071.004 | Zeek (DNS) | KQL (Query Length + Behavior) | N/A (Metadata-Based) | Hunt Screenshots + Zeek Logs | **✅ Validated** |
-| **SIM-003** | Privilege Escalation | T1055 | Sysmon, Security | SPL Integrity Analysis | ✅ | Screenshots | **✅ Validated** |
-| **SIM-004** | SQL Injection | T1190 | Web / HTTP (IDS) | Suricata Web Policy Detection | ✅ | Screenshots | **✅ Validated (IDS Layer)** |
-| SIM-005 | Unauthorized File Access | T1070 | Windows Logs | Planned | ⏳ | ⏳ | Planned |
-| SIM-006 | Sysmon ProcessCreate | T1059 | Sysmon | Planned | ⏳ | ⏳ | Planned |
-| SIM-007 | Sysmon FileCreate | T1105 | Sysmon | Planned | ⏳ | ⏳ | Planned |
-| SIM-008 | PowerShell Download | T1059.001 | Sysmon, Network | Planned | ⏳ | ⏳ | Planned |
+| **SIM-002** | DNS Tunneling | T1071.004 | Zeek (DNS) | KQL (Query Length + Behavior) | N/A (Metadata-Based) | Hunt Screenshots + Zeek Logs | **✅ Validated** |
+| **SIM-003** | SQL Injection | T1190 | Web / HTTP (IDS) | Suricata Web Policy Detection | Screenshots | **✅ Validated (IDS Layer)** |
+| **SIM-004** | Sysmon Process Create | T1059 | Sysmon | SPL Process Execution Analysis | Screenshots | 🧪 In Progress |**
+| **SIM-005** | Privilege Escalation | T1055 | Sysmon, Security | SPL Integrity Analysis | Screenshots | **✅ Validated** |
+| SIM-006 | Unauthorized File Access | T1070 | Windows Logs | Planned | ⏳ | ⏳ | Planned |
+| SIM-007 | Sysmon ProcessCreate | T1059 | Sysmon | Planned | ⏳ | ⏳ | Planned |
+| SIM-008 | Sysmon FileCreate | T1105 | Sysmon | Planned | ⏳ | ⏳ | Planned |
+| SIM-009 | PowerShell Download | T1059.001 | Sysmon, Network | Planned | ⏳ | ⏳ | Planned |
 
 ---
 
@@ -34,12 +35,13 @@ Each simulation listed below has a **1:1 mapped folder** containing:
 |-----|-----|
 | SIM-001 | [SIM-001 – Phishing Email](../simulations/SIM-001-Phishing-Email/) |
 | SIM-002 | [SIM-002 – DNS Tunneling](../simulations/SIM-002-DNS-Tunneling/) |
-| SIM-003 | [SIM-003 – Privilege Escalation](../simulations/SIM-003-Privilege-Escalation/) |
-| SIM-004 | [SIM-004 – SQL Injection](../simulations/SIM-004-SQL-Injection/) |
-| SIM-005 | [SIM-005 – Unauthorized File Access](../simulations/SIM-005-Unauthorized-File-Access/) |
-| SIM-006 | [SIM-006 – Sysmon ProcessCreate](../simulations/SIM-006-Sysmon-ProcessCreate/) |
-| SIM-007 | [SIM-007 – Sysmon FileCreate](../simulations/SIM-007-Sysmon-FileCreate/) |
-| SIM-008 | [SIM-008 – PowerShell Download](../simulations/SIM-008-PowerShell-Download/) |
+| SIM-003 | [SIM-003 – SQL Injection](../simulations/SIM-003-SQL-Injection/) |
+| SIM-004 | [SIM-004 – Sysmon Process Create](../simulations/SIM-004-Sysmon-Process-Create/) |
+| SIM-005 | [SIM-005 – Privilege Escalation](../simulations/SIM-005-Privilege-Escalation/) |
+| SIM-006 | [SIM-005 – Unauthorized File Access](../simulations/SIM-005-Unauthorized-File-Access/) |
+| SIM-007 | [SIM-006 – Sysmon ProcessCreate](../simulations/SIM-006-Sysmon-ProcessCreate/) |
+| SIM-008 | [SIM-007 – Sysmon FileCreate](../simulations/SIM-007-Sysmon-FileCreate/) |
+| SIM-009 | [SIM-008 – PowerShell Download](../simulations/SIM-008-PowerShell-Download/) |
 
 ---
 
@@ -55,7 +57,8 @@ Each simulation listed below has a **1:1 mapped folder** containing:
 
 ## 📌 Notes
 
-- **SIM-001**, **SIM-002**, **SIM-003**, and **SIM-004** are **fully validated** with alerts firing and screenshots captured.
+- **SIM-001**,  **SIM-002**, **SIM-003**, and **SIM-005** are fully validated with alerts firing and screenshots captured.
+- **SIM-004** establishes execution telemetry and serves as a foundation for privilege escalation detection.
 - All future simulations will follow the **same evidence-driven workflow**.
 
 ---

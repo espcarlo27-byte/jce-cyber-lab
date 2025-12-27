@@ -1,4 +1,4 @@
-# SIM-003 – Privilege Escalation (T1055)
+# SIM-005 – Privilege Escalation (T1055)
 
 ## 🎯 Goal
 
