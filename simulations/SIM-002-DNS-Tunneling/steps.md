@@ -144,7 +144,92 @@ Look for:
 
 ---
 
-## 8. Analyst Interpretation
+## 8. Packet Analysis with Wireshark (Validation)
+
+This step validates suspicious DNS behavior at the **packet level** to confirm that Zeek telemetry accurately reflects traffic observed on the wire.
+
+Wireshark is used strictly for **validation and analyst confirmation**, not continuous monitoring or alerting.
+
+---
+
+***8.1 Start Packet Capture***  
+
+On **Security Onion**:
+
+- Launch **Wireshark**
+- Select the **monitoring interface** (same interface used by Zeek)
+- Start capture **before or during** suspicious DNS generation
+
+---
+
+***8.2 Apply Display Filter***  
+
+Apply the following Wireshark display filter to isolate DNS traffic:
+
+```text
+udp.port == 53
+```
+
+This limits visibility to DNS queries and responses relevant to tunneling analysis.
+
+---
+
+***8.3 Observe DNS Packet Characteristics***  
+
+Inspect DNS packets generated during **Step 5 – Suspicious DNS Traffic**.
+
+Look for:
+
+- **Unusually long DNS query names**
+- **High-entropy subdomains** that appear randomized
+- **Repeated queries** to the same base domain
+- **Elevated query frequency** over a short time window
+
+These characteristics should contrast clearly with baseline DNS traffic observed earlier.
+
+---
+
+***8.4 Validate Against Zeek Telemetry***  
+
+Confirm that packet-level observations align with:
+
+- DNS entries in Zeek `dns.log`
+- ECS-normalized DNS events visible in Hunt
+
+Key fields to correlate include:
+- `dns.question.name`
+- `source.ip`
+- `destination.port`
+
+This confirms that Zeek parsing and indexing accurately represent raw packet activity.
+
+---
+
+***8.5 Capture Evidence***  
+
+📸 **Screenshots to capture:**
+- Wireshark view showing long or randomized DNS query names
+- Multiple repeated DNS queries to the same base domain
+
+📁 **Save screenshots to:**  
+`simulations/SIM-002-DNS-Tunneling/screenshots/wireshark/`
+
+
+**Suggested filenames:**
+- `sim002-wireshark-dns-baseline.png`
+- `sim002-wireshark-dns-suspicious.png`
+
+---
+
+### Notes
+
+- Packet capture is used for **ground-truth validation**
+- In production SOC environments, Zeek provides scalable DNS monitoring
+- Wireshark is most valuable during **detection development and investigation**
+
+---
+
+## 9. Analyst Interpretation
 
 At this stage, the analyst should be able to distinguish:
 
@@ -161,7 +246,7 @@ This satisfies the detection objective for DNS tunneling–style behavior.
 
 ---
 
-## 9. Save Screenshots
+## 10. Save Screenshots
 
 Store all evidence in:  
 `simulations/SIM-002-DNS-Tunneling/screenshots/`
@@ -174,7 +259,7 @@ Required screenshots:
 
 ---
 
-## 10. Mark Simulation Completion
+## 11. Mark Simulation Completion
 
 Update SIM-002 checklist:
 - [x] Baseline DNS generated
