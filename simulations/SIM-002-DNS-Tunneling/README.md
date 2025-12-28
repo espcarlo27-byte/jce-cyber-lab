@@ -71,27 +71,6 @@ Additional pivots included:
 - `destination.port`
 - `network.transport`
 
-### Packet Capture Validation (Wireshark)
-
-To complement Zeek-based detection and Hunt analysis, packet-level inspection was performed using **Wireshark** to validate DNS tunneling–like behavior directly on the network.
-
-Wireshark was used strictly as a **validation tool**, providing ground-truth confirmation that anomalous DNS activity observed in Zeek telemetry accurately reflected traffic seen on the wire.
-
-**Validation focus included:**
-- Abnormally long DNS query names
-- High-entropy subdomains inconsistent with normal DNS usage
-- Repeated DNS queries to the same base domain
-- Elevated query frequency over short time intervals
-
-Packet-level observations aligned with:
-- Zeek DNS events written to `dns.log`
-- ECS-normalized DNS fields indexed in Elastic
-- Hunt queries using:
-  ```so
-  event.dataset: "zeek.dns"
-  ```
-> This correlation confirmed that Zeek telemetry reliably represented the underlying packet activity, strengthening confidence in the detection results without relying solely on UI-based analysis.
-
 ---
 
 ## ✅ Success Criteria (Met)
