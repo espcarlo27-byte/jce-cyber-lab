@@ -61,8 +61,8 @@ flowchart TB
     Internet["Internet"]
     pfSense["pfSense\nFirewall | DNS | DHCP"]
 
-    AD["Windows Server 2025\ Active Directory"]
-    SO["Security Onion (Eval)\ Zeek | Suricata"]
+    AD["Windows Server 2025 \ Active Directory"]
+    SO["Security Onion (EVAL) \ Zeek | Suricata"]
     Win11["Windows 11 Endpoint"]
     Kali["Kali Linux"]
     Splunk["Splunk Enterprise"]
