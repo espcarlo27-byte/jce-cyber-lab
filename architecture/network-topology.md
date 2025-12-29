@@ -27,13 +27,13 @@ Core design goals:
 flowchart TB
     Internet["Internet"]
 
-    pfSense["pfSense Firewall \ 10.0.0.1 \ WAN/LAN"]
+    pfSense["pfSense \ Firewall | Routing | NAT \ DNS Resolver | DHCP \ 10.0.0.1 (Static)"]
 
-    AD["Windows Server 2025 \ Active Directory \ 10.0.0.10 (Static)"]
-    SO["Security Onion (Eval) \ Zeek | Suricata | PCAP \ 10.0.0.11 (Static)"]
-    Kali["Kali Linux \ Attacker VM \ DHCP"]
-    Splunk["Ubuntu Server \ Splunk Enterprise SIEM \ DHCP"]
-    Win11["Windows 11 Endpoint \ User Workstation \ DHCP"]
+    AD["Windows Server 2025 \ Active Directory \ Identity & Authentication \ Splunk Forwarder \ 10.0.0.10 (Static)"]
+    SO["Security Onion (Eval) \ Zeek | Suricata | ECS Telemetry \ Limited / No PCAP \ 10.0.0.11 (Static)"]
+    Kali["Kali Linux \ Attack Simulation \ DHCP"]
+    Splunk["Ubuntu Server \ Splunk Enterprise SIEM \ Receiving & Correlation \ DHCP"]
+    Win11["Windows 11 Endpoint \ User Workstation \ Sysmon + Security Logs \ Splunk Forwarder \ DHCP"]
 
     Internet --> pfSense
 
@@ -42,7 +42,12 @@ flowchart TB
     pfSense --> Kali
     pfSense --> Splunk
     pfSense --> Win11
+
+    AD --> Splunk
+    Win11 --> Splunk
+    SO --> Splunk
 ```
+
 ---
 
 ## 🧱 System Roles & Responsibilities
@@ -50,10 +55,12 @@ flowchart TB
 - Acts as the network gateway for all systems
 - Provides:
    - Routing and NAT
+   - DNS resolver services for all hosts
    - DHCP services for endpoints
    - Firewall logging
    - Traffic mirroring to Security Onion
-- Serves as the choke point for all ingress and egress traffic
+- Serves as the single choke point for ingress, egress, and DNS visibility
+- Enables network-based detections (e.g., DNS tunneling) independent of AD
 
 ---
 
@@ -61,21 +68,25 @@ flowchart TB
 - Provides identity and authentication services
 - Hosts:
    - Active Directory
-   - DNS
    - Group Policy
+- Does not act as the primary DNS resolver
 - Uses a static IP to ensure:
    - Reliable authentication
    - Predictable DNS resolution
    - Consistent log correlation
-
+- Runs a Splunk Forwarder for AD and security logs
+  
 ---
 
-**Security Onion – Network Security Monitoring (10.0.0.11)**
+**Security Onion (EVAL) – Network Security Monitoring (10.0.0.11)**
 - Passively monitors mirrored traffic from pfSense
 - Provides:
    - Zeek for protocol and session analysis
    - Suricata for IDS signatures
-   - PCAP for packet-level evidence
+   - ECS-normalized network telemetry
+- Deployed in Evaluation mode
+   - Limited or no PCAP retention
+   - Detections prioritize parsed telemetry over raw packets
 - Uses a static IP for management and analyst access
 - Does not sit inline with traffic (non-intrusive)
 
@@ -86,6 +97,7 @@ flowchart TB
 - Generates:
    - Sysmon telemetry
    - Windows Security Event logs
+- Runs a Splunk Universal Forwarder
 - IP address assigned dynamically via DHCP
 - Detection logic relies on:
    - Hostname
@@ -100,7 +112,7 @@ flowchart TB
    - Phishing activity
    - DNS tunneling
    - Privilege escalation attempts
-   - Web attacks
+   - Network and Web attacks
 - IP address assigned dynamically
 - Reflects adversary infrastructure that is:
    - Ephemeral
@@ -145,7 +157,6 @@ real-world enterprise and SOC environments.
 
 ### 🔒 Static IP Assignments (Infrastructure Components)
 
-The following systems use **static IP addresses**:
 - **pfSense Firewall**
 - **Windows Server 2025 (Active Directory)**
 - **Security Onion**
@@ -165,7 +176,6 @@ The following systems use **static IP addresses**:
 
 ### 🔄 DHCP Addressing (Endpoints & Tooling)
 
-The following systems use **DHCP**:
 - **Windows 11 Endpoint**
 - **Kali Linux (Attack VM)**
 - **Ubuntu Server (Splunk Enterprise SIEM)**
@@ -179,16 +189,16 @@ The following systems use **DHCP**:
     - Hostname
     - User
     - Process
-    - Log context (not hard-coded IPs)
+    - Log/Telemetry context (not hard-coded IPs)
 - Demonstrates analyst adaptability to dynamic environments
 
 ---
 
 ## 🧠 Detection Engineering Impact
 
-This addressing and topology design reinforces **best practices in SOC detection engineering**:
+This addressing and topology design reinforces **best practices in SOC-grade detection engineering**:
 - Detections avoid brittle IP-based logic
-- Correlation relies on:
+- Correlation focuses on:
   - Host identity
   - Process behavior
   - Network patterns
