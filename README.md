@@ -59,7 +59,7 @@ results are **repeatable, auditable, and defensible**.
 ```mermaid
 flowchart TB
     Internet["Internet"]
-    pfSense["pfSense\nFirewall | DNS | DHCP"]
+    pfSense["pfSense\Firewall | DNS | DHCP"]
 
     AD["Windows Server 2025 \ Active Directory"]
     SO["Security Onion (EVAL) \ Zeek | Suricata"]
