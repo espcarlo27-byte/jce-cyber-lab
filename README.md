@@ -59,10 +59,10 @@ results are **repeatable, auditable, and defensible**.
 ```mermaid
 flowchart TB
     Internet["Internet"]
-    pfSense["pfSense Firewall"]
+    pfSense["pfSense\nFirewall | DNS | DHCP"]
 
-    AD["Windows Server 2025\AD / DNS"]
-    SO["Security Onion\Zeek | Suricata"]
+    AD["Windows Server 2025\ Active Directory"]
+    SO["Security Onion (Eval)\ Zeek | Suricata"]
     Win11["Windows 11 Endpoint"]
     Kali["Kali Linux"]
     Splunk["Splunk Enterprise"]
@@ -150,9 +150,9 @@ Each simulation includes:
 - SOC investigation workflows
 - Windows & Active Directory security logging
 - Network traffic analysis
-- IDS and packet-level inspection
+- IDS alert validation
 - MITRE ATT&CK mapping
-- Alert design and validation
+- Alert design and testing
 - Root cause analysis and documentation
 
 ---
