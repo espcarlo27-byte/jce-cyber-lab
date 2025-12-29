@@ -37,17 +37,23 @@ results are **repeatable, auditable, and defensible**.
 
 | System | Role |
 |------|------|
-| **pfSense** | Firewall, routing, NAT, DHCP, traffic mirroring |
-| **Windows Server 2025** | Active Directory, DNS |
-| **Security Onion** | Network Security Monitoring (Zeek, Suricata, PCAP) |
+| **pfSense** | Firewall, routing, NAT, DNS resolver, DHCP, traffic mirroring |
+| **Windows Server 2025** | Active Directory (identity, authentication, domain services) |
+| **Security Onion (Eval)** | Network Security Monitoring (Zeek, Suricata, limited PCAP) |
 | **Windows 11** | User endpoint (Sysmon, Windows Security Logs) |
 | **Kali Linux** | Attack simulation |
 | **Ubuntu Server** | Splunk Enterprise SIEM |
 
-> 🔎 **Detailed architecture, log flow, and design rationale:**  
-> **[View Architecture Documentation](architecture/README.md)**  
-> ℹ️ End-user endpoints (e.g., Windows 11) use **DHCP** to reflect real-world environments, while core infrastructure components use **static IPs**; endpoint detections rely on **hostname and telemetry context**, not IP addresses.
+> 🔎 Detailed architecture, log flow, and design rationale:
+> View Architecture Documentation
 
+> ℹ️ pfSense is intentionally used as the primary DNS resolver to centralize DNS visibility and support network-based detections (e.g., DNS tunneling).
+> Active Directory provides identity and authentication services, but DNS resolution is handled at the network layer to keep detections portable and independent of domain-joined behavior.
+
+> ⚠️ Security Onion is deployed in Evaluation mode, which imposes feature limitations (e.g., reduced or unavailable PCAP retention).
+> As a result, detections prioritize parsed telemetry (Zeek logs, Suricata alerts, ECS-normalized events) rather than full packet capture, mirroring scenarios where SOC analysts operate with constrained visibility.
+
+> End-user endpoints (e.g., Windows 11) use DHCP to reflect real-world environments, while core infrastructure components use static IPs; endpoint detections rely on hostname and telemetry context, not fixed IP > addresses.
 
 ---
 
