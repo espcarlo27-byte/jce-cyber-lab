@@ -78,6 +78,31 @@ flowchart TB
     pfSense --> Splunk
 ```
 
+---
+
+## 🏗 Architecture, Network Topology & Log Flow
+
+This lab is intentionally designed to demonstrate enterprise-style network architecture, centralized visibility, and end-to-end log flow across network and endpoint layers.
+
+### 📐 Architecture & Design Rationale
+- **[View Architecture Documentation](architecture/)
+
+Explains design decisions, system roles, detection strategy, and tooling trade-offs (including Security Onion Eval constraints).
+
+### 🌐 Network Topology
+- **[View Network Topology Diagram](architecture/network-topology.md)**
+
+Visual overview of pfSense-centered routing, VM placement, IP strategy, and traffic visibility paths.
+
+### 📊 Network & Log Flow
+- **[View Network & Log Flow](architecture/network-log-flow.md)**
+
+Details how telemetry flows from endpoints and network devices into Security Onion and Splunk, including DNS, Zeek, Sysmon, and alert pipelines.
+
+> ℹ️ These documents are referenced throughout individual simulations to ensure consistent architecture assumptions and reproducible detection results.
+
+---
+
 ## 📊 Detection Validation Matrix (Authoritative)
 
 This lab follows a **1:1 mapping** between detection scenarios and simulations.  
