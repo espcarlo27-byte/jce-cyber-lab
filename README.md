@@ -44,9 +44,6 @@ results are **repeatable, auditable, and defensible**.
 | **Kali Linux** | Attack simulation |
 | **Ubuntu Server** | Splunk Enterprise SIEM |
 
-> 🔎 Detailed architecture, log flow, and design rationale:
-> View Architecture Documentation
-
 > ℹ️ pfSense is intentionally used as the primary DNS resolver to centralize DNS visibility and support network-based detections (e.g., DNS tunneling).
 > Active Directory provides identity and authentication services, but DNS resolution is handled at the network layer to keep detections portable and independent of domain-joined behavior.
 
