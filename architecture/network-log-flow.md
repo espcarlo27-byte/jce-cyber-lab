@@ -6,7 +6,7 @@ and investigation.
 
 The design mirrors **real-world SOC architectures**, emphasizing:
 - Passive network monitoring
-- Centralized log correlation
+- Centralized DNS and log visibility
 - Behavioral detection over static assumptions
 - Clear separation of control, data, and detection planes
 
@@ -15,13 +15,14 @@ The design mirrors **real-world SOC architectures**, emphasizing:
 ## 🔄 High-Level Log Flow Overview
 
 All systems communicate through a central firewall (**pfSense**), which
-acts as both a **control point** and an **observation point**.
+acts as both a **control point** and a **primary observation point** for network activity,
+including DNS resolution.
 
 Security visibility is achieved through a combination of:
-- Endpoint telemetry
-- Network protocol analysis
-- Intrusion detection
-- Centralized SIEM correlation
+- Endpoint telemetry (Sysmon, Windows Security)
+- Network protocol analysis (Zeek)
+- Intrusion detection (Suricata)
+- Centralized SIEM correlation (Splunk)
 
 ---
 
@@ -29,24 +30,27 @@ Security visibility is achieved through a combination of:
 
 ```mermaid
 flowchart LR
-    Kali["Kali Linux\nAttack Traffic (DHCP)"]
-    pfSense["pfSense Firewall"]
-    Win11["Windows 11 Endpoint\nSysmon + Security Logs (DHCP)"]
-    AD["Windows Server 2025\nAD / Identity Logs"]
-    SO["Security Onion\nZeek | Suricata | PCAP"]
-    Splunk["Splunk Enterprise SIEM\nUbuntu (DHCP)"]
+    Kali["Kali Linux\nAttack Traffic\nDHCP"]
+    pfSense["pfSense\nFirewall | Routing | NAT\nDNS Resolver | DHCP"]
+    Win11["Windows 11 Endpoint\nSysmon + Security Logs\nSplunk Forwarder\nDHCP"]
+    AD["Windows Server 2025\nActive Directory Logs\nSplunk Forwarder\nStatic IP"]
+    SO["Security Onion (Eval)\nZeek | Suricata\nECS Telemetry\nLimited / No PCAP"]
+    Splunk["Splunk Enterprise SIEM\nUbuntu Server\nDHCP"]
     Internet["Internet"]
 
     Kali --> pfSense --> Internet
     pfSense --> Win11
     pfSense --> AD
 
+    pfSense --> SO
+    SO --> Splunk
+
     Win11 --> Splunk
     AD --> Splunk
     pfSense --> Splunk
-    pfSense --> SO
-    SO --> Splunk
 ```
+
+---
 
 ## 🧭 Traffic Flow (Plain English)
 
@@ -56,28 +60,30 @@ flowchart LR
   - Phishing
   - DNS tunneling
   - Privilege escalation attempts
-  - Web-based attacks
+  - Network and Web-based attacks
 - **Windows 11** generates normal user and endpoint activity
-- All traffic flows through **pfSense**
+- All traffic (including DNS queries) flows through **pfSense**
 
 ---
 
 ### 2️⃣ Firewall & Routing Layer (pfSense)
 
-**pfSense** serves as the central network choke point:
+**pfSense** serves as the central network choke point and DNS resolver:
 
 - Routes all ingress and egress traffic
 - Provides NAT and DHCP services
-- Logs firewall decisions and session metadata
-- Mirrors traffic to **Security Onion**
+- Acts as the primary DNS resolver for all hosts
+- Logs firewall decisions and session metadata, and DNS activity
+- Mirrors network traffic to **Security Onion**
 
 This ensures:
 - No system bypasses inspection
-- Network behavior is consistently observable
+- DNS activity is centrally observable
+- Network behavior is consistently monitored
 
 ---
 
-### 3️⃣ Network Security Monitoring (Security Onion)
+### 3️⃣ Network Security Monitoring (Security Onion - EVAL)
 
 **Security Onion** passively receives mirrored traffic from pfSense and provides:
 
@@ -89,11 +95,16 @@ This ensures:
   - Signature-based IDS detection
   - Network threat indicators
 
-- **PCAP**
-  - Full packet capture for forensic validation
+- Evaluation Mode Constraints
+  - Limited or no PCAP retention
+  - Detections rely primarily on parsed telemetry (ECS-normalized events)
 
-Security Onion does **not** sit inline and does **not** block traffic.  
-It exists purely for **visibility and detection**.
+**Security Onion:**  
+- Is not inline
+- Does not block traffic
+- Exists purely for visibility and detection
+
+> All Security Onion telemetry is forwarded to Splunk for correlation.
 
 ---
 
@@ -102,12 +113,12 @@ It exists purely for **visibility and detection**.
 #### Windows 11 Endpoint
 
 Generates:
-- Sysmon events (process creation, privilege escalation)
+- Sysmon events (process creation, command-line activity)
 - Windows Security logs
 
 Behavior:
-- Logs are forwarded **directly to Splunk**
-- Logs do **not** route through pfSense
+- Logs are forwarded **directly to Splunk** via **Splunk Universal Forwarder**
+- Logs do not traverse pfSense as data payloads (only network transport)
 
 ---
 
@@ -115,26 +126,28 @@ Behavior:
 
 Generates:
 - Authentication events
-- Privilege changes
+- Privilege and group membership changes
 - Identity-related telemetry
 
 Behavior:
 - Logs are forwarded directly to **Splunk**
+- DNS services are not hosted on AD in this lab
 
 This reflects real enterprise design where:
 
 > Endpoints send logs to the SIEM independently of network routing.
+> Identity services and DNS resolution are intentionally decoupled.
 
 ---
 
-### 5️⃣ Centralized Correlation (Splunk Enterprise)
+### 5️⃣ Centralized Correlation & Detection (Splunk Enterprise)
 
-**Splunk** acts as the **single pane of glass** for:
+**Splunk Enterprise** acts as the **single pane of glass** for:
 
 - Endpoint telemetry
 - Identity activity
-- Firewall logs
-- Security Onion metadata
+- Firewall and DNS logs
+- Security Onion netwrok metadata
 
 Splunk is used to:
 - Correlate events across layers
@@ -143,7 +156,7 @@ Splunk is used to:
 - Support investigation workflows
 
 **Security Onion** provides deep network context;  
-**Splunk** provides cross-layer correlation.
+**Splunk** provides cross-layer correlation and alerting.
 
 ---
 
@@ -153,18 +166,19 @@ This log flow design enforces several detection best practices:
 
 - Network detections do not rely on endpoint trust
 - Endpoint detections do not rely on network signatures
+- DNS detections are network-based, not AD-dependent
 - IP addresses are not treated as stable identifiers
 
 Correlation is based on:
 - Host identity
 - Process behavior
-- Protocol patterns
+- Network and DNS patterns
 - Temporal relationships
 
 This enables detections that remain effective even when:
 - IPs change (DHCP)
-- Attackers rotate infrastructure
-- Partial telemetry is unavailable
+- Attack infrastructure rotates
+- Full packet capture is unavailable
 
 ---
 
@@ -172,13 +186,13 @@ This enables detections that remain effective even when:
 
 The architecture intentionally supports **degraded visibility scenarios**:
 
-- Packet capture can validate activity even if SIEM parsing fails
-- Network telemetry exists independently of endpoint logging
-- Endpoint detections remain valid without IDS alerts
+- Network telemetry exists without PCAP
+- Endpoint detections function independently of IDS alerts
+- Identity detections persist even if network data is delayed
 
 This mirrors real SOC operations, where:
 
-> Analysts must adapt to incomplete or delayed data pipelines.
+> Analysts must investigate and respond with incomplete or imperfect telemetry.
 
 ---
 
@@ -186,6 +200,6 @@ This mirrors real SOC operations, where:
 
 - Network traffic flow validated
 - Log ingestion paths confirmed
-- Security Onion successfully observing traffic
+- Security Onion successfully observing mirrored traffic
 - Splunk correlating multi-source telemetry
 - Actively used in **SIM-001 through SIM-004**
