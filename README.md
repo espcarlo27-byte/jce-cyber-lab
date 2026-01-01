@@ -82,7 +82,7 @@ flowchart TB
 This lab is intentionally designed to demonstrate enterprise-style network architecture, centralized visibility, and end-to-end log flow across network and endpoint layers.
 
 ### 📐 Architecture & Design Rationale
-- **[View Architecture Documentation](architecture/)
+- **[View Architecture Documentation](architecture/)**
 
 Explains design decisions, system roles, detection strategy, and tooling trade-offs (including Security Onion Eval constraints).
 
