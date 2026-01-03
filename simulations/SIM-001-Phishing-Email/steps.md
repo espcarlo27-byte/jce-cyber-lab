@@ -4,7 +4,8 @@
 
 Before running this simulation, ensure the following lab components are online and communicating:
 
-- **Windows 11 Endpoint (10.0.0.50)**
+- **Windows 11 Endpoint**
+  - DHCP-assigned IP
   - Windows Security Auditing enabled
   - Process Creation logging (EventCode 4688)
   - Command-line auditing enabled
@@ -16,26 +17,47 @@ Before running this simulation, ensure the following lab components are online a
   - Network visibility into Windows 11 subnet
   - Logs available in SO (optional for this sim)
 
-- **Splunk Enterprise (10.0.0.60 – Ubuntu)**
-  - Ingesting:
+- **Ubuntu Server – Splunk Enterprise**
+  - IP address assigned via **DHCP**
+  - Hosts Splunk Enterprise SIEM
+  - Receives:
     - Windows Security Logs (`winevent_security`)
     - Windows System Logs (`winevent_system`)
-  - Time synchronization (NTP) enabled across all hosts
+  - Serves as the central correlation and alerting platform
 
 - **pfSense (10.0.0.1)**
-  - Proper routing
-  - Internet access between Kali ↔ Windows 11
+  - Primary DHCP server
+  - Primary DNS resolver
+  - Routing and firewall enforcement
 
-- **Kali Linux (10.0.0.30)**
-  - Used as the phishing “attacker” host
-  - Able to host HTTP content
+- **Kali Linux – Attack Simulation Host**
+  - IP address assigned via **DHCP**
+  - Used to simulate phishing infrastructure
+  - Hosts lightweight HTTP services for attack emulation
+  - Generates controlled, observable network activity
 
-Before you continue, verify Splunk sees recent Windows logs:
+### Design Rationale – DHCP & DNS Placement
+
+This simulation intentionally uses **pfSense as the DHCP and DNS resolver**
+to reflect real-world SOC environments where:
+
+- DNS visibility is centralized at the **network layer**
+- Detections do not depend on domain-joined behavior
+- Endpoints frequently receive dynamic IP addresses
+- SOC detections rely on **telemetry context** (hostnames, users, processes),
+  not fixed IPs
+
+This design ensures that phishing detection logic remains:
+- Portable across domain and non-domain environments
+- Focused on **user-driven behavior**, not infrastructure assumptions
+
+> Before you continue, verify Splunk sees recent Windows logs:
 
 ```spl
 (index=winevent_security OR index=winevent_system)
 | head 10
 ```
+
 
 ---
 
