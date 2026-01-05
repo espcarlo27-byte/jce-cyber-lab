@@ -1,6 +1,22 @@
 # Simulation 1 – Phishing Email (T1566.002)
 ## ⚠️ Issues & Resolutions
-This document captures real operational issues encountered during SIM-003 and the structured methodology used to identify, resolve, and validate each one.
+
+This document captures real operational issues encountered during **SIM-001**
+and the structured methodology used to identify, resolve, and validate each one.
+
+---
+
+## 🧠 Lab Network Context (Important)
+
+This simulation uses the following intentional network design:
+
+- **pfSense** acts as the primary **DHCP server** and **DNS resolver**
+- Endpoints and simulation hosts receive **dynamic IP addresses via DHCP**
+- Detections rely on **user context, hostname, and process execution**
+  rather than static IP assignments
+
+This context is critical for interpreting network-related issues and resolutions
+documented below.
 
 ---
 
@@ -167,49 +183,42 @@ Event ID 4688 began appearing consistently in both Event Viewer and Splunk searc
 ### ***🧩 Issue 5: Expected Network Evidence (EVE.json / Packet Logs) Not Found During Validation***
 
 **Description:**  
-While validating the phishing email simulation, expected network artifacts such as **Suricata EVE.json events** or packet captures were not found in the expected directories on the Security Onion sensor. Commands such as:
-```bash
-find / -name eve.json 2>/dev/null
-```
-returned no results, leading to uncertainty about whether Suricata had logged any related network activity.
+While validating the phishing email simulation, expected network artifacts such as
+**Suricata EVE.json events** or packet logs were not initially located on the
+Security Onion sensor.
 
-**Impact:**   
-- Network-side validation of the phishing simulation was delayed
-- No correlated Suricata or Zeek events were available for cross-analysis
-- Detection validation relied solely on endpoint logs until the issue was resolved
-- Reduced visibility into the initial command-and-control or payload retrieval behavior
+**Impact:**  
+- Network-side validation of the phishing simulation was delayed  
+- Endpoint telemetry temporarily served as the primary validation source  
+- Reduced confidence in network-layer visibility  
 
 **Root Cause:**  
-Security Onion’s Eval mode places restrictions and structured paths on where logs are stored. Common contributing factors include:
-- Incorrect search paths for Suricata/Zeek logs
-- Suricata not generating EVE events for this simulation type
-- Using the wrong directory level (/nsm/ vs /opt/so/log/)
-- Logs being rotated or stored under a timestamped subfolder
-- Running commands without proper privileges
+This issue was influenced by both **Security Onion Eval mode behavior** and
+the lab’s **centralized DNS and routing design**:
 
-**Resolution:**
-1. Verified the correct log locations for Security Onion (Eval Mode):
+- pfSense handled **DNS resolution and traffic routing**, meaning:
+  - DNS visibility was centralized at the firewall
+  - Not all phishing-related traffic produced Suricata HTTP events
+- Security Onion Eval mode stores logs in structured, non-obvious paths
+- Initial searches targeted incorrect directories or rotated files
+
+**Resolution:**  
+1. Verified correct Suricata and Zeek log locations for Eval mode:
    ```bash
    /opt/so/log/suricata/eve.json
    /nsm/suricata/<sensor-name>/eve.json
    ```
-2. Confirmed Suricata was actively running and capturing traffic:
-   ```bash
-   systemctl status suricata
-   ```
-3. Validated that the phishing simulation produced traffic types that Suricata is expected to log.
-4. Adjusted search queries to account for rotated or compressed logs when needed:
-   ```bash
-   ls -lah /opt/so/log/suricata/
-   ```
-5. Re-ran the simulation to generate fresh network activity.
+2. Confirmed Suricata service status and packet capture activity.
+3. Re-ran the phishing simulation to generate fresh HTTP traffic.
+4. Validated that network telemetry aligned with the expected simulation scope
+(user-driven link click, not full payload delivery).
 
-**Validation:**   
-Correct log paths were confirmed, and Suricata events were successfully located, allowing network-side validation of the phishing simulation to proceed.
+**Validation:**  
+Correct log paths were confirmed, and network visibility was validated where
+expected based on the simulation’s design.  
 
 **Lessons Learned:**  
-> Network telemetry storage paths and behavior differ across platforms and modes (e.g., Security Onion Eval).  
-> Analysts must understand where and how network data is written before assuming visibility gaps.
+> Network telemetry availability depends on traffic type, sensor placement, and platform behavior, not just whether an action occurred.
 
 ---
 
@@ -218,7 +227,7 @@ Correct log paths were confirmed, and Suricata events were successfully located,
 **Description:**  
 After executing the phishing simulation and confirming that logs were being generated on the Windows endpoint, Splunk searches continued to return **“No results found.”** This occurred even though telemetry was confirmed to be present locally on the host and the Splunk Universal Forwarder was running.
 
-**Impact:**  
+**Impact:**    
 - Delayed validation of detection logic  
 - Misleading appearance that logs were still not ingesting  
 - Duplicate troubleshooting on components that were functioning correctly  
@@ -262,55 +271,58 @@ Once the correct time range and index were selected, Splunk displayed the expect
 ### ***🧩 Issue 7: Endpoint Network Connectivity or DNS Resolution Prevented Expected Callback Activity***
 
 **Description:**  
-During the phishing email simulation, the payload executed successfully and endpoint logs were generated; however, no expected outbound network activity or callback behavior was observed from the Windows 11 endpoint. This made it unclear whether the simulated phishing payload attempted any external communication.
+During the phishing simulation, endpoint execution was confirmed; however, no
+expected external callback or follow-on network activity was observed from the
+Windows 11 endpoint.
 
 **Impact:**  
-- No outbound network indicators were observed  
-- Suricata and Zeek did not record related traffic  
-- Network-based validation of the phishing scenario was incomplete  
-- Detection relied only on endpoint telemetry rather than full kill-chain visibility  
+- No outbound network indicators were visible in network telemetry  
+- Initial concern about missing network visibility  
+- Required clarification of simulation intent and expected outcomes  
 
 **Root Cause:**  
-The issue was caused by network or name-resolution constraints within the lab environment, including one or more of the following:
-- DNS resolution not functioning correctly on the Windows 11 endpoint  
-- pfSense firewall rules blocking outbound traffic  
-- NAT configuration preventing egress from the internal network  
-- The phishing payload using a hostname that could not be resolved  
-- The simulation being designed to generate endpoint-only telemetry without real external callbacks  
+This behavior was expected based on the lab’s **network and DNS architecture**:
 
-**Resolution:**  
-1. Verified network connectivity from the Windows 11 endpoint using:
-   ```powershell
-   ping 8.8.8.8
-   nslookup google.com
-   ```
-2. Confirmed correct default gateway and DNS server configuration.
-3. Reviewed pfSense firewall and NAT rules to ensure outbound traffic was permitted.
-4. Validated whether the phishing simulation was intended to generate real network callbacks or endpoint-only artifacts.
-5. Adjusted expectations and validation criteria accordingly based on the simulation design.
+- **pfSense** acted as the primary **DNS resolver**, centralizing name resolution  
+- The phishing simulation used a **controlled internal HTTP destination**  
+- The scenario was designed to validate **user interaction detection**, not
+  external command-and-control behavior  
+- Endpoints used **DHCP-assigned IP addresses**, reinforcing
+  hostname- and user-based detection rather than IP-based assumptions  
 
-**Validation:**   
-After confirming network connectivity and understanding the simulation’s intended behavior, endpoint and network visibility were correctly interpreted. This clarified that the absence of network callbacks was due to environment constraints or simulation scope rather than a logging failure.
+**Resolution:**    
+1. Verified endpoint network connectivity and DNS resolution through pfSense  
+2. Confirmed firewall and NAT rules permitted outbound traffic  
+3. Revalidated the simulation’s scope and success criteria  
+4. Adjusted validation expectations to align with the intended detection objective  
+
+**Validation:**  
+Endpoint and network telemetry were correctly interpreted within the context of
+the lab’s architecture and simulation goals.
 
 **Lessons Learned:**  
-> Not all simulations produce full kill-chain telemetry.  
-> Understanding simulation scope and environmental constraints is essential to correct detection interpretation.
+> Not every phishing simulation produces full kill-chain network activity.  
+> Detection objectives must align with **scenario scope and architectural design**.
 
 ---
 
 ## 🧠 Overall Takeaways
-SIM-001 highlighted foundational SOC and detection engineering realities, including:
-- The importance of **log ingestion validation**
-- The dependency of detections on **correct audit policy and endpoint configuration**
-- The distinction between **symbolic simulations** and **telemetry-producing executions**
-- The need to interpret results within **environmental and design constraints**
-- The value of troubleshooting methodology over “happy-path” execution
 
-Each issue reinforced that effective detection work is as much about **environment readiness** as it is about SPL logic.
+SIM-001 reinforced foundational SOC and detection engineering principles:
+
+- Log ingestion and audit policy configuration are prerequisites for detection  
+- Endpoint telemetry is often the **primary signal** for phishing activity  
+- Network visibility depends on **sensor placement and DNS architecture**  
+- Dynamic IP addressing requires **context-based correlation**  
+- Troubleshooting methodology is as critical as detection logic itself  
+
+These lessons align directly with the lab’s intentional design and real-world
+SOC operating conditions.
 
 ---
 
 ## 🏁 Status
+
 - Issues fully documented  
 - Root causes identified  
 - Resolutions validated  
