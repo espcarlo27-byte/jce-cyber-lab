@@ -4,9 +4,9 @@
 
 Simulate a phishing email that delivers a suspicious URL to a user, then validate that:
 
-- Network telemetry (Suricata/Zeek via Security Onion) observes the click,
-- Endpoint telemetry (Windows Security Event 4688 with command line logging) records browser execution,
-- Splunk correlates these signals into a detection and triggers a validated alert.
+- Endpoint telemetry (Windows Security Event 4688 with command-line logging) records browser execution
+- Network telemetry (Suricata/Zeek via Security Onion) observes outbound web access
+- Splunk correlates these signals into a detection and triggers a validated alert
 
 This simulation supports the **LAB-SIM-001** row in the `detection-validation-matrix.md`.
 
@@ -21,28 +21,55 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 
 ## 🏗 Lab Components Used
 
-- **Attacker:**  
-  - Kali Linux (10.0.0.30) – Hosted phishing landing page via Python HTTP server
+### Attacker (Simulation Host)
+- **Kali Linux**
+  - IP address assigned via **DHCP**
+  - Hosts a phishing landing page using a lightweight Python HTTP server
 
-- **Victim Endpoint:**  
-  - Windows 11 (10.0.0.50) with:
-    - Windows Security Auditing (EventCode 4688)
-    - Command-line process auditing enabled
-    - Splunk Universal Forwarder
+### Victim Endpoint
+- **Windows 11**
+  - IP address assigned via **DHCP**
+  - Windows Security Auditing enabled (EventCode 4688)
+  - Command-line process auditing enabled
+  - Splunk Universal Forwarder installed and running
 
-- **Security Stack:**
-  - Security Onion (Suricata + Zeek)
-  - Splunk Enterprise (Ubuntu – 10.0.0.60)
-  - pfSense (10.0.0.1) for routing and visibility
+### Security & Infrastructure Stack
+- **pfSense (10.0.0.1)**
+  - Primary **DHCP server**
+  - Primary **DNS resolver**
+  - Routing, NAT, and traffic visibility point
+
+- **Security Onion**
+  - Network Security Monitoring (Suricata + Zeek)
+  - Passive visibility into endpoint traffic
+
+- **Ubuntu Server – Splunk Enterprise**
+  - IP address assigned via **DHCP**
+  - Central log ingestion, correlation, and alerting platform
+
+---
+
+## 🧠 Network & DNS Design Rationale
+
+This simulation intentionally uses **pfSense as the DHCP server and DNS resolver**
+to reflect real-world SOC environments where:
+
+- Endpoint IP addresses are **dynamic**
+- DNS visibility is centralized at the **network layer**
+- Detections do not rely on domain-joined behavior
+- Correlation is based on **user context, hostnames, and process execution**
+  rather than fixed IP addresses
+
+This ensures detection logic remains **portable, resilient, and environment-agnostic**.
 
 ---
 
 ## 📂 Files in This Simulation
 
-- `steps.md` – Exact steps used to perform the simulation.
-- `logs.md` – Symbolic sample logs (endpoint, network, alert).
-- `queries.md` – SPL used to hunt and detect this activity.
-- `alert-config.md` – Splunk alert configuration and symbolic ID.
+- `steps.md` – Exact steps used to perform the simulation
+- `logs.md` – Symbolic sample logs (endpoint, network, alert)
+- `queries.md` – SPL used to hunt and detect this activity
+- `alert-config.md` – Splunk alert configuration and symbolic ID
 - `screenshots/` – Evidence:
   - Email being viewed / phishing page loaded
   - Chrome execution evidence
@@ -58,14 +85,11 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 - A user on the Windows 11 endpoint opens a **test phishing email** and clicks a suspicious URL ✅  
 - Windows generates **EventCode 4688** for `chrome.exe` ✅  
 - The phishing URL appears in **`Process_Command_Line`** ✅  
-- Security telemetry confirms HTTP traffic to Kali ✅  
-- Splunk correlates endpoint execution and URL ✅  
+- Network telemetry confirms outbound HTTP traffic to the phishing host ✅  
+- Splunk correlates endpoint execution and URL activity ✅  
 - Splunk triggers an alert with symbolic ID:
 
----
-
-## LAB-SIM-001-PHISHING-ALERT
-
+### LAB-SIM-001-PHISHING-ALERT
 
 ✅ **All success criteria met and validated with screenshots.**
 
@@ -76,8 +100,9 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 | Component | Evidence |
 |----------|----------|
 | Endpoint Execution | Windows Security EventCode 4688 |
-| Command Line Capture | `Process_Command_Line` |
-| Phishing URL | `http://10.0.0.30:8080` |
+| Command-Line Capture | `Process_Command_Line` |
+| Phishing URL | HTTP URL passed to browser |
+| Network Visibility | Suricata / Zeek HTTP telemetry |
 | SIEM Correlation | Splunk SPL |
 | Alerting | `LAB-SIM-001-PHISHING-ALERT` |
 | Validation | Screenshots + Symbolic Logs |
@@ -86,27 +111,33 @@ This simulation supports the **LAB-SIM-001** row in the `detection-validation-ma
 
 ## 🧪 Final Validation
 
-End-to-end validation was performed to confirm that phishing-related network and endpoint activity was successfully captured, correlated, and surfaced through the detection pipeline.
+End-to-end validation confirmed that phishing-related endpoint and network activity
+was successfully captured, correlated, and surfaced through the detection pipeline.
 
-During initial setup, network visibility limitations were identified within the Security Onion deployment. To establish a clean and reliable sensor baseline, **Security Onion was redeployed**, after which monitoring interfaces, traffic visibility, and Zeek/Suricata ingestion were revalidated.
-
-- **Traffic Validation:**  
-  Phishing link clicks generated HTTP traffic from the Windows 11 endpoint to the Kali Linux host (`10.0.0.30`), confirming network-level activity associated with the attack.
-
-- **Sensor Validation:**  
-  Network traffic was observed on the Security Onion monitor interface, confirming passive packet capture and sensor visibility.
+During initial setup, network visibility limitations were identified within the
+Security Onion deployment. To establish a clean and reliable sensor baseline,
+**Security Onion was redeployed**, after which monitoring interfaces, traffic
+visibility, and Zeek/Suricata ingestion were revalidated.
 
 - **Endpoint Validation:**  
-  Windows Security EventCode **4688** with command-line logging confirmed browser execution and URL invocation on the victim endpoint.
+  Windows Security EventCode **4688** with command-line logging confirmed browser
+  execution and URL invocation by the user.
+
+- **Network Validation:**  
+  Outbound HTTP traffic generated by the phishing click was observed by network sensors,
+  confirming link access behavior.
 
 - **Correlation Validation:**  
-  Splunk successfully correlated endpoint execution events with observed network traffic, producing a validated detection and alert.
+  Splunk successfully correlated endpoint execution with network activity and produced
+  a validated detection event.
 
 - **Alert Validation:**  
-  The detection alert (`LAB-SIM-001-PHISHING-ALERT`) fired as expected and was confirmed with supporting screenshots and symbolic logs.
+  The detection alert (`LAB-SIM-001-PHISHING-ALERT`) fired as expected and was confirmed
+  with supporting screenshots and symbolic logs.
 
 **Result:**  
-Following redeployment and validation, the Security Onion and Splunk pipeline reliably captured, correlated, and alerted on phishing activity, confirming full end-to-end detection functionality.
+The Security Onion and Splunk pipeline reliably captured, correlated, and alerted on
+phishing activity, confirming full end-to-end detection functionality.
 
 ---
 
@@ -123,18 +154,18 @@ Following redeployment and validation, the Security Onion and Splunk pipeline re
 
 ## ⚠️ Issues Encountered & Resolutions
 
-During execution of this simulation, multiple real-world operational and
-detection engineering challenges were encountered and resolved.
+During execution of this simulation, multiple real-world operational and detection
+engineering challenges were encountered and resolved, including:
 
-These issues include:
 - Log ingestion failures
 - Forwarder authentication problems
 - Missing audit policies
 - Endpoint execution gaps
 - Network visibility constraints
 
-Each issue was investigated, root-caused, and resolved using standard
-SOC troubleshooting techniques.  
+Each issue was investigated, root-caused, and resolved using standard SOC
+troubleshooting techniques.
+
 👉 **Full technical breakdown:**  
 [SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing-email.md)
 
@@ -153,4 +184,4 @@ This simulation demonstrates a full real-world SOC workflow:
 - Operational troubleshooting  
 - Final alert confirmation  
 
-It now serves as a **defensible, interview-ready detection project** in the JCE Cyber Lab.
+It serves as a **defensible, interview-ready detection project** in the JCE Cyber Lab.
