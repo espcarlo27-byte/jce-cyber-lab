@@ -107,7 +107,7 @@ This generates:
 In Splunk, run:
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
@@ -193,5 +193,6 @@ Update the SIM-004 checklist in README.md:
 - ✅ Alert triggered
 - ✅ Screenshots saved
 - ✅ Detection matrix updated
+
 
 
