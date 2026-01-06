@@ -53,7 +53,7 @@ Legacy or inconsistent aliases were excluded from baseline analysis.
 **User Context:** `local.lab\labuser`
 
 ```text
-Time: 2025-03-06 13:02:14
+Time: 2025-11-05 13:02:14
 Host: Windows11Pro
 Account_Name: local.lab\labuser
 New_Process_Name: C:\Windows\System32\cmd.exe
@@ -74,7 +74,7 @@ Interpretation:
 **Event ID:** 4688  
 **User Context:** `local.lab\labuser`  
 ```text
-Time: 2025-03-06 13:04:21
+Time: 2025-11-05 13:04:21
 Host: Windows11Pro
 Account_Name: local.lab\labuser
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
@@ -95,7 +95,7 @@ Interpretation:
 **Event ID:** 4688  
 **User Context:** `local.lab\labuser`
 ```text
-Time: 2025-03-06 13:06:02
+Time: 2025-11-05 13:06:02
 Host: Windows11Pro
 Account_Name: local.lab\labuser
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
@@ -116,7 +116,7 @@ Interpretation:
 **Event ID:** 1  
 **Log:** Microsoft-Windows-Sysmon/Operational
 ```text
-Time: 2025-03-06 13:06:02
+Time: 2025-11-05 13:06:02
 Host: Windows11Pro
 User: local.lab\labuser
 Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
@@ -176,3 +176,4 @@ confirms a validated execution baseline.
 
 > This log evidence establishes the execution context
 > required for SIM-005 – Privilege Escalation (T1055).
+
