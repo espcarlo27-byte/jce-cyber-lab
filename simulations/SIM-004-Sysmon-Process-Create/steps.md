@@ -108,7 +108,7 @@ In Splunk, run:
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -159,6 +159,8 @@ Expected conclusion:
 > Sysmon Operational log. Multiple benign Event ID 1 entries were observed,
 > establishing normal execution volume.
 
+> This correlation query demonstrates consistent process creation activity across Windows Security (4688) and Sysmon (Event ID 1), confirming reliable command-line execution visibility and establishing baseline execution > volume.
+
 ---
 
 ## 7. Optional Alert Validation
@@ -191,4 +193,5 @@ Update the SIM-004 checklist in README.md:
 - ✅ Alert triggered
 - ✅ Screenshots saved
 - ✅ Detection matrix updated
+
 
