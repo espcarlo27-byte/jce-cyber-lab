@@ -11,6 +11,10 @@ when available.
 SIM-004 intentionally focuses on **execution visibility**, not malicious detection
 or privilege escalation.
 
+> ℹ️ Note: In this lab environment, Windows Security Event ID 4688 populates
+> user context under `Account_Name`. `SubjectUserName` is not consistently
+> present and is therefore not referenced directly in SIM-004 tables.
+
 ---
 
 ## 1. Baseline Process Creation (Standard User)
@@ -20,7 +24,7 @@ Establish normal process execution activity for a standard (non-elevated) user.
 
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
@@ -41,7 +45,7 @@ associated with MITRE ATT&CK T1059.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 (New_Process_Name="*cmd.exe" OR New_Process_Name="*powershell.exe")
-| table _time host SubjectUserName New_Process_Name Creator_Process_Name Process_Command_Line
+| table _time host Account_Name New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -59,7 +63,7 @@ Observe normal parent → child execution behavior prior to escalation scenarios
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | where Parent_Process_Name!="null"
-| table _time host SubjectUserName New_Process_Name Creator_Process_Name Process_Command_Line
+| table _time host Account_Name New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -78,7 +82,7 @@ without assuming malicious intent.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | where like(Process_Command_Line, "%EncodedCommand%")
-| table _time host SubjectUserName New_Process_Name Creator_Process_Name Process_Command_Line
+| table _time host Account_Name New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -119,7 +123,7 @@ OR
 (
   index=winevent_sysmon EventCode=1 host="Windows11Pro"
 )
-| eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(User, Account_Name))
 | eval simulation_id="SIM-004"
 | table _time host actor New_Process_Name Image Creator_Process_Name ParentImage Process_Command_Line CommandLine IntegrityLevel simulation_id
 | sort -_time
@@ -161,4 +165,5 @@ Used For:
 
 > This file represents the finalized **execution baseline logic** for SIM-004  
 > and directly supports escalation detection introduced in **SIM-005**.
+
 
