@@ -21,7 +21,7 @@ Establish normal process execution activity for a standard (non-elevated) user.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -41,7 +41,7 @@ associated with MITRE ATT&CK T1059.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 (New_Process_Name="*cmd.exe" OR New_Process_Name="*powershell.exe")
-| table _time host SubjectUserName New_Process_Name Parent_Process_Name Process_Command_Line
+| table _time host SubjectUserName New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -59,7 +59,7 @@ Observe normal parent → child execution behavior prior to escalation scenarios
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | where Parent_Process_Name!="null"
-| table _time host SubjectUserName Parent_Process_Name New_Process_Name Process_Command_Line
+| table _time host SubjectUserName New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -78,7 +78,7 @@ without assuming malicious intent.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | where like(Process_Command_Line, "%EncodedCommand%")
-| table _time host SubjectUserName New_Process_Name Parent_Process_Name Process_Command_Line
+| table _time host SubjectUserName New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -121,7 +121,7 @@ OR
 )
 | eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
 | eval simulation_id="SIM-004"
-| table _time host actor New_Process_Name Image Parent_Process_Name ParentImage Process_Command_Line CommandLine IntegrityLevel simulation_id
+| table _time host actor New_Process_Name Image Creator_Process_Name ParentImage Process_Command_Line CommandLine IntegrityLevel simulation_id
 | sort -_time
 ```
 
@@ -161,3 +161,4 @@ Used For:
 
 > This file represents the finalized **execution baseline logic** for SIM-004  
 > and directly supports escalation detection introduced in **SIM-005**.
+
