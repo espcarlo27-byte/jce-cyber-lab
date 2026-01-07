@@ -125,7 +125,7 @@ OR
 )
 | eval actor=lower(coalesce(User, Account_Name))
 | eval simulation_id="SIM-004"
-| table _time host actor New_Process_Name Image Creator_Process_Name ParentImage Process_Command_Line CommandLine IntegrityLevel simulation_id
+| table _time actor process parent_process command_line simulation_id
 | sort -_time
 ```
 
@@ -165,5 +165,6 @@ Used For:
 
 > This file represents the finalized **execution baseline logic** for SIM-004  
 > and directly supports escalation detection introduced in **SIM-005**.
+
 
 
