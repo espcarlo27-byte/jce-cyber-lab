@@ -113,7 +113,7 @@ Now execute:
 ```bat
 powershell.exe
 ```
-> This creates a privileged `parent → child` process chain.
+***This creates a privileged `parent → child` process chain.***
 
 ---
 
