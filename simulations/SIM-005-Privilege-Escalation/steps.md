@@ -139,7 +139,7 @@ Run the following search:
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, User))
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
