@@ -99,9 +99,9 @@ These fields support:
 ``` text
 _time: 2026-01-07 04:30:42
 host: Windows11Pro
-User: administrator
+actor: administrator
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-Parent_Process_Name: C:\Windows\System32\cmd.exe
+Creator_Process_Name: C:\Windows\System32\cmd.exe
 Process_Command_Line: powershell.exe
 simulation_id: SIM-005
 symbolic_id: LAB-SIM-005-PRIVESC-ALERT
