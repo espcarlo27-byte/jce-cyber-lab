@@ -102,7 +102,7 @@ Detection is based on **Sysmon Process Create telemetry**, not Windows Security 
 
 ---
 
-## 🚨 Alert Summary
+## 🚨 Alert Summary (Optional)
 
 - **Alert Name:** LAB-SIM-004-SYSMON-PROCESSCREATE
 - **Severity:** Low
