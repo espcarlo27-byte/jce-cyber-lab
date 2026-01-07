@@ -32,10 +32,10 @@ and reflects **real-world Windows logging behavior**.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 (New_Process_Name="*cmd.exe" OR New_Process_Name="*powershell.exe")
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | eval simulation_id="SIM-004"
 | eval symbolic_id="LAB-SIM-004-PROCESS-CREATE"
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line simulation_id symbolic_id
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line simulation_id symbolic_id
 | sort -_time
 ```
 
@@ -89,7 +89,7 @@ The following fields should be included in the alert payload:
 - `host`
 - `actor`
 - `New_Process_Name`
-- `Parent_Process_Name`
+- `Creator_Process_Name`
 - `Process_Command_Line`
 - `simulation_id`
 - `symbolic_id`
@@ -103,7 +103,7 @@ These fields support:
 
 ## 🧾 Example Alert Output (Symbolic)
 ```text
-_time: 2025-03-06 13:04:21
+_time: 2026-01-07 04:30:21
 host: Windows11Pro
 actor: local.lab\labuser
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
@@ -161,4 +161,5 @@ If an analyst reviews this alert:
 > This alert configuration provides **contextual execution visibility**
 > and directly supports escalation detection introduced in  
 > **SIM-005 – Privilege Escalation (T1055)**.
+
 
