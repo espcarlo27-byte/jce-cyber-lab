@@ -16,8 +16,8 @@ Establish normal, non-privileged process execution for comparison.
 
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+| eval actor=lower(coalesce(Account_Name, User))
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -34,9 +34,9 @@ Purpose:
 Detect privileged process execution via UAC elevation or administrator context.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | where like(actor, "%administrator%") OR like(actor, "%system%")
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -53,10 +53,10 @@ Purpose:
 Identify abnormal parent/child relationships commonly observed during privilege escalation.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
-| where Parent_Process_Name="*cmd.exe"
+| eval actor=lower(coalesce(Account_Name, User))
+| where Creator_Process_Name="*cmd.exe"
 | where New_Process_Name="*powershell.exe" OR New_Process_Name="*notepad.exe"
-| table _time host actor Parent_Process_Name New_Process_Name Process_Command_Line
+| table _time host actor Creator_Process_Name New_Process_Name Process_Command_Line
 | sort -_time
 ```
 
@@ -94,12 +94,14 @@ Correlate Windows Security process creation with Sysmon telemetry for higher con
 )
 OR
 (
-  index=winlog EventCode=1 host="Windows11Pro"
+  index=winevent_sysmon EventCode=1 host="Windows11Pro"
 )
-| eval actor=lower(coalesce(User, Account_Name, SubjectUserName))
-| eval simulation_id="SIM-003"
-| eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host actor New_Process_Name Image Parent_Process_Name ParentImage Process_Command_Line CommandLine IntegrityLevel simulation_id symbolic_id
+| eval actor=lower(coalesce(Account_Name, User))
+| eval process=coalesce(New_Process_Name, Image)
+| eval parent_process=coalesce(Creator_Process_Name, ParentImage)
+| eval command_line=coalesce(Process_Command_Line, CommandLine)
+| eval simulation_id="SIM-004"
+| table _time host actor process parent_process command_line IntegrityLevel simulation_id
 | sort -_time
 ```
 
