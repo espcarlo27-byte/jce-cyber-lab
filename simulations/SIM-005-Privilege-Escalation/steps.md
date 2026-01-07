@@ -2,33 +2,65 @@
 
 ## 1. Prerequisites
 
-Before running this simulation, confirm the following components are online and healthy:
+Before running this simulation, confirm the following components are online and healthy.
 
-- **Windows 11 Endpoint (10.0.0.50)**
-  - Logged in as a **standard (non-admin) domain user** (e.g. `labuser`)
-  - Hostname: **Windows11Pro**
-  - Joined to domain: `local.lab`
-  - Sysmon installed and running (used as supplemental telemetry)
-  - Splunk Universal Forwarder running
-  - Local system time synchronized
+---
 
-- **Splunk Enterprise (Ubuntu – 10.0.0.60)**
-  - Receiving Windows Security logs
-  - Receiving Sysmon logs
-  - Disk space not blocking searches
-  - Splunk Web UI accessible
+### Windows 11 Endpoint (DHCP-assigned)
 
-- **Windows Server (SOC Console)**
-  - Used only to access Splunk Web UI
+- **Role:** Target endpoint
+- **Hostname:** `Windows11Pro`
 
-> ❌ Security Onion, Kali, and pfSense are **not required** for SIM-003.
+**IP Addressing**
+- Assigned via **DHCP from pfSense**
+- No static IP assumptions
+
+**DNS Resolution**
+- Provided by **pfSense**
+- Endpoints are **not authoritative DNS resolvers**
+
+**User Context**
+- Logged in as a **standard (non-admin) domain user** (e.g. `labuser`)
+- Domain: `local.lab`
+
+**Logging**
+- Windows Security Auditing enabled (**primary telemetry**)
+- Sysmon installed and running (**supplemental only**)
+- Splunk Universal Forwarder running
+
+**System Health**
+- System time synchronized
+- No local security controls blocking execution
+
+---
+
+### Splunk Enterprise (Ubuntu)
+
+- Receiving:
+  - Windows Security logs (**Event ID 4688**)
+  - Sysmon logs (**Event ID 1**, if available)
+- Splunk Web UI accessible
+- Disk space and indexing healthy
+
+---
+
+### pfSense (Infrastructure Dependency)
+
+- Acts as:
+  - **DHCP server** for endpoints
+  - **DNS resolver** for the lab network
+- No simulation steps require pfSense interaction
+- Included to document **network-layer responsibility and scope**
+
+> ℹ️ **Security Onion and Kali Linux are not required for SIM-005.**
+
 
 ### Verify Log Flow Before Proceeding
 
 In Splunk, confirm logs are coming in:
 
 ```spl
-index=winevent_security OR index=winevent_sysmon
+index=winevent_security OR index=winlog
 | stats count by index
 ```
 ***If results return counts, proceed.***
@@ -95,7 +127,7 @@ Start-Process notepad.exe
 This creates:
 - Multiple privileged process creation events
 - Clear parent → child relationships
-- Reliable Security + Sysmon telemetry
+- Reliable Windows Security + Sysmon telemetry
 - Clear escalation context
 - Reproducible Security telemetry
 
@@ -106,7 +138,7 @@ This creates:
 Run the following search:
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line
 | sort -_time
 ```
@@ -119,7 +151,7 @@ Confirm:
    - notepad.exe
 - Parent/child relationships reflect escalation
 
-***📸 Take screenshot:*** `sim003-security-4688.png`
+***📸 Take screenshot:*** `sim005-security-4688.png`
 
 ---
 
@@ -136,7 +168,7 @@ Confirm:
 - IntegrityLevel = High or System
 - Child processes match privileged activity
 
-***📸 Optional screenshot:*** `sim003-sysmon-processcreate.png`
+***📸 Optional screenshot:*** `sim005-sysmon-processcreate.png`
 
 > ⚠️ If no Sysmon events appear, proceed without this step.
 > Security Event 4688 is the authoritative validation source for this simulation.
@@ -150,7 +182,7 @@ Run the correlation query from `queries.md`.
 Expected conclusion:
 > “A privileged account spawned child processes inconsistent with baseline user activity.”
 
-***📸 Take screenshot:*** `sim003-correlation-results.png`
+***📸 Take screenshot:*** `sim005-correlation-results.png`
 
 ---
 
@@ -163,21 +195,21 @@ Alert setting requirements:
 - Frequency: Every 5 minutes
 - Time range: Last 15 minutes
 - Severity: High
-- Symbolic ID: `LAB-SIM-003-PRIVESC-ALERT`
+- Symbolic ID: `LAB-SIM-005-PRIVESC-ALERT`
 
 ***Re-run Steps 3–4 to force the alert if needed.***
 
-***📸 Take screenshot:*** `sim003-alert-fired.png`
+***📸 Take screenshot:*** `sim005-alert-fired.png`
 
 ---
 
 ## 9. Save Evidence
 
-Add the following to the screenshots/ folder:
-- `sim003-security-4688.png`
-- `sim003-correlation-results.png`
-- `sim003-alert-fired.png`
-- `sim003-sysmon-processcreate.png (optional)`
+Add the following to the `screenshots/` folder:
+- `sim005-security-4688.png`
+- `sim005-correlation-results.png`
+- `sim005-alert-fired.png`
+- `sim005-sysmon-processcreate.png (optional)`
 
 ---
 
@@ -185,7 +217,7 @@ Add the following to the screenshots/ folder:
 
 Update the SIM-003 checklist in README.md:
 - ✅ Steps executed
-- ✅ Security logs captured (4688)
+- ✅ Windows Security logs validated (4688)
 - ⚠️ Sysmon telemetry (supplemental)
 - ✅ Detection queries validated
 - ✅ Alert triggered
