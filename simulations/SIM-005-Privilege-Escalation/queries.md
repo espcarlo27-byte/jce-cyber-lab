@@ -118,18 +118,18 @@ Purpose:
 This is the exact query used to trigger the Splunk alert for SIM-003.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | where like(actor, "%administrator%") OR like(actor, "%system%")
-| eval simulation_id="SIM-003"
-| eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line simulation_id symbolic_id
+| eval simulation_id="SIM-005"
+| eval symbolic_id="LAB-SIM-005-PRIVESC-ALERT"
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line simulation_id symbolic_id
 | sort -_time
 ```
 
 Expected Outcome:
 - One or more results → alert fires
 - Privileged execution confirmed
-- Symbolic ID present: `LAB-SIM-003-PRIVESC-ALERT`
+- Symbolic ID present: `LAB-SIM-005-PRIVESC-ALERT`
 
 ---
 
