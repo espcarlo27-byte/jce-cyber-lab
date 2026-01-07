@@ -62,7 +62,7 @@ What This Confirms:
 Observe normal parent → child execution behavior prior to escalation scenarios.
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| where Parent_Process_Name!="null"
+| where Creator_Process_Name!="null"
 | table _time host Account_Name New_Process_Name Creator_Process_Name Process_Command_Line
 | sort -_time
 ```
@@ -165,6 +165,7 @@ Used For:
 
 > This file represents the finalized **execution baseline logic** for SIM-004  
 > and directly supports escalation detection introduced in **SIM-005**.
+
 
 
 
