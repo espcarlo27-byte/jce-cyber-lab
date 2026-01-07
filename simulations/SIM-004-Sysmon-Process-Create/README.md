@@ -117,10 +117,9 @@ This alert validates **telemetry availability**, not malicious intent.
 
 The following evidence was collected in `screenshots/`:
 
-- `sim004-sysmon-processcreate.png` – Sysmon Event ID 1 details
-- `sim004-cmd-baseline.png` – Baseline command execution
-- `sim004-commandline-visible.png` – Command-line arguments logged
-- `sim004-spl-results.png` – SPL query results
+- `sim004-security-4688.png` – Windows Security Event ID 4688 baseline process creation
+- `sim004-sysmon-processcreate.png` – Sysmon Event ID 1 enriched process creation details
+- `sim004-correlation-results.png` – Correlated SPL results (Security + Sysmon)
 
 ---
 
