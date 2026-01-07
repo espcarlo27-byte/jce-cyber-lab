@@ -22,6 +22,32 @@ triage, and incident investigation.
 
 ---
 
+## 🏷️ Alert Metadata & Scheduling Settings
+
+**Alert Title:**  
+SIM-005 – Privilege Escalation Detected (Windows Endpoint)
+
+**Alert Description:**  
+Detects privileged process creation events on a Windows endpoint indicative of local
+privilege escalation activity. The alert triggers when processes are spawned under
+Administrator or SYSTEM context in a manner inconsistent with baseline user behavior.
+
+**Alert Type:**  
+Scheduled
+
+**Cron Expression:**  
+```text
+*/5 * * * *
+```
+
+
+**Search Time Range:**  
+Last 15 minutes
+
+> This schedule provides near-real-time detection while minimizing alert noise in a lab environment.
+
+---
+
 ## 🔎 Detection Logic (Alert Search)
 
 This alert uses the **primary detection query** finalized in `queries.md` and reflects
@@ -41,18 +67,8 @@ Detection Notes:
 - Event ID 4688 is treated as the authoritative source for process creation
 - User attribution may vary due to UAC context switching
 - Detection is based on privileged execution context, not username alone
-- Actor is derived using coalesce() to ensure consistent user attribution across Windows logging variations.
+- `coalesce()` is used to normalize user attribution across Windows logging variations
   
----
-
-## ⏱️ Scheduling Configuration
-- Alert Type: Scheduled
-- Run Frequency: Every 5 minutes
-- Time Range: Last 15 minutes
-
-This configuration provides near-real-time detection while minimizing alert noise
-in a lab environment.
-
 ---
 
 ## 🚨 Trigger Conditions
@@ -109,7 +125,7 @@ symbolic_id: LAB-SIM-005-PRIVESC-ALERT
 
 **Note:**   
 During UAC elevation, Windows logged the process under the effective
-Administrator or System context rather than the originating domain user.
+Administrator or SYSTEM context rather than the originating domain user.
 This behavior is expected and accounted for in detection logic.
 
 ---
