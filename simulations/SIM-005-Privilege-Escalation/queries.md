@@ -49,21 +49,26 @@ What This Confirms:
 
 ## 3. Suspicious Parent → Child Process Chains (Security Logs)
 
-Purpose:
-Identify abnormal parent/child relationships commonly observed during privilege escalation.
+**Purpose:**  
+Identify abnormal parent → child process relationships commonly observed during
+privilege escalation scenarios.
+
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
 | eval actor=lower(coalesce(Account_Name, User))
-| where Creator_Process_Name="*cmd.exe"
-| where New_Process_Name="*powershell.exe" OR New_Process_Name="*notepad.exe"
-| table _time host actor Creator_Process_Name New_Process_Name Process_Command_Line
+| eval parent_process=coalesce(Parent_Process_Name, Creator_Process_Name)
+| where like(parent_process, "%cmd.exe")
+| where like(New_Process_Name, "%powershell.exe") OR like(New_Process_Name, "%notepad.exe")
+| table _time host actor parent_process New_Process_Name Process_Command_Line
 | sort -_time
 ```
+Why This Matters:  
+- Elevated command shells spawning child processes is a high-risk behavioral pattern
+- Parent → child process analysis reflects real attacker tradecraft
+- Using process lineage rather than usernames reduces reliance on brittle identity fields
+- Results in a low false-positive rate in baseline lab environments
 
-Why This Matters:
-- Administrative shells spawning child processes is high-risk
-- Matches real attacker tradecraft
-- Low false-positive rate in baseline environments
+---
 
 ## 4. Supplemental Sysmon Process Creation (If Available)
 
