@@ -1,7 +1,7 @@
 # SIM-005 – Privilege Escalation (T1055) – Log Evidence
 
 This file contains **symbolic and representative log evidence** captured during
-SIM-003, demonstrating **local privilege escalation** on a Windows 11 endpoint
+SIM-005, demonstrating **local privilege escalation** on a Windows 11 endpoint
 (**Windows11Pro**).
 
 The logs below reflect **actual telemetry observed during execution** and are
@@ -31,9 +31,9 @@ Sysmon telemetry is included as **supplemental enrichment when available**.
 The following field mappings were confirmed as reliable in this lab environment:
 
 ### Windows Security (Event ID 4688)
-- `Account_Name` / `SubjectUserName` → normalized as **actor**
+- `Account_Name` / `User` → normalized as **actor**
 - `New_Process_Name`
-- `Parent_Process_Name`
+- `Creator_Process_Name`
 - `Process_Command_Line`
 
 ### Sysmon (Event ID 1 – Supplemental)
@@ -53,7 +53,7 @@ Legacy or inconsistent aliases were excluded from final detections.
 **User Context:** `local.lab\labuser`
 
 ```text
-Time: 2025-03-05 14:05:11
+Time: 2026-01-07 04:30:11
 Host: Windows11Pro
 Account_Name: local.lab\labuser
 New_Process_Name: C:\Windows\System32\cmd.exe
