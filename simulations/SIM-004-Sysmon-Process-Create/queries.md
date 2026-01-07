@@ -123,9 +123,12 @@ OR
 (
   index=winevent_sysmon EventCode=1 host="Windows11Pro"
 )
-| eval actor=lower(coalesce(User, Account_Name))
+| eval actor=lower(coalesce(Account_Name, User))
+| eval process=coalesce(New_Process_Name, Image)
+| eval parent_process=coalesce(Creator_Process_Name, ParentImage)
+| eval command_line=coalesce(Process_Command_Line, CommandLine)
 | eval simulation_id="SIM-004"
-| table _time actor process parent_process command_line simulation_id
+| table _time host actor process parent_process command_line IntegrityLevel simulation_id
 | sort -_time
 ```
 
@@ -165,6 +168,7 @@ Used For:
 
 > This file represents the finalized **execution baseline logic** for SIM-004  
 > and directly supports escalation detection introduced in **SIM-005**.
+
 
 
 
