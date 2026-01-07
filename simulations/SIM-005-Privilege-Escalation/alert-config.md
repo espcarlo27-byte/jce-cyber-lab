@@ -1,6 +1,6 @@
 # SIM-005 – Privilege Escalation (T1055) - Detection Alert
 
-**Symbolic ID:** LAB-SIM-003-PRIVESC-ALERT  
+**Symbolic ID:** LAB-SIM-005-PRIVESC-ALERT  
 **MITRE Technique:** T1055 – Privilege Escalation  
 **Severity:** High  
 **Status:** Validated  
@@ -29,11 +29,11 @@ This alert uses the **primary detection query** finalized in `queries.md` and re
 
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
-| eval actor=lower(coalesce(Account_Name, SubjectUserName))
+| eval actor=lower(coalesce(Account_Name, User))
 | where like(actor, "%administrator%") OR like(actor, "%system%")
-| eval simulation_id="SIM-003"
-| eval symbolic_id="LAB-SIM-003-PRIVESC-ALERT"
-| table _time host actor New_Process_Name Parent_Process_Name Process_Command_Line simulation_id symbolic_id
+| eval simulation_id="SIM-005"
+| eval symbolic_id="LAB-SIM-005-PRIVESC-ALERT"
+| table _time host actor New_Process_Name Creator_Process_Name Process_Command_Line simulation_id symbolic_id
 | sort -_time
 ```
 
@@ -82,7 +82,7 @@ The following fields must be present in the alert payload:
 - host
 - actor
 - New_Process_Name
-- Parent_Process_Name
+- Creator_Process_Name
 - Process_Command_Line
 - simulation_id
 - symbolic_id
@@ -97,14 +97,14 @@ These fields support:
 
 ## 🧾 Example Alert Output (Symbolic)
 ``` text
-_time: 2025-03-05 14:18:42
+_time: 2026-01-07 04:30:42
 host: Windows11Pro
 User: administrator
 New_Process_Name: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
 Parent_Process_Name: C:\Windows\System32\cmd.exe
 Process_Command_Line: powershell.exe
-simulation_id: SIM-003
-symbolic_id: LAB-SIM-003-PRIVESC-ALERT
+simulation_id: SIM-005
+symbolic_id: LAB-SIM-005-PRIVESC-ALERT
 ```
 
 **Note:**   
@@ -150,12 +150,12 @@ When this alert fires, an analyst should:
 ## 📎 Required Evidence
 
 Screenshots captured after execution:
-- `sim003-alert-config.png` — Alert configuration
-- `sim003-alert-fired.png` — Alert firing confirmation
+- `sim005-alert-config.png` — Alert configuration
+- `sim005-alert-fired.png` — Alert firing confirmation
 
 Location:
 ```bash
-simulations/SIM-003-Privilege-Escalation/screenshots/
+simulations/SIM-005-Privilege-Escalation/screenshots/
 ```
 
 ---
