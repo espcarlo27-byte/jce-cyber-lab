@@ -1,7 +1,8 @@
-# SIM-001 – Phishing Email (T1566.002) - Detection Alert
+# SIM-001 – Phishing Email (T1566.002) – Detection Alert
 
 **Symbolic ID:** LAB-SIM-001-PHISHING-ALERT  
 **Technique:** T1566.002 – Phishing: Link  
+**Tactic:** Initial Access (TA0001)  
 **Severity:** Medium  
 **Status:** ✅ Validated & Triggered  
 
@@ -9,22 +10,27 @@
 
 ## 🎯 Alert Purpose
 
-This alert detects a user clicking a phishing hyperlink delivered through a simulated HR policy email.
+This alert detects a **user-driven phishing link click** by observing
+authoritative **endpoint process execution telemetry**.
 
 Detection is based on:
 
 - Windows Security **EventCode 4688**
 - Google Chrome execution
-- Presence of an **HTTP/HTTPS URL inside `Process_Command_Line`**
+- Presence of a **URL in `Process_Command_Line`**
 - Correlation and alerting via Splunk
 
-This alert represents the **first-stage user interaction detection** in the simulated attack chain.
+> **Important:**  
+> This alert is intentionally **endpoint-driven**.  
+> Network telemetry (e.g., Security Onion) may provide **supplemental context**
+> but is **not required** for detection or alert validity.
 
 ---
 
 ## 🔎 Detection Logic (FINAL WORKING ALERT SEARCH)
 
-This query reflects the **actual working detection logic used in the lab** and matches the real field names ingested by Splunk.
+This query reflects the **validated detection logic** used in SIM-001 and
+matches the actual field names ingested by Splunk.
 
 ```spl
 (index=winevent_security OR index=winevent_system)
@@ -57,7 +63,7 @@ Process_Command_Line="*http*"
 - Throttle Field: *
 
 This ensures:
-- A single phishing click triggers detection
+- A single phishing click generates an alert
 - Repeated clicks do not cause alert flooding
 
 ---
@@ -84,10 +90,10 @@ The following fields appear in the alert payload for SOC investigation and dashb
 
 These fields enable:
 - User attribution
-- Host identification
+- Endpoint/Host identification
 - Executed process visibility
 - Command-line URL detection
-- Simulation and detection tagging
+- Simulation and detection traceability
 
 ---
 
@@ -98,7 +104,7 @@ _time: 2025-12-09 01:13:10
 host: Windows11Pro
 user: LAB\testuser
 New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
-Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://10.0.0.30:8080
+Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://phish-sim.local/policy
 simulation_id: SIM-001
 symbolic_id: LAB-SIM-001-PHISHING-ALERT
 ```
@@ -118,10 +124,10 @@ symbolic_id: LAB-SIM-001-PHISHING-ALERT
 Once this alert fires, the responding analyst should:
 1. Identify and validate the impacted user
 2. Validate the affected endpoint
-3. Investigate the phishing URL destination
+3. Review the phishing URL context
 4. Confirm execution source (Explorer / PowerShell)
 5. Review follow-on activity for persistence or lateral movement
-6. Run additional endpoint and network hunts
+6. Perform additional endpoint or network hunts as needed
 7. Document findings in the incident report
 
 ---
@@ -153,6 +159,8 @@ Location: **** simulations/SIM-001-Phishing-Email/screenshots/***
 - ✅ Alert fired successfully
 - ✅ SIM-001 detection is production-ready
 
+> This alert represents a realistic SOC detection for phishing link
+> interaction based on authoritative endpoint telemetry.
 
 
 
