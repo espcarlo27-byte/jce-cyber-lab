@@ -276,6 +276,8 @@ Optional (Wireshark evidence):
 ## 12. Mark Simulation Completion
 
 Update SIM-002 checklist:
+
+### Core Validation (Required)
 - [x] Baseline DNS generated
 - [x] Suspicious DNS generated
 - [x] Zeek DNS logs captured
@@ -283,6 +285,9 @@ Update SIM-002 checklist:
 - [x] Evidence screenshots saved
 - [x] Simulation marked **Validated**
 
-Optional PCAP evidence:
-- [x] Baseline DNS PCAP captured and reviewed in Wireshark
-- [x] Suspicious DNS PCAP captured and reviewed in Wireshark
+### Packet-Level Validation (Optional – Wireshark Evidence)
+- [ ] Baseline DNS PCAP captured using `tcpdump`
+- [ ] Suspicious DNS PCAP captured using `tcpdump`
+- [ ] PCAP files transferred to Kali / Host machine for analysis
+- [ ] Wireshark inspection completed (query length, entropy, frequency)
+- [ ] Wireshark evidence screenshots saved
