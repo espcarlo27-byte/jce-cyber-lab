@@ -129,15 +129,26 @@ scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-baseline-dns.pcap ~/Downloads/
 ### 5.4 Wireshark Baseline Analysis (Kali)
 
 Open the PCAP:
-- Wireshark → File → Open → sim002-baseline-dns.pcap
+- Wireshark → File → Open → `sim002-baseline-dns.pcap`
 
-Useful display filters:
+#### Wireshark display filters (baseline)
 - `dns`
-- `dns.flags.response == 0` (queries)
-- `dns.flags.response == 1` (responses)
+- `dns.flags.response == 0` (queries only)
+- `dns.flags.response == 1` (responses only)
 
-📸 **Screenshot(s):**
-`sim002-wireshark-baseline-dns.png`
+#### What to validate (baseline)
+- Queries are short and human-readable (example: `google.com`, `github.com`)
+- Low volume / non-bursty traffic
+- Normal query-response pattern
+
+📸 **Screenshot(s) to capture (baseline Wireshark evidence):**
+- `sim002-wireshark-baseline-overview.png`  
+  **How:** Apply filter `dns`  
+  **Capture:** Packet list showing normal DNS traffic volume + query/response activity
+
+- `sim002-wireshark-baseline-query-details.png`  
+  **How:** Apply filter `dns.flags.response == 0`, click a query packet  
+  **Capture:** Expanded DNS section showing `Queries` → `Name` (short readable domain)
 
 ---
 
@@ -196,10 +207,12 @@ Look for:
 ---
 
 ## 9. (Optional) Capture Suspicious DNS PCAP for Wireshark
+
 ### 9.1 Capture Suspicious DNS Traffic (Security Onion)
-Replace <iface> with your monitor interface:
+
+Replace `<iface>` with your monitor interface and `<KALI_IP>` with Kali IP:
 ```bash
-sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-dns-kali-only.pcap
+sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-suspicious-dns.pcap
 ```
 
 While capture is running, execute Step 6 again (suspicious traffic), then stop capture:
@@ -220,22 +233,37 @@ scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-suspicious-dns.pcap ~/Downloads/
 ### 9.3 Wireshark Suspicious Analysis (Kali)
 
 Open in Wireshark:
-- `sim002-suspicious-dns.pcap`
+- Wireshark → File → Open →`sim002-suspicious-dns.pcap`
 
 Useful display filters:
 - `dns`
 - `dns.qry.name contains "example.com"`
 - `dns.qry.name`
-- `udp.port == 53`
+- `dns.flags.response == 0` (queries only)
 
 What to look for:
 - unusually long DNS query names
 - repeated base domain (example.com)
-- bursty/high-frequency DNS requests
-- randomized/high-entropy subdomains
+- bursty/high-frequency queries in short time windows
+- randomized/high-entropy subdomains (tunneling indicator)
 
-📸 **Screenshot(s):**  
-`sim002-wireshark-suspicious-dns.png`
+📸 **Screenshot(s)** to capture (suspicious Wireshark evidence):
+
+- `sim002-wireshark-suspicious-overview.png`  
+  **How:** Apply filter dns  
+  **Capture:** Packet list showing high-frequency DNS traffic compared to baseline
+  
+- `sim002-wireshark-suspicious-long-query.png`  
+  **How:** Apply filter dns.flags.response == 0, click a suspicious query  
+  **Capture:** Expanded DNS section clearly showing an unusually long query name
+  
+- `sim002-wireshark-suspicious-randomized-subdomain.png`  
+  **How:** Apply filter dns.qry.name contains "example.com"  
+  **Capture:** Multiple DNS queries showing randomized subdomains but the same base domain
+  
+- `sim002-wireshark-suspicious-frequency.png`  
+  **How:** Keep dns.flags.response == 0 filter  
+  **Capture:** Packet list timestamps showing repeated queries occurring rapidly (burst behavior)
 
 ---
 
@@ -261,15 +289,35 @@ This satisfies the detection objective for DNS tunneling–style behavior.
 Store all evidence in:  
 `simulations/SIM-002-DNS-Tunneling/screenshots/`
 
-Required screenshots:
+### ***📸 Screenshot Naming Standard (SIM-002)***
+
+All screenshots for this simulation should follow a consistent naming convention to make evidence easy to review and audit.
+
+### Required (Zeek + Hunt Evidence)
 - `sim002-zeek-dns-baseline-log.png`
 - `sim002-hunt-zeek-dns-baseline.png`
 - `sim002-zeek-dns-suspicious-log.png`
 - `sim002-hunt-zeek-dns-suspicious.png`
 
-Optional (Wireshark evidence):
-- `sim002-wireshark-baseline-dns.png`
-- `sim002-wireshark-suspicious-dns.png`
+### Optional (Wireshark Packet-Level Evidence)
+- `sim002-wireshark-baseline-overview.png`  
+  **Purpose:** Show baseline DNS query traffic in packet view
+
+- `sim002-wireshark-baseline-query-details.png`  
+  **Purpose:** Highlight normal-length DNS query names and expected response behavior
+
+- `sim002-wireshark-suspicious-overview.png`  
+  **Purpose:** Show burst/high-frequency DNS traffic during tunneling-like phase
+
+- `sim002-wireshark-suspicious-long-query.png`  
+  **Purpose:** Highlight unusually long DNS query name length
+
+- `sim002-wireshark-suspicious-randomized-subdomain.png`  
+  **Purpose:** Highlight high-entropy/random-looking subdomains (tunneling indicator)
+
+- `sim002-wireshark-suspicious-frequency.png`  
+  **Purpose:** Show repeated queries within a short time window (frequency indicator)
+
 
 ---
 
