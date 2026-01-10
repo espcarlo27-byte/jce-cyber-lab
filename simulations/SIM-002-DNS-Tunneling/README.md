@@ -71,6 +71,18 @@ Additional pivots included:
 - `destination.port`
 - `network.transport`
 
+### (Optional) Packet-Level Validation (tcpdump → Wireshark)
+
+Because Security Onion is deployed in CLI mode, packet capture evidence was generated using tcpdump and saved into .pcap files.  
+
+The **PCAPs** can then be transferred to **Kali Linux** (or the host PC) and analyzed using **Wireshark** to validate **DNS tunneling** indicators at the packet level.
+
+Example analyst indicators:
+- unusually long DNS query names
+- high-entropy/randomized subdomains
+- repeated base domain queries
+- elevated query frequency over short time windows
+
 ---
 
 ## ✅ Success Criteria (Met)
@@ -81,6 +93,8 @@ Additional pivots included:
 - Analyst-level investigation performed using KQL  
 - Evidence captured and documented  
 
+### Optional validation:
+- Packet-level DNS evidence reviewed in Wireshark (PCAP generated via tcpdump)
 ---
 
 ## ⚠️ Issues Encountered & Resolutions
@@ -111,7 +125,8 @@ Detection capability depends not only on telemetry collection, but also on analy
 
 Key lessons:
 - Zeek can be fully operational while data remains invisible without ECS-aware queries  
-- Understanding Elastic data streams is critical in modern SOC environments  
+- Understanding Elastic data streams is critical in modern SOC environments
+- Packet-level evidence (PCAP + Wireshark) provides strong validation when available
 - Proper documentation of investigation blockers is as important as detection success  
 
 ---
