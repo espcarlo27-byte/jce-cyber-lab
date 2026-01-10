@@ -126,6 +126,13 @@ Conclusion:
 > DNS behavior using Zeek metadata alone.
 
 ---
+## PCAP Evidence (Optional - See `steps.md` for more details)
+- /tmp/sim002-baseline-dns.pcap
+- /tmp/sim002-suspicious-dns.pcap
+
+> ***“Packet-level validation (tcpdump + Wireshark) is documented in steps.md and used only as supporting evidence, not as the primary detection mechanism.”***
+
+---
 
 ## 🧠 Detection Relevance
 
