@@ -2,29 +2,32 @@
 
 This file contains **symbolic and representative log evidence** captured during
 SIM-001, demonstrating **user-driven phishing link execution** resulting in
-endpoint process creation and outbound network access.
+endpoint process creation.
 
-The logs below reflect **actual telemetry observed during execution** and are
-used to validate:
+SIM-001 is designed as an **endpoint-driven detection**.
+Windows Security Event ID **4688** is treated as the **authoritative telemetry source**.
+Network telemetry, when available, is included as **optional supplemental context**.
+
+The logs below are used to validate:
 - Detection logic in `queries.md`
 - Alert logic in `alert-config.md`
-
-Windows Security Event ID **4688** is treated as the **primary authoritative
-endpoint source**, while network telemetry provides **supplemental confirmation**
-of phishing-driven web access.
 
 ---
 
 ## 🧾 Log Sources Used
 
-- **Windows Security Log (Event ID 4688)** – Primary process creation telemetry
-- **Network / Web Server Logs (HTTP)** – Supplemental confirmation of link access
+### Required (Authoritative)
+- **Windows Security Log (Event ID 4688)** – Process creation and command-line telemetry
+
+### Optional (Supplemental)
+- **Network / Web Server Logs (HTTP)** – Supporting confirmation of link access
 - **SIEM Alert Event** – Detection validation artifact
 
 > ⚠️ **Important Behavior Note**  
-> Phishing detections frequently rely on **benign parent processes**
-> (e.g., browsers or email clients). Detection logic must therefore
-> correlate **user context + destination + timing**, not process name alone.
+> Phishing detections commonly involve **benign parent processes**
+> (e.g., browsers or email clients).  
+> Detection logic must therefore rely on **user context, command-line parameters,
+> and execution timing**, not process name alone.
 
 ---
 
@@ -38,11 +41,11 @@ The following field mappings were confirmed as reliable in this lab environment:
 - `Process_Command_Line`
 - `host`
 
-### Network Telemetry (HTTP)
-- `src_ip`
-- `dest_ip`
+### Optional Network Telemetry (HTTP)
+- `src_ip` (endpoint, DHCP-assigned)
+- `dest_ip` (phishing host, DHCP-assigned)
 - `dest_port`
-- `method`
+- `http.method`
 - `user_agent`
 
 Alert metadata fields were preserved to support simulation traceability.
@@ -53,12 +56,12 @@ Alert metadata fields were preserved to support simulation traceability.
 
 **Source:** Windows Security  
 **Event ID:** 4688  
-**User Context:** `LAB\testuser`
+**User Context:** `LAB\labuser`
 
 ```text
 Time: 2025-12-09 01:13:03
 Host: Windows11Pro
-Account_Name: LAB\testuser
+Account_Name: LAB\labuser
 New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
 Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe"
 ```
@@ -70,34 +73,33 @@ Interpretation:
 
 ---
 
-## 2. Phishing Link Execution (Suspicious Command-Line)
+## 2. Phishing Link Execution (Primary Detection Signal)
 
 Source: Windows Security
 Event ID: 4688
-User Context: LAB\testuser
+User Context: LAB\labuser
 ```text
 Time: 2025-12-09 01:13:03
 Host: Windows11Pro
-Account_Name: LAB\testuser
+Account_Name: LAB\labuser
 New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
-Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://10.0.0.30:8080
+Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://phish-sim.local/policy
 ```
 
 Interpretation:
 - Browser launched with direct URL argument
-- URL points to non-standard internal web server
-- Primary endpoint-based phishing execution signal
+- Indicates a user-initiated link click
+- Serves as the authoritative phishing execution signal
 
 ---
 
-## 3. Network Access to Phishing Infrastructure
+## 3. (Optional) Network Access Confirmation
 
-Source: Network Telemetry
+Source: Network Telemetry (Optional)
 Protocol: HTTP
-Client Context: Windows 11 Endpoint
 ```text
-Source IP: 10.0.0.50
-Destination IP: 10.0.0.30
+Source IP: <Windows endpoint – DHCP-assigned>
+Destination IP: <Phishing host – DHCP-assigned>
 Destination Port: 8080
 Protocol: HTTP
 Method: GET
@@ -105,9 +107,13 @@ User-Agent: Chrome
 ```
 
 Interpretation:
-- Outbound HTTP request following browser execution
-- Confirms successful link access
-- Correlates directly with endpoint process creation event
+- Outbound HTTP request consistent with a phishing link click
+- Provides supporting context when network telemetry is available
+- Not required for SIM-001 detection validation
+
+> Note:
+> Network telemetry may not always be present due to TLS encryption,
+> sensor placement, or lab resource constraints.
 
 ---
 
@@ -118,9 +124,9 @@ Alert Name: LAB-SIM-001-PHISHING-ALERT
 ```text
 Trigger Time: 2025-12-09 01:13:10
 Host: Windows11Pro
-User: LAB\testuser
+User: LAB\labuser
 Process: chrome.exe
-URL: http://10.0.0.30:8080
+URL: http://phish-sim.local/policy
 Severity: Medium
 Status: Triggered
 ```
@@ -128,21 +134,21 @@ Status: Triggered
 Interpretation:
 - Detection logic successfully correlated endpoint and network signals
 - Alert fired within seconds of user interaction
-- Confirms operational detection pipeline
-
+- Confirms operational detection and alerting pipeline
+  
 ---
 
 ## 🔗 Correlated Phishing Execution Timeline
 ```text
 01:13:03 – User launches Chrome (baseline execution)
 01:13:03 – Chrome executed with phishing URL argument
-01:13:05 – HTTP GET request sent to attacker-controlled server
 01:13:10 – SIEM alert triggered
 ```
 
 Conclusion:  
-A user-initiated phishing link resulted in browser execution with a malicious
-destination, followed by confirmed network access and successful alerting.
+A user-initiated phishing link resulted in browser execution with a
+suspicious destination, followed by successful detection and alerting
+based on authoritative endpoint telemetry.
 
 ---
 
@@ -155,8 +161,8 @@ These log events directly support:
 
 The combination of:
 - User context
-- Suspicious command-line parameters
-- Correlated network access
+- Browser execution
+- URL presence in command line
 
 provides a high-confidence phishing execution signal suitable for SOC alerting
 and triage.
@@ -169,3 +175,6 @@ and triage.
 - [x] Correlated timeline established
 - [x] Alert successfully triggered
 - [x] Simulation complete
+
+> Endpoint telemetry is authoritative.
+> Network telemetry is optional and supplemental.
