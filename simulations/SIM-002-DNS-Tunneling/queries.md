@@ -12,6 +12,8 @@ This simulation reflects a **realistic SOC detection workflow**, where:
 Detection logic is documented across **baseline validation,
 primary detection, and alert readiness**.
 
+> ***“Packet-level validation (tcpdump + Wireshark) is documented in steps.md and used only as supporting evidence, not as the primary detection mechanism.”***
+
 ---
 
 ## 1. Baseline DNS Activity (Normal Resolution)
