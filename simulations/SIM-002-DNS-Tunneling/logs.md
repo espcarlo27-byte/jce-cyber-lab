@@ -71,11 +71,11 @@ This establishes a clean baseline for comparison.
 
 ---
 
-2. High-Frequency Randomized DNS Queries (Suspicious Behavior)
+## 2. High-Frequency Randomized DNS Queries (Suspicious Behavior)
 
-Source: Zeek DNS Logs  
-View: Security Onion Hunt (Suspicious Activity)  
-Screenshot Reference:  
+**Source:** Zeek DNS Logs  
+**View:** Security Onion Hunt (Suspicious Activity)  
+**Screenshot Reference:**  
 `sim002-zeek-dns-suspicious-log.png`  
 `sim002-hunt-zeek-dns-suspicious.png`  
 
@@ -127,10 +127,23 @@ Conclusion:
 
 ---
 ## PCAP Evidence (Optional - See `steps.md` for more details)
-- /tmp/sim002-baseline-dns.pcap
-- /tmp/sim002-suspicious-dns.pcap
 
-> ***“Packet-level validation (tcpdump + Wireshark) is documented in steps.md and used only as supporting evidence, not as the primary detection mechanism.”***
+PCAPs generated via `tcpdump` on Security Onion and inspected in Wireshark from Kali/Host.
+
+**PCAP Files**
+- `/tmp/sim002-baseline-dns.pcap`
+- `/tmp/sim002-suspicious-dns.pcap`
+
+**Wireshark Evidence Screenshots**
+- `sim002-wireshark-baseline-overview.png`
+- `sim002-wireshark-baseline-query-details.png`
+- `sim002-wireshark-suspicious-overview.png`
+- `sim002-wireshark-suspicious-long-query.png`
+- `sim002-wireshark-suspicious-randomized-subdomain.png`
+- `sim002-wireshark-suspicious-frequency.png`
+
+> ***Packet-level validation (tcpdump + Wireshark) is documented in `steps.md` and used only as supporting evidence, not as the primary detection mechanism.***
+
 
 ---
 
