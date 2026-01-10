@@ -4,6 +4,11 @@
 This document captures real operational issues encountered during **SIM-001**
 and the structured methodology used to identify, resolve, and validate each one.
 
+SIM-001 is designed as an **endpoint-driven detection simulation**.
+Windows Security Event ID **4688** is treated as the **authoritative source**.
+Network telemetry (Security Onion / Suricata / Zeek), when available, is treated
+as **optional supplemental validation**.
+
 ---
 
 ## 🧠 Lab Network Context (Important)
@@ -35,7 +40,7 @@ The Splunk Universal Forwarder on the Windows 11 endpoint was either:
 
 **Resolution:**  
 1. Verified that the Splunk Universal Forwarder service was running on the Windows 11 endpoint.  
-2. Confirmed that the forwarder was correctly pointed to the Splunk Enterprise server (`10.0.0.60`).  
+2. Confirmed that the forwarder was correctly pointed to the Splunk Enterprise server.  
 3. Validated that the appropriate Windows Event Log inputs were enabled.  
 4. Restarted the Splunk Forwarder service after configuration changes.  
 5. Re-ran the phishing simulation to regenerate log activity.  
@@ -133,7 +138,7 @@ Once the payload was properly executed, Windows Security and Sysmon logs generat
 
 **Lessons Learned:**  
 > A detection cannot trigger if the attack never truly executes.  
-> Simulations must explicitly generate telemetry—symbolic artifacts require deliberate execution to be useful.
+> Validation requires deliberate execution of behavior that produces log evidence.
 
 ---
 
@@ -146,15 +151,13 @@ During the phishing email simulation, the expected Windows Event ID **4688 (Proc
 Without Event ID 4688:
 - Process lineage for the attack could not be validated  
 - SPL detections relying on command-line visibility did not trigger  
-- No evidence of the malicious child process was visible  
 - Endpoint telemetry for the simulation was incomplete  
 
 **Root Cause:**  
 Process creation auditing was not enabled on the Windows 11 endpoint.  
 On a default installation, Event ID 4688 may be missing due to:
 - **Advanced Audit Policy** for process creation not being enabled  
-- Group Policy settings not yet applied from the Windows Server domain  
-- Sysmon not installed or not configured to capture process events  
+- Group Policy / GPO settings not applied from the Windows Server domain (if domain-joined)  
 
 **Resolution:**  
 1. Enabled **Audit Process Creation** via Group Policy:  
@@ -172,7 +175,7 @@ On a default installation, Event ID 4688 may be missing due to:
 5. Re-ran the phishing simulation to regenerate process events.
 
 **Validation:**  
-Event ID 4688 began appearing consistently in both Event Viewer and Splunk searches, enabling the phishing simulation's detections to trigger successfully.
+Event ID 4688 began appearing consistently in both Event Viewer and Splunk searches, enabling SIM-001 detections to trigger successfully.  
 
 **Lessons Learned:**  
 > Detection engineering depends on proper audit policy configuration.  
@@ -180,45 +183,46 @@ Event ID 4688 began appearing consistently in both Event Viewer and Splunk searc
 
 ---
 
-### ***🧩 Issue 5: Expected Network Evidence (EVE.json / Packet Logs) Not Found During Validation***
+### ***🧩 Issue 5: Optional Network Evidence Was Unavailable or Not Required for Validation***
 
 **Description:**  
-While validating the phishing email simulation, expected network artifacts such as
-**Suricata EVE.json events** or packet logs were not initially located on the
-Security Onion sensor.
+While validating SIM-001, expected optional network artifacts such as
+Suricata EVE.json events were not initially located or were not available
+due to lab resource constraints.
 
 **Impact:**  
-- Network-side validation of the phishing simulation was delayed  
-- Endpoint telemetry temporarily served as the primary validation source  
-- Reduced confidence in network-layer visibility  
+- Network-side validation of the phishing simulation was delayed or skipped
+- Endpoint telemetry served as the primary validation source  
+- Required correct interpretation of detection scope  
 
 **Root Cause:**  
-This issue was influenced by both **Security Onion Eval mode behavior** and
-the lab’s **centralized DNS and routing design**:
+SIM-001 is designed to be endpoint-driven, and network evidence is
+supplemental only. In addition, network evidence may be unavailable due to:
 
-- pfSense handled **DNS resolution and traffic routing**, meaning:
-  - DNS visibility was centralized at the firewall
-  - Not all phishing-related traffic produced Suricata HTTP events
-- Security Onion Eval mode stores logs in structured, non-obvious paths
-- Initial searches targeted incorrect directories or rotated files
+- Security Onion not running (VM resource limitations)
+- Sensor placement limitations
+- TLS encryption reducing visibility
+- Suricata/Zeek logging behavior and storage paths (Eval mode)  
 
 **Resolution:**  
-1. Verified correct Suricata and Zeek log locations for Eval mode:
+1. Confirmed SIM-001 success criteria are met using endpoint telemetry:
+   - Windows Security Event ID 4688
+   - URL present in Process_Command_Line
+
+2. If Security Onion was available, validated correct Suricata log locations:
    ```bash
    /opt/so/log/suricata/eve.json
    /nsm/suricata/<sensor-name>/eve.json
    ```
-2. Confirmed Suricata service status and packet capture activity.
-3. Re-ran the phishing simulation to generate fresh HTTP traffic.
-4. Validated that network telemetry aligned with the expected simulation scope
-(user-driven link click, not full payload delivery).
+3. Re-ran simulation for fresh HTTP activity if network confirmation was desired.
 
 **Validation:**  
-Correct log paths were confirmed, and network visibility was validated where
-expected based on the simulation’s design.  
+SIM-001 was considered fully validated once endpoint telemetry and Splunk alerting
+were confirmed. Optional network evidence was treated as supporting context only.  
 
 **Lessons Learned:**  
-> Network telemetry availability depends on traffic type, sensor placement, and platform behavior, not just whether an action occurred.
+> Network telemetry is valuable, but not always available.
+> Detections must remain valid even when network visibility is partial.
 
 ---
 
@@ -231,7 +235,6 @@ After executing the phishing simulation and confirming that logs were being gene
 - Delayed validation of detection logic  
 - Misleading appearance that logs were still not ingesting  
 - Duplicate troubleshooting on components that were functioning correctly  
-- Difficulty confirming whether Event ID 4688 and other telemetry were present  
 
 **Root Cause:**  
 The issue was caused by incorrect Splunk search filters, specifically:
@@ -248,19 +251,17 @@ The issue was caused by incorrect Splunk search filters, specifically:
    ```spl
    index=* earliest=-15m latest=now
    ```
-2. Confirmed correct Windows log index using:
+2. Confirmed available sourcetypes:
    ```spl
    | metadata type=sourcetypes
    ```
-3. Re-ran searches with explicit source paths, such as:
+3. Re-ran searches with correct index and EventCode.
    ```spl
    index=wineventlog EventCode=4688
    ```
-4. Verified the event timestamps aligned with when the phishing simulation occurred.
-5. Allowed Splunk additional time to finish indexing newly forwarded events.
 
 **Validation:**   
-Once the correct time range and index were selected, Splunk displayed the expected 4688 events and related telemetry. This confirmed that the ingestion pipeline was functioning correctly and that prior “no results” responses were not ingestion failures but search configuration issues.
+After adjusting time range and index, expected 4688 events appeared and the alert logic validated successfully.
 
 **Lessons Learned:**  
 > “No results” does not always mean “no data.”  
@@ -268,7 +269,7 @@ Once the correct time range and index were selected, Splunk displayed the expect
 
 ---
 
-### ***🧩 Issue 7: Endpoint Network Connectivity or DNS Resolution Prevented Expected Callback Activity***
+### ***🧩 Issue 7: No External Callback Activity Observed (Expected in Endpoint-Driven Scope)***
 
 **Description:**  
 During the phishing simulation, endpoint execution was confirmed; however, no
@@ -277,32 +278,28 @@ Windows 11 endpoint.
 
 **Impact:**  
 - No outbound network indicators were visible in network telemetry  
-- Initial concern about missing network visibility  
-- Required clarification of simulation intent and expected outcomes  
-
+- Required clarification of simulation scope and expectations
+  
 **Root Cause:**  
-This behavior was expected based on the lab’s **network and DNS architecture**:
-
+This behavior was expected based on the lab’s **architecture and SIM-001 scope:**
 - **pfSense** acted as the primary **DNS resolver**, centralizing name resolution  
-- The phishing simulation used a **controlled internal HTTP destination**  
-- The scenario was designed to validate **user interaction detection**, not
-  external command-and-control behavior  
-- Endpoints used **DHCP-assigned IP addresses**, reinforcing
-  hostname- and user-based detection rather than IP-based assumptions  
+- The simulation uses a controlled URL click and browser execution
+- SIM-001 validates user interaction detection, not C2/payload behavior
+- Endpoints use DHCP, reinforcing hostname/user/process based detection
 
 **Resolution:**    
 1. Verified endpoint network connectivity and DNS resolution through pfSense  
-2. Confirmed firewall and NAT rules permitted outbound traffic  
-3. Revalidated the simulation’s scope and success criteria  
-4. Adjusted validation expectations to align with the intended detection objective  
+2. Confirmed firewall and NAT rules permitted (if needed)
+3. Revalidated SIMM-001’s scope and success criteria  
+4. Confirmed endpoint telemetry (4688 + URL command line) was sufficient for validation  
 
 **Validation:**  
-Endpoint and network telemetry were correctly interpreted within the context of
-the lab’s architecture and simulation goals.
+Endpoint and alert telemetry were correctly interpreted within the simulation’s
+intent and architecture.
 
 **Lessons Learned:**  
 > Not every phishing simulation produces full kill-chain network activity.  
-> Detection objectives must align with **scenario scope and architectural design**.
+> Detection objectives must align with **scenario scope and visibility**.
 
 ---
 
@@ -312,7 +309,7 @@ SIM-001 reinforced foundational SOC and detection engineering principles:
 
 - Log ingestion and audit policy configuration are prerequisites for detection  
 - Endpoint telemetry is often the **primary signal** for phishing activity  
-- Network visibility depends on **sensor placement and DNS architecture**  
+- Network visibility is valuable but often partial or unavailable  
 - Dynamic IP addressing requires **context-based correlation**  
 - Troubleshooting methodology is as critical as detection logic itself  
 
@@ -323,11 +320,11 @@ SOC operating conditions.
 
 ## 🏁 Status
 
-- Issues fully documented  
-- Root causes identified  
-- Resolutions validated  
-- Detection logic confirmed  
-- Simulation executed end-to-end  
+- [x] Issues fully documented  
+- [x] Root causes identified  
+- [x] Resolutions validated  
+- [x] Detection logic confirmed  
+- [x] Simulation executed end-to-end  
 
 > **SIM-001 is marked as ✅ Validated**  
 > and is suitable for portfolio and interview discussion.
