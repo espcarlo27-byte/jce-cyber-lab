@@ -106,9 +106,9 @@ ip a
 
 ### 5.2 Capture Baseline DNS Traffic (Security Onion)
 
-Replace <iface> with your monitor interface:  
+Replace `<iface>` with your monitor interface and `<KALI_IP>` with Kali IP:  
 ```bash
-sudo tcpdump -i <iface> -nn udp port 53 -w /tmp/sim002-baseline-dns.pcap
+sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-baseline-dns.pcap
 ```
 
 **Generate DNS queries again from Kali (Step 2), then stop capture:**  
