@@ -90,7 +90,58 @@ Expected:
 
 ---
 
-## 5. Generate Suspicious DNS Traffic (Tunneling-Like Behavior)
+## 5. (Optional) Capture Baseline DNS PCAP for Wireshark
+
+This step is optional but strongly recommended for interview-quality evidence.
+Security Onion CLI does not provide Wireshark, so packet captures are generated using tcpdump
+and analyzed in Wireshark from Kali or the host PC.
+
+### 5.1 Identify the Monitoring Interface (Security Onion)
+```bash
+ip a
+```
+
+**Common names:**  
+- ens160, ens192, eth0, etc.
+
+### 5.2 Capture Baseline DNS Traffic (Security Onion)
+
+Replace <iface> with your monitor interface:  
+```bash
+sudo tcpdump -i <iface> -nn udp port 53 -w /tmp/sim002-baseline-dns.pcap
+```
+
+**Generate DNS queries again from Kali (Step 2), then stop capture:**  
+- Press Ctrl + C
+
+Verify file exists:
+```bash
+ls -lh /tmp/sim002-baseline-dns.pcap
+```
+
+### 5.3 Transfer PCAP to Kali for Wireshark
+
+From Kali:
+```bash
+scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-baseline-dns.pcap ~/Downloads/
+```
+
+### 5.4 Wireshark Baseline Analysis (Kali)
+
+Open the PCAP:
+- Wireshark → File → Open → sim002-baseline-dns.pcap
+
+Useful display filters:
+- `dns`
+- `dns.flags.response == 0` (queries)
+- `dns.flags.response == 1` (responses)
+
+📸 **Screenshot(s):**
+`sim002-wireshark-baseline-dns.png`
+
+---
+
+## 6. Generate Suspicious DNS Traffic (Tunneling-Like Behavior)
 
 On **Kali Linux**, generate high-frequency DNS queries with long, randomized subdomains:
 ```bash
@@ -104,7 +155,7 @@ This simulates:
 
 ---
 
-## 6. Observe Suspicious DNS in Zeek Logs
+## 7. Observe Suspicious DNS in Zeek Logs
 
 On **Security Onion**:
 ```bash
@@ -121,7 +172,7 @@ Expected:
 
 ---
 
-## 7. Analyze Suspicious DNS in Hunt
+## 8. Analyze Suspicious DNS in Hunt
 
 In **Security Onion → Hunt**:
 
@@ -144,7 +195,51 @@ Look for:
 
 ---
 
-## 8. Analyst Interpretation
+## 9. (Optional) Capture Suspicious DNS PCAP for Wireshark
+### 9.1 Capture Suspicious DNS Traffic (Security Onion)
+Replace <iface> with your monitor interface:
+```bash
+sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-dns-kali-only.pcap
+```
+
+While capture is running, execute Step 6 again (suspicious traffic), then stop capture:
+- Press Ctrl + C
+
+Verify file exists:
+```bash
+ls -lh /tmp/sim002-suspicious-dns.pcap
+```
+
+### 9.2 Transfer PCAP to Kali
+
+From Kali:
+```bash
+scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-suspicious-dns.pcap ~/Downloads/
+```
+
+### 9.3 Wireshark Suspicious Analysis (Kali)
+
+Open in Wireshark:
+- `sim002-suspicious-dns.pcap`
+
+Useful display filters:
+- `dns`
+- `dns.qry.name contains "example.com"`
+- `dns.qry.name`
+- `udp.port == 53`
+
+What to look for:
+- unusually long DNS query names
+- repeated base domain (example.com)
+- bursty/high-frequency DNS requests
+- randomized/high-entropy subdomains
+
+📸 **Screenshot(s):**  
+`sim002-wireshark-suspicious-dns.png`
+
+---
+
+## 10. Analyst Interpretation
 
 At this stage, the analyst should be able to distinguish:
 
@@ -161,7 +256,7 @@ This satisfies the detection objective for DNS tunneling–style behavior.
 
 ---
 
-## 9. Save Screenshots
+## 11. Save Screenshots
 
 Store all evidence in:  
 `simulations/SIM-002-DNS-Tunneling/screenshots/`
@@ -172,9 +267,13 @@ Required screenshots:
 - `sim002-zeek-dns-suspicious-log.png`
 - `sim002-hunt-zeek-dns-suspicious.png`
 
+Optional (Wireshark evidence):
+- `sim002-wireshark-baseline-dns.png`
+- `sim002-wireshark-suspicious-dns.png`
+
 ---
 
-## 10. Mark Simulation Completion
+## 12. Mark Simulation Completion
 
 Update SIM-002 checklist:
 - [x] Baseline DNS generated
@@ -184,4 +283,6 @@ Update SIM-002 checklist:
 - [x] Evidence screenshots saved
 - [x] Simulation marked **Validated**
 
-
+Optional PCAP evidence:
+- [x] Baseline DNS PCAP captured and reviewed in Wireshark
+- [x] Suspicious DNS PCAP captured and reviewed in Wireshark
