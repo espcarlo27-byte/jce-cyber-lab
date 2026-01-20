@@ -54,6 +54,7 @@ Alert metadata fields were preserved to support simulation traceability.
 
 ## 1. Baseline User Activity (Browser Execution)
 
+**Evidence ID:** E-SIM001-002  
 **Source:** Windows Security  
 **Event ID:** 4688  
 **User Context:** `LAB\labuser`
@@ -75,9 +76,10 @@ Interpretation:
 
 ## 2. Phishing Link Execution (Primary Detection Signal)
 
-Source: Windows Security
-Event ID: 4688
-User Context: LAB\labuser
+**Evidence ID:** E-SIM001-003
+**Source:** Windows Security
+**Event ID:** 4688
+**User Context:** `LAB\labuser`
 ```text
 Time: 2025-12-09 01:13:03
 Host: Windows11Pro
@@ -95,8 +97,9 @@ Interpretation:
 
 ## 3. (Optional) Network Access Confirmation
 
-Source: Network Telemetry (Optional)
-Protocol: HTTP
+**Evidence ID:** E-SIM001-006
+**Source:** Network Telemetry (Optional)
+**Protocol:** HTTP
 ```text
 Source IP: <Windows endpoint – DHCP-assigned>
 Destination IP: <Phishing host – DHCP-assigned>
@@ -119,8 +122,9 @@ Interpretation:
 
 ## 4. Alert Trigger Confirmation
 
-Source: SIEM Alert Event
-Alert Name: LAB-SIM-001-PHISHING-ALERT
+**Evidence ID:** E-SIM001-005
+**Source:** SIEM Alert Event
+**Alert Name:** `LAB-SIM-001-PHISHING-ALERT`
 ```text
 Trigger Time: 2025-12-09 01:13:10
 Host: Windows11Pro
