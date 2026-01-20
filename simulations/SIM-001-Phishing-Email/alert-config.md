@@ -99,6 +99,7 @@ These fields enable:
 
 ## 🧾 Example Alert Output (Symbolic – Validated)
 
+**Evidence ID:** `E-SIM001-005`
 ```yaml
 _time: 2025-12-09 01:13:10
 host: Windows11Pro
@@ -146,11 +147,15 @@ Once this alert fires, the responding analyst should:
 
 ## Required Evidence (Captured)
 
+**Evidence ID:** `E-SIM001-005`
 - ✅ sim001-alert-config.png — Alert configuration screen
 - ✅ sim001-alert-fired.png — Triggered alert confirmation-
 
-Location: **** simulations/SIM-001-Phishing-Email/screenshots/***
+Location: ***simulations/SIM-001-Phishing-Email/screenshots/***
 
+> Note:
+> Evidence IDs `E-SIM001-007` and `E-SIM001-008` refer to screenshot artifacts
+> supporting the alert control validation evidence `E-SIM001-005`.
 ---
 
 ## 🏁 Final Status
