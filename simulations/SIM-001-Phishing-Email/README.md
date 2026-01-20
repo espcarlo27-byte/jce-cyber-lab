@@ -122,6 +122,68 @@ This ensures detection logic remains **portable, resilient, and environment-agno
 
 ---
 
+## 🛡 GRC Control Validation (Governance / Risk / Compliance)
+
+This simulation is also treated as a **security control test** to support audit readiness
+and continuous improvement in the JCE Cyber Lab security program.
+
+### 🎯 Control Objective
+
+Ensure the environment can **detect and alert on phishing link execution**
+using **authoritative endpoint telemetry** with repeatable evidence.
+
+### 🧩 Applicable Framework Mapping (NIST CSF)
+
+| Function | Category | Mapping |
+|---------|----------|---------|
+| Protect | PR.AT | Security Awareness & user-risk simulation validation |
+| Detect | DE.CM | Continuous monitoring via endpoint telemetry + SIEM correlation |
+| Detect | DE.AE | Detect anomalous/suspicious activity (URL invocation via browser execution) |
+| Respond | RS.AN | Analyst validation using logs + SIEM evidence |
+
+### ✅ Control(s) Validated
+
+| Control Area | Control Statement | Validation Method | Result |
+|-------------|-------------------|------------------|--------|
+| Logging & Monitoring | Process execution events are logged with command-line details | Windows Security EventCode 4688 with command-line logging | Pass ✅ |
+| Detection Engineering | Suspicious URL invocation is detectable via correlation logic | Splunk SPL correlation search | Pass ✅ |
+| Alerting | A validated alert is generated for review | Splunk alert firing with symbolic ID | Pass ✅ |
+
+### 📌 Evidence Collected (Audit-Ready)
+
+| Evidence ID | Description | Source | Location |
+|------------|-------------|--------|----------|
+| E-SIM001-001 | Email viewed / phishing content | Windows 11 | `screenshots/` |
+| E-SIM001-002 | Browser execution log (EventCode 4688) | Windows Security Logs | `logs.md` + `screenshots/` |
+| E-SIM001-003 | URL present in `Process_Command_Line` | Windows Security Logs | `logs.md` |
+| E-SIM001-004 | Splunk correlation query results | Splunk | `queries.md` + `screenshots/` |
+| E-SIM001-005 | Alert configuration + alert firing evidence | Splunk | `alert-config.md` + `screenshots/` |
+
+### 🧾 Compliance/Audit Readiness Notes
+
+- This simulation produces defensible evidence suitable for **audit validation**
+  of monitoring and detection controls in a SOC/SIEM environment.
+- Optional network telemetry (Zeek/Suricata) may support investigation but is
+  **not required** for control validity in this SIM.
+
+### 👤 Control Ownership & Governance
+
+| Item | Value |
+|------|-------|
+| Control Owner | JCE (Lab Owner / Security Program Owner) |
+| Control Type | Preventive + Detective |
+| Test Frequency | Quarterly (or after major environment changes) |
+| Evidence Retention | 90 days minimum (lab standard) |
+| Exception Handling | If telemetry/alert fails → record issue in Issues & Resolutions and re-test after remediation |
+
+### 🟢 Control Test Status
+
+**Control Test Result:** Pass ✅  
+**Control Status:** Implemented and Verified  
+**Linked Detection ID:** `LAB-SIM-001-PHISHING-ALERT`
+
+---
+
 ## 🧪 Final Validation
 
 End-to-end validation confirmed that phishing-related **endpoint activity**
