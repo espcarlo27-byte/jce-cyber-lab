@@ -38,11 +38,13 @@ New_Process_Name="*\\chrome.exe"
 | sort - _time
 ```
 
-What This Confirms:
+**What This Confirms:**
 - Chrome was launched
 - Which user launched it
 - What command line was used
 
+**Related Log Evidence:**
+- `E-SIM001-002` (Baseline Chrome Execution – 4688)
 ---
 
 ### 2. Chrome With Suspicious URL in Command Line (Primary Phishing Click Indicator)
@@ -64,12 +66,15 @@ Process_Command_Line="*http*"
 - The activity is user-driven
 - This is the primary detection signal for SIM-001
 
+**Related Log Evidence:**
+- `E-SIM001-003` (Chrome executed with URL in command line – authoritative signal)
+
 ---
 
 ## 3. Optional - PowerShell Fallback Detection (Post-Click Payload Check)
 
 **Purpose:**  
-Checks whether PowerShell executed after the phishing click.
+Checks whether PowerShell was executed after the phishing click.
 This query is supplemental and used to identify potential
 payload execution or secondary compromise.
 ```spl
@@ -111,6 +116,8 @@ process-based detection.
 ---
 
 ## 5. ✅ PRIMARY CORRELATION QUERY (ALERT-READY – VALIDATED)
+
+**Evidence ID:** `E-SIM001-004`
 
 **Purpose:**  
 This is the authoritative detection query for SIM-001.  
