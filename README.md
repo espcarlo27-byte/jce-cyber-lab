@@ -38,6 +38,7 @@ Each simulation (SIM-001 → SIM-XXX) may also be treated as a **security contro
 ### 🔍 Core References
 - 📊 **[Detection Validation Matrix](detection-matrix/detection-validation-matrix.md)** – Authoritative simulation status  
 - 🚧 **[Issues & Resolutions](issues-and-resolutions/)** – Root causes, fixes, and lessons learned  
+- 🛡️ **[GRC Program](GRC-Program/)** – Policies, risk register, control mapping, and audit evidence index
 
 ### 🧪 Validated Simulations
 - ✅ **[SIM-001 – Phishing Email](simulations/SIM-001-Phishing-Email/)** – Initial Access  
