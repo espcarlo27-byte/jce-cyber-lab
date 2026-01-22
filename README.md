@@ -18,6 +18,21 @@ results are **repeatable, auditable, and defensible**.
 
 ---
 
+## 🛡️ GRC Overlay (Audit-Ready Control Validation)
+
+In addition to SOC detections, this repository includes a lightweight **GRC (Governance, Risk, and Compliance)** layer to ensure detections are not only functional, but also **documented, measurable, and auditable**.
+
+Each simulation (SIM-001 → SIM-XXX) may also be treated as a **security control validation** with:
+- Evidence IDs (audit traceability)
+- Control ownership & test frequency
+- Framework mapping (NIST CSF)
+- Repeatable evidence collection (logs + screenshots)
+
+📌 **GRC Program Folder:**  
+- **[GRC Program](GRC-Program/)** – policies, risk register, control mapping, and audit evidence index
+
+---
+
 ## 🧭 Repository Navigation
 
 ### 🔍 Core References
