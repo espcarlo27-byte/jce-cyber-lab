@@ -9,7 +9,7 @@
 | Asset Name | Hostname | Type | OS / Version | IP Address | Network Zone | Owner | Business Function | Criticality | Notes |
 |----------|----------|------|--------------|------------|--------------|-------|------------------|------------|------|
 | pfSense | pfSense.local.lab | Firewall | pfSense CE | 10.0.0.1 (Static) | WAN/LAN | JCE | Edge firewall, routing, NAT, DNS resolver, DHCP | High | Central choke point; traffic mirroring to Security Onion |
-| Windows Server 2025 (AD) | winwerver2025 | Domain Controller | Server 2025 | 10.0.0.10 (Static) | LAN | JCE | Identity & authentication services (AD DS / GPO); Splunk Forwarder | High | Static required for stable identity services and predictable log correlation |
+| Windows Server 2025 (AD) | winserver2025 | Domain Controller | Server 2025 | 10.0.0.10 (Static) | LAN | JCE | Identity & authentication services (AD DS / GPO); Splunk Forwarder | High | Static required for stable identity services and predictable log correlation |
 | Security Onion (Eval) | securityonion | NSM/Sensor | Security Onion Eval | 10.0.0.11 (Static) | Monitor | JCE | Passive monitoring (Zeek/Suricata), ECS telemetry | High | Static for sensor management; non-inline deployment |
 | Ubuntu Server (Splunk Enterprise) | ubuntu24.04 | SIEM | Ubuntu Server | DHCP (Dynamic) | LAN | JCE | Central log ingestion, correlation, dashboards, alerting | High | DHCP by design to simulate flexible SOC infrastructure |
 | Windows 11 Endpoint | windows11pro | Endpoint | Win11 Pro | DHCP (Dynamic) | LAN | JCE | Primary endpoint telemetry (Sysmon + Security logs) | High | Splunk Forwarder installed; detections rely on hostname + user context |
