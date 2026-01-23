@@ -95,6 +95,75 @@ Example analyst indicators:
 
 ### Optional validation:
 - Packet-level DNS evidence reviewed in Wireshark (PCAP generated via tcpdump)
+
+---
+
+---
+
+## 🛡 GRC Control Validation (Governance / Risk / Compliance)
+
+This simulation is treated as a **security control test** to support audit readiness
+and continuous improvement in the JCE Cyber Lab security program.
+
+### 🎯 Control Objective
+
+Ensure the environment can **detect anomalous DNS behavior consistent with DNS tunneling**
+by validating that:
+
+- DNS telemetry is captured by Zeek
+- Events are indexed into ECS-compliant data streams
+- An analyst can investigate using Security Onion Hunt (KQL)
+- Evidence can be collected in a repeatable and defensible way
+
+### 🧩 Applicable Framework Mapping (NIST CSF)
+
+| Function | Category | Mapping |
+|---------|----------|---------|
+| Identify | ID.RA | Risk analysis for C2/exfil over DNS |
+| Protect | PR.PT | Protective technology and network controls (firewall/DNS centralization) |
+| Detect | DE.CM | Continuous monitoring of DNS telemetry via Zeek |
+| Detect | DE.AE | Detection of anomalies in query length/entropy/frequency |
+| Respond | RS.AN | Analyst investigation and validation using Hunt pivots |
+
+### ✅ Control(s) Validated
+
+| Control Area | Control Statement | Validation Method | Result |
+|-------------|-------------------|------------------|--------|
+| Network Monitoring | DNS traffic is captured and logged for visibility | Zeek `dns.log` / ECS telemetry | Pass ✅ |
+| Detection Capability | DNS anomalies can be identified via Hunt pivots and query patterns | Security Onion Hunt (KQL) | Pass ✅ |
+| Evidence Readiness | Evidence can be captured and retained for audit-ready validation | Screenshots + query outputs + optional PCAP | Pass ✅ |
+
+### 👤 Control Ownership & Governance
+
+| Item | Value |
+|------|-------|
+| Control Owner | JCE (Lab Owner / Security Program Owner) |
+| Control Type | Detective |
+| Test Frequency | Quarterly (or after sensor / pipeline changes) |
+| Evidence Retention | 90 days minimum (lab standard) |
+| Exception Handling | If telemetry/indexing fails → document in Issues & Resolutions and re-test after remediation |
+
+### 📌 Evidence Collected (Audit-Ready)
+
+| Evidence ID | Description | Source | Location |
+|------------|-------------|--------|----------|
+| E-SIM002-001 | Zeek DNS telemetry presence proof (`event.dataset: "zeek.dns"`) | Security Onion Hunt | `screenshots/` |
+| E-SIM002-002 | KQL pivot results showing DNS question name anomalies (length/entropy/frequency) | Security Onion Hunt | `queries.md` + `screenshots/` |
+| E-SIM002-003 | Timeline / investigation workflow screenshots (analyst validation) | Security Onion Hunt | `screenshots/` |
+| E-SIM002-004 | Optional packet-level validation (PCAP evidence via tcpdump) | Security Onion / Wireshark | `screenshots/` or `pcap/` (if included) |
+
+### 🧾 Compliance/Audit Readiness Notes
+
+- This SIM provides defensible evidence supporting DNS monitoring controls aligned with modern SOC requirements.
+- DNS tunneling represents a high-impact technique often associated with **Command & Control** and **data exfiltration**.
+- ECS-aware querying is required to validate ingestion and visibility in Security Onion 2.x Hunt.
+
+### 🟢 Control Test Status
+
+**Control Test Result:** Pass ✅  
+**Control Status:** Implemented and Verified  
+**MITRE Technique Validated:** T1071.004 (DNS)
+
 ---
 
 ## ⚠️ Issues Encountered & Resolutions
