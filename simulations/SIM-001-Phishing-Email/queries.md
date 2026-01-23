@@ -44,7 +44,8 @@ New_Process_Name="*\\chrome.exe"
 - What command line was used
 
 **Related Log Evidence:**
-- `E-SIM001-002` (Baseline Chrome Execution – 4688)
+- `E-SIM001-001` (Baseline Chrome Execution – 4688)
+
 ---
 
 ### 2. Chrome With Suspicious URL in Command Line (Primary Phishing Click Indicator)
@@ -67,7 +68,7 @@ Process_Command_Line="*http*"
 - This is the primary detection signal for SIM-001
 
 **Related Log Evidence:**
-- `E-SIM001-003` (Chrome executed with URL in command line – authoritative signal)
+- `E-SIM001-002` (Chrome executed with URL in command line – authoritative signal)
 
 ---
 
@@ -140,8 +141,8 @@ Process_Command_Line="*http*"
 - A phishing link was clicked
 - Chrome executed with a URL
 - The event is tagged with:
-   - simulation_id = SIM-001
-   - symbolic_id = LAB-SIM-001-PHISHING-ALERT
+   - simulation_id = `SIM-001`
+   - symbolic_id = `LAB-SIM-001-PHISHING-ALERT`
 
 ***✅ This query is directly reused in the live alert configuration.***
 
