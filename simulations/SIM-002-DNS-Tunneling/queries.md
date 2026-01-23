@@ -16,7 +16,23 @@ primary detection, and alert readiness**.
 
 ---
 
+## 🧾 Evidence & Naming Convention Notes
+
+This simulation uses the standardized evidence naming convention:
+
+- Evidence IDs: `E-SIM002-###`
+- Screenshot files: `sim002-evidence-###-<short-description>.png`
+
+Examples:
+- `sim002-evidence-001-zeek-dns-visible.png`
+- `sim002-evidence-002-suspicious-dns-length.png`
+- `sim002-evidence-003-hunt-timeline-pivot.png`
+
+---
+
 ## 1. Baseline DNS Activity (Normal Resolution)
+
+**Evidence ID:** `E-SIM002-001`
 
 **Purpose:**  
 Establish expected DNS traffic patterns prior to tunneling detection.
@@ -47,6 +63,8 @@ What This Confirms:
 ---
 
 ## 2. PRIMARY Detection – High-Entropy DNS Queries (Zeek)
+
+**Evidence ID:** `E-SIM002-002`
 
 Purpose:  
 Detect DNS queries indicative of tunneling or covert C2 behavior.
