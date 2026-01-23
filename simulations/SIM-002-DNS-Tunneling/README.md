@@ -145,12 +145,21 @@ by validating that:
 
 ### 📌 Evidence Collected (Audit-Ready)
 
+All evidence follows the standardized naming convention:
+
+- Evidence IDs: `E-SIM002-###`
+- Screenshot format: `sim002-evidence-###-<short-description>.png`
+
 | Evidence ID | Description | Source | Location |
 |------------|-------------|--------|----------|
-| E-SIM002-001 | Zeek DNS telemetry presence proof (`event.dataset: "zeek.dns"`) | Security Onion Hunt | `screenshots/` |
-| E-SIM002-002 | KQL pivot results showing DNS question name anomalies (length/entropy/frequency) | Security Onion Hunt | `queries.md` + `screenshots/` |
-| E-SIM002-003 | Timeline / investigation workflow screenshots (analyst validation) | Security Onion Hunt | `screenshots/` |
-| E-SIM002-004 | Optional packet-level validation (PCAP evidence via tcpdump) | Security Onion / Wireshark | `screenshots/` or `pcap/` (if included) |
+| E-SIM002-001 | Baseline DNS telemetry observed in Zeek `dns.log` | Security Onion (Zeek logs) | `screenshots/` |
+| E-SIM002-002 | Baseline DNS telemetry validated in Hunt (ECS dataset visibility) | Security Onion Hunt | `screenshots/` |
+| E-SIM002-003 | Suspicious DNS tunneling-style queries observed in Zeek `dns.log` | Security Onion (Zeek logs) | `screenshots/` |
+| E-SIM002-004 | Suspicious DNS behavior validated in Hunt (length anomaly / pivots) | Security Onion Hunt | `screenshots/` |
+| E-SIM002-006 → E-SIM002-011 (Optional) | Wireshark packet-level DNS validation screenshots (baseline + suspicious) | tcpdump → Wireshark | `screenshots/` |
+| E-SIM002-012 (Optional) | Baseline DNS PCAP retention (`sim002-evidence-012-baseline-dns.pcap`) | Security Onion tcpdump | `pcap/` (or external archive) |
+| E-SIM002-013 (Optional) | Suspicious DNS PCAP retention (`sim002-evidence-013-suspicious-dns.pcap`) | Security Onion tcpdump | `pcap/` (or external archive) |
+
 
 ### 🧾 Compliance/Audit Readiness Notes
 
