@@ -66,7 +66,7 @@ Expected:
 - `NOERROR` responses
 
 📸 **Screenshot:**  
-`sim002-zeek-dns-baseline-log.png`
+`sim002-evidence-001-zeek-dns-baseline-log.png`
 
 ---
 
@@ -86,7 +86,7 @@ Expected:
 - Normal domain lengths
 
 📸 **Screenshot:**  
-`sim002-hunt-zeek-dns-baseline.png`
+`sim002-evidence-002-hunt-zeek-dns-baseline.png`
 
 ---
 
@@ -123,13 +123,13 @@ ls -lh /tmp/sim002-baseline-dns.pcap
 
 From Kali:
 ```bash
-scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-baseline-dns.pcap ~/Downloads/
+scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-evidence-003-baseline-dns.pcap ~/Downloads/
 ```
 
 ### 5.4 Wireshark Baseline Analysis (Kali)
 
 Open the PCAP:
-- Wireshark → File → Open → `sim002-baseline-dns.pcap`
+- Wireshark → File → Open → `sim002-evidence-003-baseline-dns.pcap`
 
 #### Wireshark display filters (baseline)
 - `dns`
@@ -141,12 +141,13 @@ Open the PCAP:
 - Low volume / non-bursty traffic
 - Normal query-response pattern
 
+**📌 Evidence ID:** `E-SIM002-004`
 📸 **Screenshot(s) to capture (baseline Wireshark evidence):**
-- `sim002-wireshark-baseline-overview.png`  
+- `sim002-evidence-004-wireshark-baseline-overview.png`
   **How:** Apply filter `dns`  
   **Capture:** Packet list showing normal DNS traffic volume + query/response activity
 
-- `sim002-wireshark-baseline-query-details.png`  
+- `sim002-evidence-005-wireshark-baseline-query-details.png`
   **How:** Apply filter `dns.flags.response == 0`, click a query packet  
   **Capture:** Expanded DNS section showing `Queries` → `Name` (short readable domain)
 
@@ -178,8 +179,9 @@ Expected:
 - Repeated base domain
 - Rapid query generation
 
-📸 **Screenshot:**  
-`sim002-zeek-dns-suspicious-log.png`
+**📌 Evidence ID:** `E-SIM002-002`  
+**📸 Screenshot:**  
+`sim002-evidence-006-zeek-dns-suspicious-log.png`
 
 ---
 
@@ -201,8 +203,9 @@ Look for:
 - Repeated query patterns
 - Increased frequency
 
-📸 **Screenshot:**  
-`sim002-hunt-zeek-dns-suspicious.png`
+**📌 Evidence ID:** `E-SIM002-002`
+**📸 Screenshot:**  
+`sim002-evidence-007-hunt-zeek-dns-suspicious.png`
 
 ---
 
@@ -247,21 +250,22 @@ What to look for:
 - bursty/high-frequency queries in short time windows
 - randomized/high-entropy subdomains (tunneling indicator)
 
+**📌 Evidence ID:** `E-SIM002-004`
 📸 **Screenshot(s)** to capture (suspicious Wireshark evidence):
 
-- `sim002-wireshark-suspicious-overview.png`  
+- `sim002-evidence-009-wireshark-suspicious-overview.png`
   **How:** Apply filter dns  
   **Capture:** Packet list showing high-frequency DNS traffic compared to baseline
   
-- `sim002-wireshark-suspicious-long-query.png`  
+- `sim002-evidence-010-wireshark-suspicious-long-query.png`
   **How:** Apply filter dns.flags.response == 0, click a suspicious query  
   **Capture:** Expanded DNS section clearly showing an unusually long query name
   
-- `sim002-wireshark-suspicious-randomized-subdomain.png`  
+- `sim002-evidence-011-wireshark-suspicious-randomized-subdomain.png`
   **How:** Apply filter dns.qry.name contains "example.com"  
   **Capture:** Multiple DNS queries showing randomized subdomains but the same base domain
   
-- `sim002-wireshark-suspicious-frequency.png`  
+- `sim002-evidence-012-wireshark-suspicious-frequency.png`
   **How:** Keep dns.flags.response == 0 filter  
   **Capture:** Packet list timestamps showing repeated queries occurring rapidly (burst behavior)
 
@@ -289,35 +293,61 @@ This satisfies the detection objective for DNS tunneling–style behavior.
 Store all evidence in:  
 `simulations/SIM-002-DNS-Tunneling/screenshots/`
 
-### ***📸 Screenshot Naming Standard (SIM-002)***
+### ***📸 Evidence Naming Standard (SIM-002)***
 
-All screenshots for this simulation should follow a consistent naming convention to make evidence easy to review and audit.
+All evidence for this simulation follows a consistent naming convention to support audit traceability.
 
-### Required (Zeek + Hunt Evidence)
-- `sim002-zeek-dns-baseline-log.png`
-- `sim002-hunt-zeek-dns-baseline.png`
-- `sim002-zeek-dns-suspicious-log.png`
-- `sim002-hunt-zeek-dns-suspicious.png`
+- Evidence ID format: `E-SIM002-###`
+- Screenshot file format: `sim002-evidence-###-<short-description>.png`
+- PCAP file format (optional): `sim002-evidence-###-<short-description>.pcap`
 
-### Optional (Wireshark Packet-Level Evidence)
-- `sim002-wireshark-baseline-overview.png`  
-  **Purpose:** Show baseline DNS query traffic in packet view
+---
 
-- `sim002-wireshark-baseline-query-details.png`  
-  **Purpose:** Highlight normal-length DNS query names and expected response behavior
+### ✅ Required (Zeek + Hunt Evidence)
 
-- `sim002-wireshark-suspicious-overview.png`  
-  **Purpose:** Show burst/high-frequency DNS traffic during tunneling-like phase
+- `sim002-evidence-001-zeek-dns-baseline-log.png`  
+  **Purpose:** Zeek baseline DNS queries visible in `dns.log`
 
-- `sim002-wireshark-suspicious-long-query.png`  
+- `sim002-evidence-002-hunt-zeek-dns-baseline.png`  
+  **Purpose:** Baseline DNS telemetry visible in Hunt (`event.dataset:"zeek.dns"`)
+
+- `sim002-evidence-006-zeek-dns-suspicious-log.png`  
+  **Purpose:** Zeek suspicious DNS queries (randomized subdomains / long names)
+
+- `sim002-evidence-007-hunt-zeek-dns-suspicious.png`  
+  **Purpose:** Suspicious DNS telemetry investigated in Hunt (pivot/anomaly review)
+
+---
+
+### 🟡 Optional (Wireshark Packet-Level Evidence)
+
+**Baseline PCAP + Wireshark**
+- `sim002-evidence-004-wireshark-baseline-overview.png`  
+  **Purpose:** Show baseline DNS query traffic volume and query/response flow
+
+- `sim002-evidence-005-wireshark-baseline-query-details.png`  
+  **Purpose:** Highlight normal-length DNS query name details
+
+**Suspicious PCAP + Wireshark**
+- `sim002-evidence-009-wireshark-suspicious-overview.png`  
+  **Purpose:** Show burst/high-frequency DNS traffic during tunneling-like activity
+
+- `sim002-evidence-010-wireshark-suspicious-long-query.png`  
   **Purpose:** Highlight unusually long DNS query name length
 
-- `sim002-wireshark-suspicious-randomized-subdomain.png`  
-  **Purpose:** Highlight high-entropy/random-looking subdomains (tunneling indicator)
+- `sim002-evidence-011-wireshark-suspicious-randomized-subdomain.png`  
+  **Purpose:** Highlight high-entropy/randomized subdomains under same base domain
 
-- `sim002-wireshark-suspicious-frequency.png`  
-  **Purpose:** Show repeated queries within a short time window (frequency indicator)
+- `sim002-evidence-012-wireshark-suspicious-frequency.png`  
+  **Purpose:** Show repeated queries over short time window (burst behavior)
 
+---
+
+### 🟦 Optional (PCAP File Retention – Supporting Evidence)
+
+If retaining PCAP files in the repo or evidence archive:
+- `sim002-evidence-003-baseline-dns.pcap`
+- `sim002-evidence-008-suspicious-dns.pcap`
 
 ---
 
