@@ -147,15 +147,18 @@ Once this alert fires, the responding analyst should:
 
 ## Required Evidence (Captured)
 
+Location: `simulations/SIM-001-Phishing-Email/screenshots/`  
+
+**Alert Configuration Evidence**  
+
+**Evidence ID:** `E-SIM001-004`
+- ✅ `sim001-evidence-004-alert-config.png` — Alert configuration screen
+
+**Alert Trigger Evidence**  
+
 **Evidence ID:** `E-SIM001-005`
-- ✅ sim001-alert-config.png — Alert configuration screen
-- ✅ sim001-alert-fired.png — Triggered alert confirmation-
+- ✅ `sim001-evidence-005-alert-fired.png` — Triggered alert confirmation
 
-Location: ***simulations/SIM-001-Phishing-Email/screenshots/***
-
-> Note:
-> Evidence IDs `E-SIM001-007` and `E-SIM001-008` refer to screenshot artifacts
-> supporting the alert control validation evidence `E-SIM001-005`.
 ---
 
 ## 🏁 Final Status
