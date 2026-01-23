@@ -97,6 +97,9 @@ These fields support:
 ---  
 
 ## 🧾 Example Alert Output (Representative)
+
+**Evidence ID:** `E-SIM002-005`
+
 ```text
 @timestamp: 2025-12-23 15:06:36
 source.ip: 10.0.0.100
@@ -149,23 +152,46 @@ Upon alert trigger, an analyst should:
 
 ## 📎 Required Evidence
 
-The following evidence supports this alert configuration:
-- `sim002-zeek-dns-baseline-log.png`
-- `sim002-hunt-zeek-dns-baseline.png`
-- `sim002-zeek-dns-suspicious-log.png`
-- `sim002-hunt-zeek-dns-suspicious.png`
+**Location:**  
+`simulations/SIM-002-DNS-Tunneling/screenshots/`  
 
-Location:
-```bash
-simulations/SIM-002-DNS-Tunneling/screenshots/
-```
+## Baseline Capture Evidence
+**Evidence ID:** `E-SIM002-001`
+- ✅ `sim002-evidence-001-zeek-dns-baseline-log.png`
+
+**Evidence ID:** `E-SIM002-002`
+- ✅ `sim002-evidence-002-hunt-zeek-dns-baseline.png`
+
+## Suspicious Activity Evidence
+**Evidence ID:** `E-SIM002-003`
+- ✅ `sim002-evidence-003-zeek-dns-suspicious-log.png`
+
+**Evidence ID:** `E-SIM002-004`
+- ✅ `sim002-evidence-004-hunt-zeek-dns-suspicious.png`
+
+## Alert Evidence (Representative Output)
+**Evidence ID:** `E-SIM002-005`
+- ✅ Alert output artifacts documented in `logs.md` and screenshots above
+
+---
+
+## 🛡 GRC Note (Control Impact)
+
+This detection supports governance and risk objectives by strengthening visibility into
+Command & Control (C2) behavior over DNS.
+- Control Area: Network Security Monitoring (NSM) / Detection Engineering
+- Threat Class: Covert channel (C2 / Exfil)
+- Control Status: Implemented ✅
+- Validation Method: Zeek telemetry + ECS field verification + Hunt investigation evidence
+- Retest Required: Yes (recommended after Zeek upgrades or pipeline changes)
+- Retest Result: Pass ✅
 
 ---
 
 ## 🏁 Status
-- Detection logic validated
-- Alert logic finalized
-- Evidence captured
-- Alert is deployable and defensible
+- [x] Detection logic validated
+- [x] Alert logic finalized
+- [x] Evidence captured
+- [x] Alert is deployable and defensible
 
 **SIM-002 Alert Status:** ***✅ Ready***
