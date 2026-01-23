@@ -98,8 +98,6 @@ Example analyst indicators:
 
 ---
 
----
-
 ## 🛡 GRC Control Validation (Governance / Risk / Compliance)
 
 This simulation is treated as a **security control test** to support audit readiness
