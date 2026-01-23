@@ -295,59 +295,85 @@ Store all evidence in:
 
 ### ***📸 Evidence Naming Standard (SIM-002)***
 
-All evidence for this simulation follows a consistent naming convention to support audit traceability.
+All screenshots for this simulation follow a consistent naming convention to make
+evidence easy to review, audit, and map directly to validation artifacts.
 
-- Evidence ID format: `E-SIM002-###`
+- Evidence IDs format: `E-SIM002-###`
 - Screenshot file format: `sim002-evidence-###-<short-description>.png`
-- PCAP file format (optional): `sim002-evidence-###-<short-description>.pcap`
 
 ---
 
-### ✅ Required (Zeek + Hunt Evidence)
+### ✅ Required Evidence (Zeek + Hunt)
 
+**Evidence ID:** `E-SIM002-001`  
 - `sim002-evidence-001-zeek-dns-baseline-log.png`  
-  **Purpose:** Zeek baseline DNS queries visible in `dns.log`
+  **Purpose:** Show baseline DNS resolution telemetry directly in Zeek `dns.log`
 
+**Evidence ID:** `E-SIM002-002`  
 - `sim002-evidence-002-hunt-zeek-dns-baseline.png`  
-  **Purpose:** Baseline DNS telemetry visible in Hunt (`event.dataset:"zeek.dns"`)
+  **Purpose:** Show baseline Zeek DNS telemetry indexed and visible in Hunt
 
-- `sim002-evidence-006-zeek-dns-suspicious-log.png`  
-  **Purpose:** Zeek suspicious DNS queries (randomized subdomains / long names)
+**Evidence ID:** `E-SIM002-003`  
+- `sim002-evidence-003-zeek-dns-suspicious-log.png`  
+  **Purpose:** Show suspicious DNS tunneling-style queries in Zeek `dns.log`
 
-- `sim002-evidence-007-hunt-zeek-dns-suspicious.png`  
-  **Purpose:** Suspicious DNS telemetry investigated in Hunt (pivot/anomaly review)
+**Evidence ID:** `E-SIM002-004`  
+- `sim002-evidence-004-hunt-zeek-dns-suspicious.png`  
+  **Purpose:** Show suspicious Zeek DNS telemetry visible in Hunt (ECS fields confirmed)
+
+---
+
+### 🟡 Optional Evidence (Packet-Level Validation – Wireshark)
+
+> These artifacts are supplemental validation only.  
+> Zeek telemetry is the authoritative source for SIM-002.
+
+**Evidence ID:** `E-SIM002-006`  
+- `sim002-evidence-006-wireshark-baseline-overview.png`  
+  **Purpose:** Baseline DNS traffic in packet view (low volume + normal resolution)
+
+**Evidence ID:** `E-SIM002-007`  
+- `sim002-evidence-007-wireshark-baseline-query-details.png`  
+  **Purpose:** Show normal-length DNS query name structure (baseline)
+
+**Evidence ID:** `E-SIM002-008`  
+- `sim002-evidence-008-wireshark-suspicious-overview.png`  
+  **Purpose:** Show burst/high-frequency DNS traffic during tunneling-like phase
+
+**Evidence ID:** `E-SIM002-009`  
+- `sim002-evidence-009-wireshark-suspicious-long-query.png`  
+  **Purpose:** Highlight unusually long DNS query name length (tunneling indicator)
+
+**Evidence ID:** `E-SIM002-010`  
+- `sim002-evidence-010-wireshark-suspicious-randomized-subdomain.png`  
+  **Purpose:** Highlight randomized/high-entropy subdomains (tunneling indicator)
+
+**Evidence ID:** `E-SIM002-011`  
+- `sim002-evidence-011-wireshark-suspicious-frequency.png`  
+  **Purpose:** Show repeated queries in short time windows (frequency indicator)
 
 ---
 
-### 🟡 Optional (Wireshark Packet-Level Evidence)
-
-**Baseline PCAP + Wireshark**
-- `sim002-evidence-004-wireshark-baseline-overview.png`  
-  **Purpose:** Show baseline DNS query traffic volume and query/response flow
-
-- `sim002-evidence-005-wireshark-baseline-query-details.png`  
-  **Purpose:** Highlight normal-length DNS query name details
-
-**Suspicious PCAP + Wireshark**
-- `sim002-evidence-009-wireshark-suspicious-overview.png`  
-  **Purpose:** Show burst/high-frequency DNS traffic during tunneling-like activity
-
-- `sim002-evidence-010-wireshark-suspicious-long-query.png`  
-  **Purpose:** Highlight unusually long DNS query name length
-
-- `sim002-evidence-011-wireshark-suspicious-randomized-subdomain.png`  
-  **Purpose:** Highlight high-entropy/randomized subdomains under same base domain
-
-- `sim002-evidence-012-wireshark-suspicious-frequency.png`  
-  **Purpose:** Show repeated queries over short time window (burst behavior)
-
----
 
 ### 🟦 Optional (PCAP File Retention – Supporting Evidence)
 
-If retaining PCAP files in the repo or evidence archive:
-- `sim002-evidence-003-baseline-dns.pcap`
-- `sim002-evidence-008-suspicious-dns.pcap`
+PCAP files are **optional supporting evidence** for SIM-002.
+Zeek DNS metadata remains the **authoritative detection source**, while PCAPs
+provide packet-level validation for interview-quality artifacts.
+
+If retaining PCAP files in the repo (or evidence archive), use this naming standard:
+
+**Evidence ID:** `E-SIM002-012`  
+- `sim002-evidence-012-baseline-dns.pcap`  
+  **Purpose:** Baseline DNS packet capture (normal query behavior)
+
+**Evidence ID:** `E-SIM002-013`  
+- `sim002-evidence-013-suspicious-dns.pcap`  
+  **Purpose:** Suspicious DNS tunneling-style packet capture (long randomized subdomains + burst patterns)
+
+> Notes:
+> - PCAP files may be stored outside GitHub if size is excessive.
+> - If stored externally, document the storage location and checksum in `logs.md`.
 
 ---
 
