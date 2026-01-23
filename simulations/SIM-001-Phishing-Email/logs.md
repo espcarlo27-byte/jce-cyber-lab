@@ -52,12 +52,24 @@ Alert metadata fields were preserved to support simulation traceability.
 
 ---
 
+## 🧾 Evidence & Naming Convention Notes
+
+This simulation follows the standardized evidence naming convention:
+
+- Evidence IDs: `E-SIM001-###`
+- Screenshot files: `sim001-evidence-###-<short-description>.png`
+
+---
+
 ## 1. Baseline User Activity (Browser Execution)
 
-**Evidence ID:** E-SIM001-002  
+**Evidence ID:** `E-SIM001-001`  
 **Source:** Windows Security  
 **Event ID:** 4688  
 **User Context:** `LAB\labuser`
+
+**Screenshot Reference (Optional):**  
+- `sim001-evidence-002-splunk-url-detection.png` *(shows baseline + URL executions depending on view)*
 
 ```text
 Time: 2025-12-09 01:13:03
@@ -76,10 +88,14 @@ Interpretation:
 
 ## 2. Phishing Link Execution (Primary Detection Signal)
 
-**Evidence ID:** E-SIM001-003
+**Evidence ID:** `E-SIM001-002`
 **Source:** Windows Security
 **Event ID:** 4688
 **User Context:** `LAB\labuser`
+
+**Screenshot References:**  
+- `sim001-evidence-002-splunk-url-detection.png`
+
 ```text
 Time: 2025-12-09 01:13:03
 Host: Windows11Pro
@@ -97,9 +113,13 @@ Interpretation:
 
 ## 3. (Optional) Network Access Confirmation
 
-**Evidence ID:** E-SIM001-006
+**Evidence ID:** `E-SIM001-006`
 **Source:** Network Telemetry (Optional)
 **Protocol:** HTTP
+
+**Screenshot Reference (Optional):**  
+- `sim001-evidence-006-network-http-confirmation.png`
+
 ```text
 Source IP: <Windows endpoint – DHCP-assigned>
 Destination IP: <Phishing host – DHCP-assigned>
@@ -122,9 +142,13 @@ Interpretation:
 
 ## 4. Alert Trigger Confirmation
 
-**Evidence ID:** E-SIM001-005
+**Evidence ID:** `E-SIM001-005`
 **Source:** SIEM Alert Event
 **Alert Name:** `LAB-SIM-001-PHISHING-ALERT`
+
+**Screenshot Reference:**  
+- `sim001-evidence-005-alert-fired.png`
+
 ```text
 Trigger Time: 2025-12-09 01:13:10
 Host: Windows11Pro
@@ -144,9 +168,9 @@ Interpretation:
 
 ## 🔗 Correlated Phishing Execution Timeline
 ```text
-01:13:03 – User launches Chrome (baseline execution)
-01:13:03 – Chrome executed with phishing URL argument
-01:13:10 – SIEM alert triggered
+01:13:03 – User launches Chrome (baseline execution) [E-SIM001-001]
+01:13:03 – Chrome executed with phishing URL argument [E-SIM001-002]
+01:13:10 – SIEM alert triggered [E-SIM001-005]
 ```
 
 Conclusion:  
