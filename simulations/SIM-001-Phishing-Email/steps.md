@@ -217,7 +217,8 @@ Look for:
 http://<Kali IP>:8080
 ```
 
-***📸 Take screenshot:***  `sim001-splunk-url-detection.png`
+**📌 Evidence ID:** `E-SIM001-002`
+**📸 Screenshot:** `sim001-evidence-002-splunk-url-detection.png`
 
 ---
 
@@ -233,7 +234,10 @@ Process_Command_Line="*http*"
 | sort - _time
 ~~~
 
-***📸 Take screenshot:***  `sim001-splunk-correlation.png`
+**📌 Evidence ID:** `E-SIM001-003`
+**📸 Screenshot:** `sim001-evidence-003-splunk-correlation.png`
+
+This confirms:
 
 This confirms:
 ***“User clicked phishing link → browser executed → URL captured → detection validated.”***
@@ -250,18 +254,39 @@ Use the correlation query above to configure the alert:
 - Throttle: 10 minutes
 - Severity: Medium
 
-***Paste the final configuration into:***  `alert-config.md`
+***Paste the final configuration into:***  `alert-config.md`  
+
+**📌 Evidence ID:** `E-SIM001-004`
+**📸 Screenshots:**
+- `sim001-evidence-004-alert-config.png`
+- `sim001-evidence-005-alert-fired.png`
 
 ---
 
 ## 9. Save Evidence
 
-In the `screenshots/` folder, add:
-- sim001-email-view.png
-- sim001-splunk-url-detection.png
-- sim001-splunk-correlation.png
-- sim001-alert-config.png
-- sim001-alert-fired.png
+Store all evidence in:  
+`simulations/SIM-001-Phishing-Email/screenshots/`
+
+***📸 Evidence Naming Standard (SIM-001)***
+- Evidence IDs: `E-SIM001-###`
+- Screenshot file format: `sim001-evidence-###-<short-description>.png`
+
+**✅ Required Evidence (Endpoint + SIEM)**
+- `sim001-evidence-001-email-view.png`
+Purpose: Show the simulated phishing message containing the URL
+- `sim001-evidence-002-splunk-url-detection.png`
+Purpose: Show 4688 evidence with chrome.exe + URL in command line
+- `sim001-evidence-003-splunk-correlation.png`
+Purpose: Show correlation query output including simulation_id + symbolic_id
+- `sim001-evidence-004-alert-config.png`
+Purpose: Show Splunk alert configuration (schedule, trigger, throttle)
+- `sim001-evidence-005-alert-fired.png`
+Purpose: Show Splunk triggered alert proving end-to-end validation  
+
+**🟡 Optional Evidence (Network Confirmation)**
+- `sim001-evidence-006-network-http-confirmation.png`
+Purpose: Optional Suricata/Zeek HTTP evidence supporting the URL click
 
 ---
 
