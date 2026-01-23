@@ -8,6 +8,21 @@ been **fully resolved**.
 
 ---
 
+## 🧾 Evidence & Naming Convention Notes
+
+This simulation follows the standardized evidence naming convention:
+
+- Evidence IDs: `E-SIM002-###`
+- Screenshot files: `sim002-evidence-###-<short-description>.png`
+- PCAP files (optional): `sim002-evidence-###-<short-description>.pcap`
+
+Key evidence referenced throughout this I&R:
+- `E-SIM002-001` – Baseline Zeek + Hunt DNS visibility validation
+- `E-SIM002-002` – Suspicious DNS anomaly detection and pivots
+- `E-SIM002-004` – Optional packet-level supporting evidence (Wireshark)
+
+---
+
 ### 🧩 Issue 1: DNS Telemetry Generated but Not Initially Visible in Hunt
 
 **Description:**  
@@ -39,8 +54,14 @@ The issue was caused by **incorrect query methodology** in Security Onion 2.x:
 
 **Validation:**  
 DNS telemetry became fully visible and searchable in Security Onion Hunt using
-ECS-aware KQL queries.
+ECS-aware KQL queries.  
 
+**Evidence Reference:**  
+
+- `E-SIM002-001`
+   - `sim002-evidence-001-zeek-dns-baseline-log.png`
+   - `sim002-evidence-002-hunt-zeek-dns-baseline.png`
+     
 **Lessons Learned:**  
 > Visibility issues may stem from query methodology, not telemetry failure.
 
@@ -77,8 +98,14 @@ Default views do not flag these patterns without contextual analysis.
 
 **Validation:**  
 Suspicious DNS queries were clearly distinguishable when evaluated
-behaviorally rather than syntactically.
+behaviorally rather than syntactically.  
 
+**Evidence Reference:**
+
+- `E-SIM002-002`
+   - `sim002-evidence-006-zeek-dns-suspicious-log.png`
+   - `sim002-evidence-007-hunt-zeek-dns-suspicious.png`
+     
 **Lessons Learned:**  
 > DNS tunneling detection requires behavioral analysis, not signature matching.
 
@@ -113,8 +140,11 @@ Without familiarity with ECS mappings, telemetry may appear incomplete.
 3. Aligned queries with observed Zeek DNS telemetry.
 
 **Validation:**  
-Field-level analysis became reliable and repeatable, enabling confident detection.
+Field-level analysis became reliable and repeatable, enabling confident detection.  
 
+**Evidence Reference:**
+- `E-SIM002-002` (KQL investigation pivots + ECS field-based validation)
+  
 **Lessons Learned:**  
 > Effective SOC analysis depends on understanding the underlying data model.
 
@@ -144,8 +174,11 @@ not initially established.
 
 **Validation:**  
 Suspicious DNS queries consistently exceeded the defined threshold, confirming
-the effectiveness of the heuristic.
+the effectiveness of the heuristic.  
 
+**Evidence Reference:**
+- `E-SIM002-002 (threshold-based detection logic)`
+  
 **Lessons Learned:**  
 > Detection thresholds must be informed by real telemetry, not assumptions.
 
@@ -181,7 +214,10 @@ Without correlation, signals remain weak.
 
 **Validation:**  
 When indicators were evaluated together, DNS tunneling behavior was identified
-with high confidence.
+with high confidence.  
+
+**Evidence Reference:**
+- `E-SIM002-002` (correlated behavioral indicators)
 
 **Lessons Learned:**  
 > High-confidence detections emerge from correlated weak signals.
@@ -203,12 +239,24 @@ were successfully resolved through structured analysis and validation.
 
 ---
 
+## 🛡 GRC Note (Control Impact)
+
+These issues affected the lab’s Detect (DE.CM / DE.AE) capability for DNS-based threats.
+Resolution restored consistent, audit-ready telemetry visibility and investigation capability.
+
+- Impacted Control Area: Network Monitoring / Detection Engineering
+- Control Status: Restored ✅
+- Retest Required: Yes
+- Retest Result: Pass ✅ (validated via Hunt + Zeek evidence)
+
+---
+
 ## 🏁 Status
 
-- All issues resolved  
-- Telemetry validated  
-- Detection logic finalized  
-- Evidence captured  
-- Simulation fully validated  
+- [x] All issues resolved  
+- [x] Telemetry validated  
+- [x] xDetection logic finalized  
+- [x] Evidence captured  
+- [x] Simulation fully validated  
 
 **SIM-002 Status:** ***✅ Resolved***
