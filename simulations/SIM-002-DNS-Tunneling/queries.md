@@ -149,6 +149,8 @@ This confirms direct alignment between attacker activity and observed telemetry.
 
 ## 6. Correlation-Ready Detection Logic (Symbolic)
 
+**Evidence ID:** `E-SIM002-002`
+
 Purpose:  
 Define a symbolic detection identifier for SOC tracking.
 
