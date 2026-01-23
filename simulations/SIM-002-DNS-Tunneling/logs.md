@@ -43,13 +43,25 @@ without requiring payload inspection.
 
 ---
 
+## 🧾 Evidence & Naming Convention Notes
+
+This simulation follows the standardized evidence naming convention:
+
+- Evidence IDs: `E-SIM002-###`
+- Screenshot files: `sim002-evidence-###-<short-description>.png`
+- PCAP files (optional): `sim002-evidence-###-<short-description>.pcap`
+
+---
+
 ## 1. Baseline DNS Resolution (Normal Behavior)
 
+**Evidence ID:** `E-SIM002-001`  
 **Source:** Zeek DNS Logs  
 **View:** Security Onion Hunt (Baseline)  
-**Screenshot Reference:**  
-`sim002-zeek-dns-baseline-log.png`  
-`sim002-hunt-zeek-dns-baseline.png`
+
+**Screenshot References:**  
+- `sim002-evidence-001-zeek-dns-baseline-log.png`  
+- `sim002-evidence-002-hunt-zeek-dns-baseline.png`
 
 ```text
 Timestamp: 2025-12-23 15:06:36
@@ -73,11 +85,13 @@ This establishes a clean baseline for comparison.
 
 ## 2. High-Frequency Randomized DNS Queries (Suspicious Behavior)
 
+**Evidence ID:** `E-SIM002-002`
 **Source:** Zeek DNS Logs  
 **View:** Security Onion Hunt (Suspicious Activity)  
+
 **Screenshot Reference:**  
-`sim002-zeek-dns-suspicious-log.png`  
-`sim002-hunt-zeek-dns-suspicious.png`  
+- `sim002-evidence-006-zeek-dns-suspicious-log.png`
+- `sim002-evidence-007-hunt-zeek-dns-suspicious.png `
 
 Traffic Generation Command (Kali Linux):
 ```bash
@@ -116,9 +130,9 @@ These characteristics align with MITRE ATT&CK T1071.004 – DNS-based C2.
 
 ## 🔗 Correlated DNS Activity Timeline
 ```text
-15:06:30 – Baseline DNS queries observed (normal domains)
-15:06:36 – Randomized subdomain queries begin
-15:06:36–15:07:00 – High-frequency DNS requests sustained
+15:06:30 – Baseline DNS queries observed (normal domains) [E-SIM002-001]
+15:06:36 – Randomized subdomain queries begin [E-SIM002-002]
+15:06:36–15:07:00 – High-frequency DNS requests sustained [E-SIM002-002]
 ```
 
 Conclusion:
@@ -128,31 +142,35 @@ Conclusion:
 ---
 ## PCAP Evidence (Optional - See `steps.md` for more details)
 
-PCAPs generated via `tcpdump` on Security Onion and inspected in Wireshark from Kali/Host.
+PCAPs generated via `tcpdump` on Security Onion and inspected in Wireshark from Kali/Host.  
+
+**Evidence IDs (PCAP Supporting Evidence):**
+- `E-SIM002-003 – Baseline PCAP capture`
+- `E-SIM002-008 – Suspicious PCAP capture`
+- `E-SIM002-004 – Wireshark analysis screenshots (baseline + suspicious)`
 
 **PCAP Files**
-- `/tmp/sim002-baseline-dns.pcap`
-- `/tmp/sim002-suspicious-dns.pcap`
+- `/tmp/sim002-evidence-003-baseline-dns.pcap`
+- `/tmp/sim002-evidence-008-suspicious-dns.pcap`
 
 **Wireshark Evidence Screenshots**
-- `sim002-wireshark-baseline-overview.png`
-- `sim002-wireshark-baseline-query-details.png`
-- `sim002-wireshark-suspicious-overview.png`
-- `sim002-wireshark-suspicious-long-query.png`
-- `sim002-wireshark-suspicious-randomized-subdomain.png`
-- `sim002-wireshark-suspicious-frequency.png`
+- `sim002-evidence-004-wireshark-baseline-overview.png`
+- `sim002-evidence-005-wireshark-baseline-query-details.png`
+- `sim002-evidence-009-wireshark-suspicious-overview.png`
+- `sim002-evidence-010-wireshark-suspicious-long-query.png`
+- `sim002-evidence-011-wireshark-suspicious-randomized-subdomain.png`
+- `sim002-evidence-012-wireshark-suspicious-frequency.png`
 
 > ***Packet-level validation (tcpdump + Wireshark) is documented in `steps.md` and used only as supporting evidence, not as the primary detection mechanism.***
-
 
 ---
 
 ## 🧠 Detection Relevance
 
 These logs directly support:
-- Detection logic in queries.md
+- Detection logic in `queries.md`
 - Behavioral DNS anomaly identification
-- Symbolic detection ID: LAB-SIM-002-DNS-TUNNEL
+- Symbolic detection ID: `LAB-SIM-002-DNS-TUNNEL`
 
 The simulation demonstrates that DNS tunneling can be detected using
 query structure, length, and frequency, even when payloads are opaque.
@@ -166,6 +184,8 @@ query structure, length, and frequency, even when payloads are opaque.
 - [x] Hunt UI validation completed
 - [x] Screenshots captured and referenced
 - [x] Detection logic validated
+
+> ***Simulation Status: ✅ Validated (Zeek / Network Metadata Layer)***
 
 **Simulation Status:** ***✅ Validated (Zeek / Network Metadata Layer)***
 
