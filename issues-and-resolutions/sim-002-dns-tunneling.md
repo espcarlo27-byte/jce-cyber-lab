@@ -17,9 +17,12 @@ This simulation follows the standardized evidence naming convention:
 - PCAP files (optional): `sim002-evidence-###-<short-description>.pcap`
 
 Key evidence referenced throughout this I&R:
-- `E-SIM002-001` – Baseline Zeek + Hunt DNS visibility validation
-- `E-SIM002-002` – Suspicious DNS anomaly detection and pivots
-- `E-SIM002-004` – Optional packet-level supporting evidence (Wireshark)
+- `E-SIM002-001` – Zeek baseline DNS visibility (`dns.log`)
+- `E-SIM002-002` – Hunt baseline DNS visibility (`event.dataset:"zeek.dns"`)
+- `E-SIM002-003` – Zeek suspicious DNS activity (`dns.log`, high-entropy/length)
+- `E-SIM002-004` – Hunt suspicious DNS pivots / anomaly validation
+- `E-SIM002-006` → `E-SIM002-011` – Optional Wireshark supporting evidence
+- `E-SIM002-012` → `E-SIM002-013` – Optional PCAP retention artifacts
 
 ---
 
@@ -60,6 +63,7 @@ ECS-aware KQL queries.
 
 - `E-SIM002-001`
    - `sim002-evidence-001-zeek-dns-baseline-log.png`
+- `E-SIM002-002`
    - `sim002-evidence-002-hunt-zeek-dns-baseline.png`
      
 **Lessons Learned:**  
@@ -102,9 +106,10 @@ behaviorally rather than syntactically.
 
 **Evidence Reference:**
 
-- `E-SIM002-002`
-   - `sim002-evidence-006-zeek-dns-suspicious-log.png`
-   - `sim002-evidence-007-hunt-zeek-dns-suspicious.png`
+- `E-SIM002-003`
+   - `sim002-evidence-003-zeek-dns-suspicious-log.png`
+- `E-SIM002-004`
+   - `sim002-evidence-004-hunt-zeek-dns-suspicious.png`
      
 **Lessons Learned:**  
 > DNS tunneling detection requires behavioral analysis, not signature matching.
@@ -143,8 +148,8 @@ Without familiarity with ECS mappings, telemetry may appear incomplete.
 Field-level analysis became reliable and repeatable, enabling confident detection.  
 
 **Evidence Reference:**
-- `E-SIM002-002` (KQL investigation pivots + ECS field-based validation)
-  
+- `E-SIM002-004` (Hunt pivots + ECS field-based validation)  
+
 **Lessons Learned:**  
 > Effective SOC analysis depends on understanding the underlying data model.
 
@@ -177,8 +182,8 @@ Suspicious DNS queries consistently exceeded the defined threshold, confirming
 the effectiveness of the heuristic.  
 
 **Evidence Reference:**
-- `E-SIM002-002 (threshold-based detection logic)`
-  
+- `E-SIM002-004` (threshold-supported Hunt results)
+    
 **Lessons Learned:**  
 > Detection thresholds must be informed by real telemetry, not assumptions.
 
@@ -217,8 +222,8 @@ When indicators were evaluated together, DNS tunneling behavior was identified
 with high confidence.  
 
 **Evidence Reference:**
-- `E-SIM002-002` (correlated behavioral indicators)
-
+- `E-SIM002-003` + `E-SIM002-004` (correlated behavioral indicators)
+  
 **Lessons Learned:**  
 > High-confidence detections emerge from correlated weak signals.
 
