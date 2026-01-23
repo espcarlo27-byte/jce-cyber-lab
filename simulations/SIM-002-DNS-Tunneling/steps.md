@@ -107,8 +107,11 @@ ip a
 ### 5.2 Capture Baseline DNS Traffic (Security Onion)
 
 Replace `<iface>` with your monitor interface and `<KALI_IP>` with Kali IP:  
+
+**Evidence ID:** `E-SIM002-012`
+
 ```bash
-sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-baseline-dns.pcap
+sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-evidence-012-baseline-dns.pcap
 ```
 
 **Generate DNS queries again from Kali (Step 2), then stop capture:**  
@@ -116,20 +119,20 @@ sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-baseli
 
 Verify file exists:
 ```bash
-ls -lh /tmp/sim002-baseline-dns.pcap
+ls -lh /tmp/sim002-evidence-012-baseline-dns.pcap
 ```
 
 ### 5.3 Transfer PCAP to Kali for Wireshark
 
 From Kali:
 ```bash
-scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-evidence-003-baseline-dns.pcap ~/Downloads/
+scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-evidence-012-baseline-dns.pcap ~/Downloads/
 ```
 
 ### 5.4 Wireshark Baseline Analysis (Kali)
 
 Open the PCAP:
-- Wireshark → File → Open → `sim002-evidence-003-baseline-dns.pcap`
+- Wireshark → File → Open → `sim002-evidence-012-baseline-dns.pcap`
 
 #### Wireshark display filters (baseline)
 - `dns`
@@ -141,15 +144,17 @@ Open the PCAP:
 - Low volume / non-bursty traffic
 - Normal query-response pattern
 
-**📌 Evidence ID:** `E-SIM002-004`
-📸 **Screenshot(s) to capture (baseline Wireshark evidence):**
-- `sim002-evidence-004-wireshark-baseline-overview.png`
-  **How:** Apply filter `dns`  
-  **Capture:** Packet list showing normal DNS traffic volume + query/response activity
+**📸 Screenshot(s) to capture (baseline Wireshark evidence):**  
 
-- `sim002-evidence-005-wireshark-baseline-query-details.png`
-  **How:** Apply filter `dns.flags.response == 0`, click a query packet  
-  **Capture:** Expanded DNS section showing `Queries` → `Name` (short readable domain)
+**Evidence ID:** `E-SIM002-006`
+- `sim002-evidence-006-wireshark-baseline-overview.png`
+   How: Apply filter dns  
+   Capture: Packet list showing normal DNS traffic volume + query/response activity  
+
+**Evidence ID:** `E-SIM002-007`
+- `sim002-evidence-007-wireshark-baseline-query-details.png`
+   How: Apply filter dns.flags.response == 0, click a query packet  
+   Capture: Expanded DNS section showing Queries → Name (short readable domain)
 
 ---
 
@@ -179,9 +184,9 @@ Expected:
 - Repeated base domain
 - Rapid query generation
 
-**📌 Evidence ID:** `E-SIM002-002`  
+**📌 Evidence ID:** `E-SIM002-003`  
 **📸 Screenshot:**  
-`sim002-evidence-006-zeek-dns-suspicious-log.png`
+`sim002-evidence-003-zeek-dns-suspicious-log.png`
 
 ---
 
@@ -203,9 +208,9 @@ Look for:
 - Repeated query patterns
 - Increased frequency
 
-**📌 Evidence ID:** `E-SIM002-002`
+**📌 Evidence ID:** `E-SIM002-004`
 **📸 Screenshot:**  
-`sim002-evidence-007-hunt-zeek-dns-suspicious.png`
+`sim002-evidence-004-hunt-zeek-dns-suspicious.png`
 
 ---
 
@@ -214,8 +219,10 @@ Look for:
 ### 9.1 Capture Suspicious DNS Traffic (Security Onion)
 
 Replace `<iface>` with your monitor interface and `<KALI_IP>` with Kali IP:
+
+**Evidence ID:** `E-SIM002-013`
 ```bash
-sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-suspicious-dns.pcap
+sudo tcpdump -i <iface> -nn host <KALI_IP> and udp port 53 -w /tmp/sim002-evidence-013-suspicious-dns.pcap
 ```
 
 While capture is running, execute Step 6 again (suspicious traffic), then stop capture:
@@ -223,20 +230,20 @@ While capture is running, execute Step 6 again (suspicious traffic), then stop c
 
 Verify file exists:
 ```bash
-ls -lh /tmp/sim002-suspicious-dns.pcap
+ls -lh /tmp/sim002-evidence-013-suspicious-dns.pcap
 ```
 
 ### 9.2 Transfer PCAP to Kali
 
 From Kali:
 ```bash
-scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-suspicious-dns.pcap ~/Downloads/
+scp soadmin@<SECURITY_ONION_IP>:/tmp/sim002-evidence-013-suspicious-dns.pcap ~/Downloads/
 ```
 
 ### 9.3 Wireshark Suspicious Analysis (Kali)
 
 Open in Wireshark:
-- Wireshark → File → Open →`sim002-suspicious-dns.pcap`
+- Wireshark → File → Open →`sim002-evidence-013-suspicious-dns.pcap`
 
 Useful display filters:
 - `dns`
@@ -250,25 +257,24 @@ What to look for:
 - bursty/high-frequency queries in short time windows
 - randomized/high-entropy subdomains (tunneling indicator)
 
-**📌 Evidence ID:** `E-SIM002-004`
-📸 **Screenshot(s)** to capture (suspicious Wireshark evidence):
+**📸 Screenshot(s) to capture (suspicious Wireshark evidence):**  
 
-- `sim002-evidence-009-wireshark-suspicious-overview.png`
-  **How:** Apply filter dns  
-  **Capture:** Packet list showing high-frequency DNS traffic compared to baseline
-  
-- `sim002-evidence-010-wireshark-suspicious-long-query.png`
-  **How:** Apply filter dns.flags.response == 0, click a suspicious query  
-  **Capture:** Expanded DNS section clearly showing an unusually long query name
-  
-- `sim002-evidence-011-wireshark-suspicious-randomized-subdomain.png`
-  **How:** Apply filter dns.qry.name contains "example.com"  
-  **Capture:** Multiple DNS queries showing randomized subdomains but the same base domain
-  
-- `sim002-evidence-012-wireshark-suspicious-frequency.png`
-  **How:** Keep dns.flags.response == 0 filter  
-  **Capture:** Packet list timestamps showing repeated queries occurring rapidly (burst behavior)
+**Evidence ID:** `E-SIM002-008`
+- `sim002-evidence-008-wireshark-suspicious-overview.png`
+**Purpose:** Show burst/high-frequency DNS traffic compared to baseline  
 
+**Evidence ID:** `E-SIM002-009`
+- `sim002-evidence-009-wireshark-suspicious-long-query.png`
+**Purpose:** Highlight unusually long DNS query name length  
+
+**Evidence ID: E-SIM002-010**
+- `sim002-evidence-010-wireshark-suspicious-randomized-subdomain.png`
+**Purpose:** Show randomized/high-entropy subdomains under the same base domain  
+
+**Evidence ID: E-SIM002-011**
+- `sim002-evidence-011-wireshark-suspicious-frequency.png`
+**Purpose:** Show repeated queries occurring rapidly (burst behavior)
+  
 ---
 
 ## 10. Analyst Interpretation
