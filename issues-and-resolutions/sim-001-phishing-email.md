@@ -1,4 +1,5 @@
 # Simulation 1 – Phishing Email (T1566.002)
+
 ## ⚠️ Issues & Resolutions
 
 This document captures real operational issues encountered during **SIM-001**
@@ -8,6 +9,22 @@ SIM-001 is designed as an **endpoint-driven detection simulation**.
 Windows Security Event ID **4688** is treated as the **authoritative source**.
 Network telemetry (Security Onion / Suricata / Zeek), when available, is treated
 as **optional supplemental validation**.
+
+---
+
+## 🧾 Evidence & Naming Convention Notes
+
+This simulation follows the standardized evidence naming convention:
+
+- Evidence IDs: `E-SIM001-###`
+- Screenshot files: `sim001-evidence-###-<short-description>.png`
+
+Key evidence referenced throughout this I&R:
+- `E-SIM001-001` – Baseline 4688 visibility + ingestion proof
+- `E-SIM001-002` – Phishing click execution evidence (chrome.exe + URL in command line)
+- `E-SIM001-003` – Splunk correlation query results (detection logic validation)
+- `E-SIM001-004` – Alert configuration + alert fired confirmation
+- `E-SIM001-005` – Optional network confirmation (if captured)
 
 ---
 
@@ -47,8 +64,11 @@ The Splunk Universal Forwarder on the Windows 11 endpoint was either:
 6. Confirmed successful ingestion using Splunk search queries.
 
 **Validation:**  
-After these corrections, Windows Security logs and related process execution events appeared correctly in Splunk, allowing the phishing detection to be fully validated.
+After these corrections, Windows Security logs and related process execution events appeared correctly in Splunk, allowing the phishing detection to be fully validated.  
 
+**Evidence Reference:**  
+- `E-SIM001-001` (Ingestion proof: 4688 events visible in Splunk)
+  
 **Lessons Learned:**  
 > Log ingestion must always be validated before testing detection logic.  
 > Endpoint activity alone is not sufficient—SOC visibility depends entirely on reliable telemetry flow into the SIEM.
@@ -94,7 +114,10 @@ In this case, the issue resulted from a mismatch between the Splunk Web credenti
    ```
 
 **Validation:**  
-After correcting the authentication configuration, the forwarder successfully registered with the Splunk server, and endpoint logs began flowing consistently.
+After correcting the authentication configuration, the forwarder successfully registered with the Splunk server, and endpoint logs began flowing consistently.  
+
+**Evidence Reference:**
+- `E-SIM001-001` (Forwarder health + logs flowing into Splunk)
 
 **Lessons Learned:**  
 > Splunk authentication is platform-specific and separate from OS credentials.  
@@ -134,7 +157,10 @@ The phishing payload or attachment did not execute due to one or more of the fol
 6. Validated the simulation again with a successful execution path.
 
 **Validation:**   
-Once the payload was properly executed, Windows Security and Sysmon logs generated the expected process creation events. Splunk detections then triggered successfully, confirming the phishing scenario was executed end-to-end.
+Once the payload was properly executed, Windows Security and Sysmon logs generated the expected process creation events. Splunk detections then triggered successfully, confirming the phishing scenario was executed end-to-end.  
+
+**Evidence Reference:**
+- `E-SIM001-002` (chrome.exe execution with URL argument / 4688 proof)
 
 **Lessons Learned:**  
 > A detection cannot trigger if the attack never truly executes.  
@@ -176,6 +202,10 @@ On a default installation, Event ID 4688 may be missing due to:
 
 **Validation:**  
 Event ID 4688 began appearing consistently in both Event Viewer and Splunk searches, enabling SIM-001 detections to trigger successfully.  
+
+**Evidence Reference:**
+- `E-SIM001-001` (4688 enabled + visible)
+- `E-SIM001-002` (phishing click evidence tied to 4688)
 
 **Lessons Learned:**  
 > Detection engineering depends on proper audit policy configuration.  
@@ -220,6 +250,9 @@ supplemental only. In addition, network evidence may be unavailable due to:
 SIM-001 was considered fully validated once endpoint telemetry and Splunk alerting
 were confirmed. Optional network evidence was treated as supporting context only.  
 
+**Evidence Reference (Optional):**
+- `E-SIM001-005` (network confirmation, if captured)
+
 **Lessons Learned:**  
 > Network telemetry is valuable, but not always available.
 > Detections must remain valid even when network visibility is partial.
@@ -261,7 +294,10 @@ The issue was caused by incorrect Splunk search filters, specifically:
    ```
 
 **Validation:**   
-After adjusting time range and index, expected 4688 events appeared and the alert logic validated successfully.
+After adjusting time range and index, expected 4688 events appeared and the alert logic validated successfully.  
+
+**Evidence Reference:**
+- `E-SIM001-003` (query results validating data present + searchable)
 
 **Lessons Learned:**  
 > “No results” does not always mean “no data.”  
@@ -295,7 +331,11 @@ This behavior was expected based on the lab’s **architecture and SIM-001 scope
 
 **Validation:**  
 Endpoint and alert telemetry were correctly interpreted within the simulation’s
-intent and architecture.
+intent and architecture.  
+
+**Evidence Reference:**
+- `E-SIM001-002` (endpoint execution evidence)
+- `E-SIM001-004` (alert fired confirming detection success)
 
 **Lessons Learned:**  
 > Not every phishing simulation produces full kill-chain network activity.  
@@ -315,6 +355,18 @@ SIM-001 reinforced foundational SOC and detection engineering principles:
 
 These lessons align directly with the lab’s intentional design and real-world
 SOC operating conditions.
+
+---
+
+## 🛡 GRC Note (Control Impact)
+
+These issues affected the lab’s ability to Detect and Respond to phishing link execution
+using endpoint telemetry and SIEM correlation.
+
+- Impacted Control Area: Endpoint Logging / SIEM Monitoring / Alerting
+- Control Status: Restored ✅
+- Retest Required: Yes
+- Retest Result: Pass ✅ (validated via 4688 evidence + Splunk correlation + alert trigger)
 
 ---
 
