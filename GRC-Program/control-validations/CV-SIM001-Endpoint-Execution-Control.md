@@ -1,58 +1,62 @@
-# CV-SIM001 — Endpoint Execution Control Validation  
+# CV-SIM001 — Endpoint Phishing Link Detection Control Validation  
 **Simulation:** SIM-001 – Phishing Email (T1566.002)  
-**Control Type:** Detection & Monitoring Control  
+**Control Type:** Endpoint Monitoring + Detection Engineering Control  
 **Owner:** Carlo Espina  
-**Validation Date:** 2026-01-23  
+**Validation Date:** 2026-01-24  
 
 ---
 
 ## 🎯 Control Objective
 
-Ensure that endpoint process execution resulting from phishing activity is:
-
-- Logged at the endpoint  
-- Ingested into the SIEM  
-- Searchable for investigation  
-- Correlated into detection logic  
-- Capable of generating alertable evidence  
-
-This validates endpoint execution visibility as a security control against phishing-based initial access.
+Ensure the environment can **detect and alert on phishing link execution**
+using **authoritative endpoint telemetry**, SIEM correlation logic, and
+repeatable evidence suitable for audit validation.
 
 ---
 
 ## ⚠️ Risk Addressed
 
-If phishing emails cause users to execute malicious content, attackers may gain initial access, steal credentials, deliver malware, or establish persistence.
+Phishing links are a primary initial access vector used to:
 
-Without reliable visibility into endpoint process execution, compromise may go undetected.
+- Deliver malware  
+- Harvest credentials  
+- Establish attacker footholds  
+
+If endpoint execution telemetry is not captured and correlated, phishing-based compromise may go undetected.
 
 ---
 
 ## 🛡️ Control Implementation
 
-### Primary Telemetry (Authoritative)
-- Windows Security Event ID 4688 – Process Creation  
+### Primary Telemetry (Authoritative Source)
 
-### Supplemental Telemetry (Supporting)
-- Security Onion network telemetry (Zeek / Suricata), when available  
+- Windows Security EventCode **4688 – Process Creation**
+- Command-line auditing enabled (`Process_Command_Line` field)
 
-### SIEM Layer
-- Splunk ingestion of Windows logs  
-- SPL searches validating suspicious browser execution  
-- Correlation logic supporting phishing detection  
+### Supplemental Telemetry (Optional)
+
+- Security Onion network logs (Zeek / Suricata)  
+  Used only as supporting validation when available.
+
+### Detection & SIEM Layer
+
+- Splunk Enterprise ingestion of endpoint logs  
+- SPL correlation logic detecting browser execution with URL context  
+- Alerting pipeline configured to generate detection alerts
 
 ---
 
 ## 🧪 Control Testing Method
 
-The control was tested through a controlled phishing simulation:
+The control was validated through a controlled phishing simulation:
 
-1. Simulated phishing click event  
-2. Browser execution triggered  
-3. Process creation event generated  
-4. Event ingested into Splunk  
-5. SPL searches validated visibility  
-6. Correlation logic confirmed detection capability  
+1. User opened a phishing email on Windows endpoint  
+2. Suspicious URL was clicked  
+3. Browser execution occurred (`chrome.exe`)  
+4. Windows logged EventCode 4688 with command-line data  
+5. Event ingested into Splunk  
+6. SPL correlation search detected URL execution  
+7. Alert fired with symbolic detection ID
 
 ---
 
@@ -60,11 +64,13 @@ The control was tested through a controlled phishing simulation:
 
 | Evidence ID | Description |
 |------------|-------------|
-| E-SIM001-001 | Baseline Event ID 4688 ingestion proof |
-| E-SIM001-002 | Browser execution showing URL / command-line |
-| E-SIM001-003 | SPL correlation search proof |
+| E-SIM001-001 | Email viewed / phishing content |
+| E-SIM001-002 | Browser execution EventCode 4688 |
+| E-SIM001-003 | URL present in `Process_Command_Line` |
+| E-SIM001-004 | Splunk correlation search output |
+| E-SIM001-005 | Alert configuration + firing evidence |
 
-Related screenshots follow naming convention:  
+Screenshots follow naming convention:  
 `sim001-evidence-###-description.png`
 
 ---
@@ -72,25 +78,51 @@ Related screenshots follow naming convention:
 ## 🧩 Framework Alignment
 
 **NIST CSF**
-- DE.CM – Security Continuous Monitoring  
-- DE.AE – Anomalies and Events  
-- RS.AN – Response Analysis  
+
+| Function | Category |
+|----------|----------|
+| Protect | PR.AT |
+| Detect | DE.CM |
+| Detect | DE.AE |
+| Respond | RS.AN |
 
 **CIS Controls**
 - Control 8 – Audit Log Management  
-- Control 13 – Network Monitoring and Defense  
+- Control 17 – Incident Response Management  
+
+---
+
+## 🧾 Governance & Compliance Notes
+
+- Detection relies on endpoint telemetry as the authoritative signal.  
+- Network telemetry is optional and not required for control validity.  
+- Evidence collected supports audit validation of monitoring and detection controls.
+
+---
+
+## 👤 Control Ownership
+
+| Item | Value |
+|------|------|
+| Control Owner | JCE (Lab Owner / Security Program Owner) |
+| Control Type | Preventive + Detective |
+| Test Frequency | Quarterly or after environment changes |
+| Evidence Retention | 90 days minimum |
+| Exception Handling | Failures logged in Issues & Resolutions and re-tested |
 
 ---
 
 ## ✅ Validation Status
 
-**Status:** ✅ Validated  
-This control successfully logged, ingested, and supported detection of phishing-related execution activity with evidence.
+**Control Test Result:** Pass ✅  
+**Control Status:** Implemented and Verified  
+**Linked Detection ID:** `LAB-SIM-001-PHISHING-ALERT`
 
 ---
 
 ## 🔁 Related Documentation
 
-- Risk Register Entry (Phishing / Initial Access Risk)
-- Detection Matrix Coverage for Endpoint Execution
-- SIM-001 Technical Simulation Documentation
+- SIM-001 Technical Simulation Documentation  
+- Risk Register (Phishing / Initial Access Risk)  
+- Detection Validation Matrix Entry  
+- SIM-001 Issues & Resolutions Log  
