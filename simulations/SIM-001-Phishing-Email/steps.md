@@ -238,8 +238,6 @@ Process_Command_Line="*http*"
 **📸 Screenshot:** `sim001-evidence-003-splunk-correlation.png`
 
 This confirms:
-
-This confirms:
 ***“User clicked phishing link → browser executed → URL captured → detection validated.”***
 
 ---
@@ -266,7 +264,7 @@ Use the correlation query above to configure the alert:
 ## 9. Save Evidence
 
 Store all evidence in:  
-`simulations/SIM-001-Phishing-Email/screenshots/`
+`simulations/SIM-001-Phishing-Email/screenshots/`  
 
 ***📸 Evidence Naming Standard (SIM-001)***
 - Evidence IDs: `E-SIM001-###`  
