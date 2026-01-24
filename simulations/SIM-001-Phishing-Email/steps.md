@@ -217,7 +217,7 @@ Look for:
 http://<Kali IP>:8080
 ```
 
-**📌 Evidence ID:** `E-SIM001-002`
+**📌 Evidence ID:** `E-SIM001-002`  
 **📸 Screenshot:** `sim001-evidence-002-splunk-url-detection.png`
 
 ---
@@ -234,7 +234,7 @@ Process_Command_Line="*http*"
 | sort - _time
 ~~~
 
-**📌 Evidence ID:** `E-SIM001-003`
+**📌 Evidence ID:** `E-SIM001-003`  
 **📸 Screenshot:** `sim001-evidence-003-splunk-correlation.png`
 
 This confirms:
@@ -256,7 +256,7 @@ Use the correlation query above to configure the alert:
 
 ***Paste the final configuration into:***  `alert-config.md`  
 
-**📌 Evidence ID:** `E-SIM001-004`
+**📌 Evidence ID:** `E-SIM001-004`  
 **📸 Screenshots:**
 - `sim001-evidence-004-alert-config.png`
 - `sim001-evidence-005-alert-fired.png`
@@ -269,7 +269,7 @@ Store all evidence in:
 `simulations/SIM-001-Phishing-Email/screenshots/`
 
 ***📸 Evidence Naming Standard (SIM-001)***
-- Evidence IDs: `E-SIM001-###`
+- Evidence IDs: `E-SIM001-###`  
 - Screenshot file format: `sim001-evidence-###-<short-description>.png`
 
 **✅ Required Evidence (Endpoint + SIEM)**
