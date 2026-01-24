@@ -1,6 +1,6 @@
-# CV-SIM004 — Enhanced Process Telemetry Control Validation  
+# CV-SIM004 — Endpoint Execution Baseline Telemetry Control Validation  
 **Simulation:** SIM-004 – Sysmon Process Create (T1059)  
-**Control Type:** Endpoint Monitoring Control  
+**Control Type:** Endpoint Monitoring / Telemetry Depth Control  
 **Owner:** Carlo Espina  
 **Validation Date:** 2026-01-24  
 
@@ -8,62 +8,64 @@
 
 ## 🎯 Control Objective
 
-Ensure that endpoint process execution is captured with **detailed telemetry**, including:
+Ensure endpoint process execution is captured with **enriched telemetry**
+that supports baseline development and future detection engineering by validating that:
 
-- Command-line arguments  
-- Parent → child process relationships  
-- Executing user context  
-- Timestamp and host attribution  
-
-This validates enhanced endpoint telemetry as a control that improves detection accuracy and investigative capability.
+- Sysmon Process Create events are generated  
+- Command-line arguments are logged  
+- Parent → child process relationships are visible  
+- Execution events are searchable for analyst use  
+- A reliable baseline of normal execution behavior can be established  
 
 ---
 
 ## ⚠️ Risk Addressed
 
-Basic execution logs may not provide enough context to detect or investigate:
+Basic execution logging may lack sufficient context to detect:
 
-- Malicious scripts  
+- Script abuse  
 - Living-off-the-land techniques  
-- Obfuscated command execution  
-- Privilege misuse  
+- Suspicious command execution  
+- Privilege escalation attempts  
 
-Without detailed process telemetry, attacker behavior may blend into normal activity.
+Without detailed process telemetry, malicious activity may blend into normal behavior.
 
 ---
 
 ## 🛡️ Control Implementation
 
-### Primary Telemetry
-- **Sysmon Event ID 1 – Process Create**
+### Primary Telemetry (Authoritative Source)
 
-Provides:
-- Full command line  
-- Parent process  
-- Process GUIDs  
-- Image path  
+- **Sysmon Event ID 1 – Process Create**
+  - Full command-line logging
+  - Parent-child process lineage
+  - User context
+  - Integrity level
 
 ### Supplemental Telemetry
-- Windows Security Event ID 4688 (baseline execution logging)
 
-### SIEM Layer
-- Splunk ingestion of Sysmon logs  
-- SPL searches validating command-line visibility  
-- Queries showing parent-child process chains  
+- Windows Security Event ID 4688 (baseline comparison)
+
+### Analyst / SIEM Layer
+
+- SPL searches used to validate telemetry visibility  
+- Alert configured to confirm telemetry availability  
+
+> SIEM ingestion supports analysis but is not a prerequisite for control validity.
 
 ---
 
 ## 🧪 Control Testing Method
 
-The control was tested through controlled execution scenarios:
+The control was validated through controlled baseline execution:
 
-1. Commands executed on endpoint  
-2. Sysmon generated Process Create events  
-3. Events ingested into Splunk  
-4. SPL searches validated:
-   - command-line logging  
-   - process lineage visibility  
-5. Data confirmed usable for detection engineering and investigation  
+1. Standard user launched common binaries  
+2. Commands executed with and without arguments  
+3. Sysmon generated Process Create events  
+4. Command-line fields verified  
+5. Parent-child process relationships observed  
+6. Events validated via SPL queries  
+7. Alert triggered confirming telemetry presence  
 
 ---
 
@@ -71,11 +73,11 @@ The control was tested through controlled execution scenarios:
 
 | Evidence ID | Description |
 |------------|-------------|
-| E-SIM004-001 | Sysmon Event ID 1 ingestion proof |
-| E-SIM004-002 | Command-line visibility proof |
-| E-SIM004-003 | Parent-child process relationship proof |
+| E-SIM004-001 | Windows Security Event 4688 baseline |
+| E-SIM004-002 | Sysmon Event ID 1 enriched telemetry |
+| E-SIM004-003 | Correlated SPL results |
 
-Related screenshots follow naming convention:  
+Screenshots follow naming convention:  
 `sim004-evidence-###-description.png`
 
 ---
@@ -83,8 +85,11 @@ Related screenshots follow naming convention:
 ## 🧩 Framework Alignment
 
 **NIST CSF**
-- DE.CM – Security Continuous Monitoring  
-- DE.AE – Anomalies and Events  
+
+| Function | Category |
+|----------|----------|
+| Detect | DE.CM |
+| Detect | DE.AE |
 
 **CIS Controls**
 - Control 8 – Audit Log Management  
@@ -92,15 +97,47 @@ Related screenshots follow naming convention:
 
 ---
 
+## 🧾 Governance & Compliance Notes
+
+- This control establishes the execution baseline required for higher-risk detections.
+- Serves as prerequisite for privilege escalation and advanced execution detections.
+- Evidence supports audit validation of endpoint monitoring controls.
+
+---
+
+## 👤 Control Ownership
+
+| Item | Value |
+|------|------|
+| Control Owner | JCE (Lab Owner / Security Program Owner) |
+| Control Type | Detective |
+| Test Frequency | Quarterly or after endpoint telemetry changes |
+| Evidence Retention | 90 days minimum |
+| Exception Handling | Failures logged in Issues & Resolutions and re-tested |
+
+---
+
+## 🔁 Dependency Note
+
+This control provides the baseline required for:
+
+- SIM-005 – Privilege Escalation Detection  
+- Script abuse detections  
+- Living-off-the-land monitoring  
+
+---
+
 ## ✅ Validation Status
 
-**Status:** ✅ Validated  
-Sysmon telemetry successfully provided detailed execution context supporting detection engineering and investigations.
+**Control Test Result:** Pass ✅  
+**Control Status:** Implemented and Verified  
+**MITRE Technique Supported:** T1059 (Execution)
 
 ---
 
 ## 🔁 Related Documentation
 
-- Risk Register Entry (Malicious Execution Visibility Risk)
-- Detection Matrix Coverage for Endpoint Telemetry
-- SIM-004 Technical Simulation Documentation
+- SIM-004 Technical Simulation Documentation  
+- Risk Register (Execution Visibility Risk)  
+- Detection Validation Matrix Entry  
+- SIM-004 Issues & Resolutions Log  
