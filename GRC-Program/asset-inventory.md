@@ -8,12 +8,13 @@
 
 | Asset Name | Hostname | Type | OS / Version | IP Address | Network Zone | Owner | Business Function | Criticality | Notes |
 |----------|----------|------|--------------|------------|--------------|-------|------------------|------------|------|
-| pfSense | pfSense.local.lab | Firewall | pfSense CE | 10.0.0.1 (Static) | WAN/LAN | JCE | Edge firewall, routing, NAT, DNS resolver, DHCP | High | Central choke point; traffic mirroring to Security Onion |
-| Windows Server 2025 (AD) | winserver2025 | Domain Controller | Server 2025 | 10.0.0.10 (Static) | LAN | JCE | Identity & authentication services (AD DS / GPO); Splunk Forwarder | High | Static required for stable identity services and predictable log correlation |
-| Security Onion (Eval) | securityonion | NSM/Sensor | Security Onion Eval | 10.0.0.11 (Static) | Monitor | JCE | Passive monitoring (Zeek/Suricata), ECS telemetry | High | Static for sensor management; non-inline deployment |
-| Ubuntu Server (Splunk Enterprise) | ubuntu24.04 | SIEM | Ubuntu Server | DHCP (Dynamic) | LAN | JCE | Central log ingestion, correlation, dashboards, alerting | High | DHCP by design to simulate flexible SOC infrastructure |
-| Windows 11 Endpoint | windows11pro | Endpoint | Win11 Pro | DHCP (Dynamic) | LAN | JCE | Primary endpoint telemetry (Sysmon + Security logs) | High | Splunk Forwarder installed; detections rely on hostname + user context |
-| Kali Linux | kali | Attacker | Kali | DHCP (Dynamic) | LAN | JCE | Attack simulation host (controlled adversary TTP execution) | Medium | Ephemeral attacker modeling; non-persistent by design |
+| pfSense | pfSense.local.lab | Firewall / Gateway | pfSense CE | 10.0.0.1 (Static) | WAN/LAN | JCE | Network perimeter control, routing, NAT, DNS resolution, DHCP services, and traffic visibility point | High | Central network choke point; supports segmentation and DNS monitoring; traffic mirrored to Security Onion |
+| Windows Server 2025 (AD) | winserver2025 | Domain Controller | Server 2025 | 10.0.0.10 (Static) | LAN | JCE | Identity and access management platform (AD DS, authentication, authorization, GPO enforcement) | High | Core identity authority; compromise impacts entire environment |
+| Security Onion (Eval) | securityonion | NSM / Sensor | Security Onion Eval | 10.0.0.11 (Static) | Monitor | JCE | Network security monitoring platform providing Zeek telemetry, Suricata IDS alerts, and packet-level visibility | High | Primary network detection sensor; loss reduces visibility into C2, web attacks, and anomalies |
+| Ubuntu Server (Splunk Enterprise) | ubuntu24.04 | SIEM Platform | Ubuntu Server | DHCP (Dynamic) | LAN | JCE | Centralized security monitoring platform responsible for log ingestion, event correlation, dashboards, alerting, and investigative search | High | Security monitoring brain; DHCP by design to simulate flexible SOC infrastructure |
+| Windows 11 Endpoint | windows11pro | Endpoint / Log Source | Win11 Pro | DHCP (Dynamic) | LAN | JCE | User workstation and primary host telemetry source (Sysmon + Security logs) for execution and privilege monitoring | High | Critical detection data source; detections rely on hostname and user context rather than static IP |
+| Kali Linux | kali | Adversary Simulation | Kali | DHCP (Dynamic) | LAN | JCE | Controlled adversary emulation system used to generate attack telemetry and validate security controls | Medium | Ephemeral attacker modeling; not production but required for control validation |
+
 
 ---
 
