@@ -1,6 +1,6 @@
-# CV-SIM003 — Detection Correlation Control Validation  
-**Simulation:** SIM-003 – Detection Logic & Correlation  
-**Control Type:** Detection Engineering / Monitoring Control  
+# CV-SIM003 — Web Application IDS Detection Control Validation  
+**Simulation:** SIM-003 – SQL Injection (T1190)  
+**Control Type:** Network Intrusion Detection Control  
 **Owner:** Carlo Espina  
 **Validation Date:** 2026-01-24  
 
@@ -8,53 +8,58 @@
 
 ## 🎯 Control Objective
 
-Ensure that security telemetry is not only logged but:
+Ensure that malicious web application activity, specifically SQL injection attempts against a vulnerable web application, can be:
 
-- Aggregated in the SIEM  
-- Correlated into detection logic  
-- Capable of identifying suspicious behavior patterns  
-- Able to generate alertable events with supporting evidence  
+- Observed at the network monitoring layer  
+- Detected by IDS signatures  
+- Logged as security-relevant events  
+- Used as investigative evidence  
 
-This validates that the environment can transform raw telemetry into actionable security detections.
+This validates IDS-based visibility for web application exploitation attempts.
 
 ---
 
 ## ⚠️ Risk Addressed
 
-Even when logs exist, attackers may remain undetected if:
+Attackers exploit public-facing applications using SQL injection to:
 
-- Events are not correlated  
-- Suspicious patterns are not recognized  
-- Alerts are not generated  
+- Bypass authentication  
+- Access sensitive data  
+- Extract credentials  
+- Compromise backend databases  
 
-Without detection logic, security monitoring becomes passive logging instead of active defense.
+Without network-based application-layer monitoring, these attacks may succeed without detection.
 
 ---
 
 ## 🛡️ Control Implementation
 
-### Data Sources Used
-- Windows endpoint logs (e.g., Sysmon / Security logs)
-- Network telemetry (Zeek / Suricata), when applicable
+### Primary Telemetry (Authoritative for this control)
 
-### SIEM Detection Layer
-- Splunk SPL searches designed to identify suspicious patterns  
-- Aggregation and filtering of events  
-- Logic-based detection criteria  
-- Query structures used to reduce false positives  
+- **Security Onion (Suricata IDS)**  
+  Detection of web-based attack patterns and SQL injection-related behavior
+
+### Supplemental Telemetry
+
+- Zeek HTTP logs (request visibility context)
+
+### SIEM Layer
+
+- ❌ IDS-to-SIEM ingestion not implemented by design  
+- SIEM correlation excluded and documented as a known visibility gap  
 
 ---
 
 ## 🧪 Control Testing Method
 
-The control was validated through a controlled simulation:
+The control was validated through a controlled SQL injection simulation:
 
-1. Suspicious activity generated in the lab environment  
-2. Relevant telemetry captured by logging sources  
-3. Events ingested into Splunk  
-4. SPL correlation searches executed  
-5. Detection logic confirmed ability to identify the activity  
-6. Results verified as usable for investigation  
+1. SQL injection payloads submitted to DVWA application  
+2. Application executed injected SQL logic  
+3. HTTP traffic traversed inline Security Onion sensor  
+4. Suricata generated a web policy alert  
+5. Alert source/destination IPs verified  
+6. Detection confirmed at IDS layer  
 
 ---
 
@@ -62,9 +67,9 @@ The control was validated through a controlled simulation:
 
 | Evidence ID | Description |
 |------------|-------------|
-| E-SIM003-001 | Correlation SPL search execution proof |
-| E-SIM003-002 | Detection result output in Splunk |
-| E-SIM003-003 | Supporting raw event visibility |
+| E-SIM003-001 | Suricata SQL injection alert proof |
+| E-SIM003-002 | Zeek HTTP log request visibility |
+| E-SIM003-003 | Alert metadata showing source/destination IPs |
 
 Related screenshots follow naming convention:  
 `sim003-evidence-###-description.png`
@@ -74,24 +79,33 @@ Related screenshots follow naming convention:
 ## 🧩 Framework Alignment
 
 **NIST CSF**
-- DE.AE – Anomalies and Events  
 - DE.CM – Security Continuous Monitoring  
+- DE.AE – Anomalies and Events  
 
 **CIS Controls**
-- Control 8 – Audit Log Management  
-- Control 17 – Incident Response Management  
+- Control 13 – Network Monitoring and Defense  
+- Control 16 – Application Software Security  
+
+---
+
+## ⚠️ Known Limitation (Documented Risk)
+
+IDS alerts were **not ingested into SIEM** due to intentional lab design.  
+This represents a **visibility gap** between detection and centralized correlation.
+
+This limitation is recorded for transparency and mirrors real-world SOC integration gaps.
 
 ---
 
 ## ✅ Validation Status
 
-**Status:** ✅ Validated  
-Correlation logic successfully transformed raw telemetry into a detection event with supporting evidence.
+**Status:** ✅ Validated (IDS Layer Only)  
+SQL injection activity was successfully detected by network intrusion detection controls. SIEM ingestion remains out of scope for this simulation.
 
 ---
 
 ## 🔁 Related Documentation
 
-- Risk Register Entry (Detection Gaps Risk)
-- Detection Matrix Coverage
+- Risk Register Entry (Web Application Exploitation Risk)
 - SIM-003 Technical Simulation Documentation
+- Issues & Resolutions Record for SQL Injection Simulation
