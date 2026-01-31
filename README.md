@@ -18,6 +18,40 @@ results are **repeatable, auditable, and defensible**.
 
 ---
 
+## 🧠 Detection Coverage Philosophy
+
+The JCE Cyber Lab is structured as a **detection engineering program**, not a linear attack tutorial. Simulations are designed to collectively represent **how real breaches unfold**, and how SOC teams detect activity at different stages of attacker behavior.
+
+### 🔗 Breach Lifecycle Mapping
+
+Simulations are mapped to **attack progression stages** commonly observed in enterprise incident response:
+
+| Breach Stage | Example Coverage in This Lab |
+|--------------|------------------------------|
+| Initial Access | SIM-001 (Phishing) |
+| Execution | SIM-004, SIM-008 |
+| Privilege Escalation | SIM-005 |
+| Command & Control | SIM-002 |
+| Lateral Movement | Planned future simulation |
+| Impact / Data Interaction | SIM-006, SIM-007 |
+| External Exploitation | SIM-003 |
+
+This mapping allows detections to be understood in the context of **real incident investigation workflows**, rather than isolated lab tests.
+
+### 🔢 About Simulation Numbering
+
+Simulation IDs (**SIM-001 → SIM-XXX**) represent **chronological development of detections**, not the order of an attack chain.
+
+In enterprise security programs:
+
+- Detection IDs remain stable once created  
+- New detections are added over time  
+- Coverage is organized by **behavior and risk**, not numeric sequence  
+
+For that reason, simulation numbers **do not imply attack order**. The authoritative view of detection coverage is the **Detection Validation Matrix**, which maps each simulation to attacker behavior stages.
+
+---
+
 ## 🛡️ GRC Overlay (Audit-Ready Control Validation)
 
 In addition to SOC detections, this repository includes a lightweight **GRC (Governance, Risk, and Compliance)** layer to ensure detections are not only functional, but also **documented, measurable, and auditable**.
