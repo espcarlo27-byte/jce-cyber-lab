@@ -9,6 +9,7 @@ The design mirrors **real-world SOC architectures**, emphasizing:
 - Centralized DNS and log visibility
 - Behavioral detection over static assumptions
 - Clear separation of control, data, and detection planes
+- Email + identity telemetry as first-class detection sources
 
 ---
 
@@ -19,9 +20,12 @@ acts as both a **control point** and a **primary observation point** for network
 including DNS resolution.
 
 Security visibility is achieved through a combination of:
+
 - Endpoint telemetry (Sysmon, Windows Security)
 - Network protocol analysis (Zeek)
 - Intrusion detection (Suricata)
+- Identity telemetry (Active Directory)
+- **Email & authentication telemetry (Zimbra)**
 - Centralized SIEM correlation (Splunk)
 
 ---
@@ -34,6 +38,7 @@ flowchart LR
     pfSense["pfSense\nFirewall | Routing | NAT\nDNS Resolver | DHCP"]
     Win11["Windows 11 Endpoint\nSysmon + Security Logs\nSplunk Forwarder\nDHCP"]
     AD["Windows Server 2025\nActive Directory Logs\nSplunk Forwarder\nStatic IP"]
+    Zimbra["Ubuntu Mail Server (Zimbra)\nMail + Auth Logs\nStatic IP"]
     SO["Security Onion (Eval)\nZeek | Suricata\nECS Telemetry\nLimited / No PCAP"]
     Splunk["Splunk Enterprise SIEM\nUbuntu Server\nDHCP"]
     Internet["Internet"]
@@ -41,12 +46,14 @@ flowchart LR
     Kali --> pfSense --> Internet
     pfSense --> Win11
     pfSense --> AD
+    pfSense --> Zimbra
 
     pfSense --> SO
     SO --> Splunk
 
     Win11 --> Splunk
     AD --> Splunk
+    Zimbra --> Splunk
     pfSense --> Splunk
 ```
 
@@ -54,15 +61,22 @@ flowchart LR
 
 ## 🧭 Traffic Flow (Plain English)
 
-### 1️⃣ Attack & User Traffic Generation
+### 1️⃣ Attack, User, and Email Activity
 
 - **Kali Linux** generates simulated attack traffic, including:
-  - Phishing
+  - Phishing infrastructure
   - DNS tunneling
-  - Privilege escalation attempts
-  - Network and Web-based attacks
+  - Web attacks
+
 - **Windows 11** generates normal user and endpoint activity
-- All traffic (including DNS queries) flows through **pfSense**
+
+- **Zimbra Mail Server** generates:
+  - Email login attempts
+  - Message sending/receiving events
+  - Admin actions
+  - Account authentication telemetry
+
+All traffic (including DNS queries) flows through **pfSense**.
 
 ---
 
@@ -73,10 +87,11 @@ flowchart LR
 - Routes all ingress and egress traffic
 - Provides NAT and DHCP services
 - Acts as the primary DNS resolver for all hosts
-- Logs firewall decisions and session metadata, and DNS activity
+- Logs firewall decisions and DNS activity
 - Mirrors network traffic to **Security Onion**
 
 This ensures:
+
 - No system bypasses inspection
 - DNS activity is centrally observable
 - Network behavior is consistently monitored
@@ -87,56 +102,71 @@ This ensures:
 
 **Security Onion** passively receives mirrored traffic from pfSense and provides:
 
-- **Zeek**
-  - Protocol-level metadata (DNS, HTTP, connections)
-  - Session context and behavioral indicators
+#### Zeek
+- Protocol-level metadata (DNS, HTTP, connections)
+- Session context and behavioral indicators
 
-- **Suricata**
-  - Signature-based IDS detection
-  - Network threat indicators
+#### Suricata
+- Signature-based IDS detection
+- Network threat indicators
 
-- Evaluation Mode Constraints
-  - Limited or no PCAP retention
-  - Detections rely primarily on parsed telemetry (ECS-normalized events)
+#### Evaluation Mode Constraints
+- Limited or no PCAP retention
+- Detections rely primarily on parsed telemetry
 
-**Security Onion:**  
+Security Onion:
 - Is not inline
 - Does not block traffic
 - Exists purely for visibility and detection
 
-> All Security Onion telemetry is forwarded to Splunk for correlation.
+All Security Onion telemetry is forwarded to **Splunk**.
 
 ---
 
-### 4️⃣ Endpoint & Identity Telemetry
+### 4️⃣ Endpoint, Identity, and Email Telemetry
 
 #### Windows 11 Endpoint
 
 Generates:
-- Sysmon events (process creation, command-line activity)
+- Sysmon events
 - Windows Security logs
 
 Behavior:
-- Logs are forwarded **directly to Splunk** via **Splunk Universal Forwarder**
-- Logs do not traverse pfSense as data payloads (only network transport)
+- Logs forwarded directly to **Splunk**
+- Network routing does not determine log visibility
 
 ---
 
-#### Windows Server 2025 (Active Directory)
+#### Active Directory (Windows Server 2025)
 
 Generates:
 - Authentication events
-- Privilege and group membership changes
-- Identity-related telemetry
+- Privilege changes
+- Account lockouts
 
 Behavior:
-- Logs are forwarded directly to **Splunk**
-- DNS services are not hosted on AD in this lab
+- Logs forwarded directly to **Splunk**
+- Provides identity context for detections
 
-This reflects real enterprise design where:
+---
 
-> Endpoints send logs to the SIEM independently of network routing.
-> Identity services and DNS resolution are intentionally decoupled.
+#### Zimbra Mail Server (Ubuntu – 10.0.0.14)
+
+Generates high-value SOC telemetry:
+- Webmail login successes/failures
+- IMAP/SMTP authentication attempts
+- Account lockouts / brute-force indicators
+- Message flow metadata
+- Admin activity
+
+Behavior:
+- Mail server logs are forwarded to **Splunk**
+- Authentication events correlate with AD and endpoint activity
+
+This enables realistic detection scenarios such as:
+- Phishing → credential use
+- Password spraying against mail
+- Compromised mailbox → lateral movement
 
 ---
 
@@ -147,59 +177,55 @@ This reflects real enterprise design where:
 - Endpoint telemetry
 - Identity activity
 - Firewall and DNS logs
-- Security Onion netwrok metadata
+- Security Onion metadata
+- Zimbra email and authentication logs
 
-Splunk is used to:
-- Correlate events across layers
-- Validate detections
-- Trigger alerts
-- Support investigation workflows
-
-**Security Onion** provides deep network context;  
-**Splunk** provides cross-layer correlation and alerting.
+Splunk enables:
+- Cross-layer correlation
+- Alerting and dashboards
+- Detection validation
+- Investigation workflows
 
 ---
 
 ## 🔁 Detection Engineering Perspective
 
-This log flow design enforces several detection best practices:
+This design enforces SOC-grade detection practices:
 
-- Network detections do not rely on endpoint trust
-- Endpoint detections do not rely on network signatures
-- DNS detections are network-based, not AD-dependent
-- IP addresses are not treated as stable identifiers
+- Email telemetry feeds identity detections
+- Identity telemetry feeds endpoint investigations
+- Network telemetry validates infrastructure activity
+- Detections do not rely on static IPs
 
-Correlation is based on:
+Correlation focuses on:
 - Host identity
-- Process behavior
-- Network and DNS patterns
-- Temporal relationships
-
-This enables detections that remain effective even when:
-- IPs change (DHCP)
-- Attack infrastructure rotates
-- Full packet capture is unavailable
+- User behavior
+- Authentication patterns
+- Network and DNS behavior
+- Email activity chains
 
 ---
 
 ## 🧠 SOC Realism & Resilience
 
-The architecture intentionally supports **degraded visibility scenarios**:
+The architecture supports degraded visibility scenarios:
 
 - Network telemetry exists without PCAP
-- Endpoint detections function independently of IDS alerts
-- Identity detections persist even if network data is delayed
+- Endpoint detections work without IDS
+- Identity detections work without network alerts
+- Email telemetry provides initial access visibility
 
-This mirrors real SOC operations, where:
+This mirrors real SOC operations where:
 
-> Analysts must investigate and respond with incomplete or imperfect telemetry.
+> Analysts investigate across layers with imperfect data.
 
 ---
 
 ## 🏁 Status
 
-- Network traffic flow validated
-- Log ingestion paths confirmed
-- Security Onion successfully observing mirrored traffic
-- Splunk correlating multi-source telemetry
+- Network traffic flow validated  
+- Log ingestion paths confirmed  
+- Security Onion observing mirrored traffic  
+- Splunk correlating multi-source telemetry  
+- Mail server integrated into detection workflows  
 - Actively used in **SIM-001 through SIM-004**
