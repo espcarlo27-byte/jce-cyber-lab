@@ -18,6 +18,7 @@ Core design goals:
 - Passive network monitoring
 - Realistic endpoint behavior
 - Clear detection and log visibility
+- Realistic email + identity attack surface (mail server)
 
 ---
 
@@ -31,6 +32,8 @@ flowchart TB
 
     AD["Windows Server 2025 \ Active Directory \ Identity & Authentication \ Splunk Forwarder \ 10.0.0.10 (Static)"]
     SO["Security Onion (Eval) \ Zeek | Suricata | ECS Telemetry \ Limited / No PCAP \ 10.0.0.11 (Static)"]
+    Zimbra["Ubuntu Mail Server (Zimbra) \ Enterprise Email + AD/LDAP Integration \ Mail + Auth Telemetry \ 10.0.0.14 (Static)"]
+
     Kali["Kali Linux \ Attack Simulation \ DHCP"]
     Splunk["Ubuntu Server \ Splunk Enterprise SIEM \ Receiving & Correlation \ DHCP"]
     Win11["Windows 11 Endpoint \ User Workstation \ Sysmon + Security Logs \ Splunk Forwarder \ DHCP"]
@@ -39,6 +42,7 @@ flowchart TB
 
     pfSense --> AD
     pfSense --> SO
+    pfSense --> Zimbra
     pfSense --> Kali
     pfSense --> Splunk
     pfSense --> Win11
@@ -46,92 +50,109 @@ flowchart TB
     AD --> Splunk
     Win11 --> Splunk
     SO --> Splunk
+
+    Zimbra --> Splunk
+    Zimbra <--> AD
 ```
-
----
-
 ## 🧱 System Roles & Responsibilities
-**pfSense Firewall (10.0.0.1)**
+
+### **pfSense Firewall (10.0.0.1)**
 - Acts as the network gateway for all systems
 - Provides:
-   - Routing and NAT
-   - DNS resolver services for all hosts
-   - DHCP services for endpoints
-   - Firewall logging
-   - Traffic mirroring to Security Onion
+  - Routing and NAT
+  - DNS resolver services for all hosts
+  - DHCP services for endpoints
+  - Firewall logging
+  - Traffic mirroring to Security Onion
 - Serves as the single choke point for ingress, egress, and DNS visibility
 - Enables network-based detections (e.g., DNS tunneling) independent of AD
 
 ---
 
-**Windows Server 2025 – Active Directory (10.0.0.10)**
+### **Windows Server 2025 – Active Directory (10.0.0.10)**
 - Provides identity and authentication services
 - Hosts:
-   - Active Directory
-   - Group Policy
+  - Active Directory
+  - Group Policy
 - Does not act as the primary DNS resolver
 - Uses a static IP to ensure:
-   - Reliable authentication
-   - Predictable DNS resolution
-   - Consistent log correlation
+  - Reliable authentication
+  - Predictable DNS resolution
+  - Consistent log correlation
 - Runs a Splunk Forwarder for AD and security logs
-  
+
 ---
 
-**Security Onion (EVAL) – Network Security Monitoring (10.0.0.11)**
+### **Security Onion (EVAL) – Network Security Monitoring (10.0.0.11)**
 - Passively monitors mirrored traffic from pfSense
 - Provides:
-   - Zeek for protocol and session analysis
-   - Suricata for IDS signatures
-   - ECS-normalized network telemetry
+  - Zeek for protocol and session analysis
+  - Suricata for IDS signatures
+  - ECS-normalized network telemetry
 - Deployed in Evaluation mode
-   - Limited or no PCAP retention
-   - Detections prioritize parsed telemetry over raw packets
+  - Limited or no PCAP retention
+  - Detections prioritize parsed telemetry over raw packets
 - Uses a static IP for management and analyst access
 - Does not sit inline with traffic (non-intrusive)
 
 ---
 
-**Windows 11 Endpoint (DHCP)**
+### **Ubuntu Mail Server (Zimbra) – Enterprise Email (10.0.0.14)**
+- Provides enterprise email services for realistic phishing and user messaging
+- Integrates with Active Directory via LDAP/LDAPS (directory-backed accounts)
+- Generates high-value telemetry for SOC detections, including:
+  - Authentication success/failure patterns
+  - Account lockouts / brute-force / password spraying indicators
+  - Message delivery patterns (internal/external)
+  - Admin access and configuration changes (where logging is enabled)
+- Uses a static IP to ensure:
+  - Stable DNS/MX-style dependencies (lab internal)
+  - Predictable log forwarding and correlation
+  - Reliable directory integration (AD ↔ mail server)
+
+---
+
+### **Windows 11 Endpoint (DHCP)**
 - Represents a standard enterprise user workstation
 - Generates:
-   - Sysmon telemetry
-   - Windows Security Event logs
+  - Sysmon telemetry
+  - Windows Security Event logs
 - Runs a Splunk Universal Forwarder
 - IP address assigned dynamically via DHCP
 - Detection logic relies on:
-   - Hostname
-   - User context
-   - Process behavior
-   - Log metadata (not fixed IPs)
+  - Hostname
+  - User context
+  - Process behavior
+  - Log metadata (not fixed IPs)
 
 ---
 
-**Kali Linux – Attack Simulation Host (DHCP)**
+### **Kali Linux – Attack Simulation Host (DHCP)**
 - Used to simulate:
-   - Phishing activity
-   - DNS tunneling
-   - Privilege escalation attempts
-   - Network and Web attacks
+  - Phishing activity
+  - DNS tunneling
+  - Privilege escalation attempts
+  - Network and Web attacks
 - IP address assigned dynamically
 - Reflects adversary infrastructure that is:
-   - Ephemeral
-   - Non-persistent
-   - Not trusted by design
-  
+  - Ephemeral
+  - Non-persistent
+  - Not trusted by design
+
 ---
 
-**Ubuntu Server – Splunk Enterprise SIEM (DHCP)**
+### **Ubuntu Server – Splunk Enterprise SIEM (DHCP)**
 - Hosts Splunk Enterprise
 - Serves as the central correlation and analysis platform
 - Ingests logs from:
-   - Windows endpoints
-   - Active Directory
-   - pfSense
-   - Security Onion metadata
+  - Windows endpoints
+  - Active Directory
+  - pfSense
+  - Security Onion metadata
+  - Zimbra mail server telemetry (as configured)
 - Uses DHCP to mirror:
-   - Cloud-hosted SIEM deployments
-   - Dynamic infrastructure common in modern SOCs
+  - Cloud-hosted SIEM deployments
+  - Dynamic infrastructure common in modern SOCs
 
 ---
 
@@ -142,6 +163,7 @@ flowchart TB
 | pfSense              | Static          | Core routing and firewall control        |
 | Windows Server 2025  | Static          | Identity, DNS, authentication stability  |
 | Security Onion       | Static          | Predictable sensor management            |
+| Ubuntu Mail (Zimbra) | Static          | Email + directory integration stability  |
 | Windows 11           | DHCP            | Realistic endpoint behavior              |
 | Kali Linux           | DHCP            | Ephemeral attacker modeling              |
 | Ubuntu (Splunk)      | DHCP            | SIEM flexibility and realism             |
@@ -150,41 +172,43 @@ flowchart TB
 
 ## 🔁 DHCP vs Static IP Design Rationale
 
-This lab intentionally uses a **hybrid IP addressing strategy** to mirror
-real-world enterprise and SOC environments.
+This lab intentionally uses a **hybrid IP addressing strategy** to mirror real-world enterprise and SOC environments.
 
 ---
 
 ### 🔒 Static IP Assignments (Infrastructure Components)
 
-- **pfSense Firewall**
-- **Windows Server 2025 (Active Directory)**
-- **Security Onion**
+- pfSense Firewall  
+- Windows Server 2025 (Active Directory)  
+- Security Onion  
+- Ubuntu Mail Server (Zimbra)
 
 **Rationale:**
-- These systems provide **core infrastructure services**
+- These systems provide core infrastructure services
 - Static addressing ensures:
   - Reliable log forwarding targets
   - Consistent detection and correlation
   - Predictable sensor placement and management
+  - Stable identity + email dependencies (directory integration)
 - Reflects standard enterprise design for:
   - Firewalls
   - Identity services
+  - Email infrastructure
   - Network security monitoring
 
 ---
 
 ### 🔄 DHCP Addressing (Endpoints & Tooling)
 
-- **Windows 11 Endpoint**
-- **Kali Linux (Attack VM)**
-- **Ubuntu Server (Splunk Enterprise SIEM)**
+- Windows 11 Endpoint  
+- Kali Linux (Attack VM)  
+- Ubuntu Server (Splunk Enterprise SIEM)
 
 **Rationale:**
 - Endpoints commonly receive IPs dynamically in production environments
 - DHCP enables:
   - Realistic host churn
-  - Accurate testing of detection logic that relies on **behavior**, not fixed IPs
+  - Accurate testing of detection logic that relies on behavior, not fixed IPs
   - SOC workflows that track hosts by:
     - Hostname
     - User
@@ -196,12 +220,14 @@ real-world enterprise and SOC environments.
 
 ## 🧠 Detection Engineering Impact
 
-This addressing and topology design reinforces **best practices in SOC-grade detection engineering**:
+This addressing and topology design reinforces best practices in SOC-grade detection engineering:
+
 - Detections avoid brittle IP-based logic
 - Correlation focuses on:
   - Host identity
   - Process behavior
   - Network patterns
+  - Email + authentication activity patterns
 - Simulations remain reproducible even as IPs change
 
 > 💡 Infrastructure is stable, endpoints are dynamic, and detections must adapt —  
@@ -211,7 +237,8 @@ This addressing and topology design reinforces **best practices in SOC-grade det
 
 ## 🏁 Status
 
-- Network topology validated
-- All systems reachable and monitored
-- Traffic successfully mirrored to Security Onion
-- Topology actively used in **SIM-001 through SIM-004**
+- Network topology validated  
+- All systems reachable and monitored  
+- Traffic successfully mirrored to Security Onion  
+- Topology actively used in SIM-001 through SIM-004  
+- Mail server added as a core component for email-based simulations  
