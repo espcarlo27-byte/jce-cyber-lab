@@ -3,15 +3,22 @@
 ## Executive Summary
 
 The JCE Cyber Lab demonstrates my ability to **design, deploy, operate, and validate**
-a complete **SOC detection engineering workflow** across **network, endpoint, and
-identity layers**.
+a complete **SOC detection engineering workflow** across **network, endpoint,
+identity, and email layers**.
 
 The lab consists of **hands-on attack simulations** with:
-- Reproducible execution steps
-- Real and symbolic log evidence
-- Detection logic and alert definitions
-- MITRE ATT&CK–aligned validation
-- Documented issues, resolutions, and analyst takeaways
+
+- Reproducible execution steps  
+- Real and symbolic log evidence  
+- Detection logic and alert definitions  
+- MITRE ATT&CK–aligned validation  
+- Documented issues, resolutions, and analyst takeaways  
+
+In addition to network and endpoint telemetry, the lab includes:
+
+- 🔐 A structured **Active Directory Identity & Access Management (IAM) model**
+- 📧 A **Zimbra mail server integrated with Active Directory**
+- 📊 Identity-aware telemetry ingested into **Splunk SIEM**
 
 Each detection scenario has a **dedicated simulation folder (1:1 mapping)** to ensure
 results are **repeatable, auditable, and defensible**.
@@ -52,6 +59,62 @@ For that reason, simulation numbers **do not imply attack order**. The authorita
 
 ---
 
+---
+
+## 🔐 Identity & Access Management (IAM) Layer
+
+The lab includes a structured **enterprise-style Active Directory IAM model**
+that provides identity context for detections and investigations.
+
+The IAM design includes:
+
+- Role-Based Access Control (RBAC)
+- Department-based user structure
+- Executive, IT, employee, and contractor separation
+- Service account governance
+- Privilege tier modeling
+
+All human identities include **Title** and **Department** attributes, enabling:
+
+| Use Case | IAM Value |
+|----------|-----------|
+| Incident response | Understand user role during investigation |
+| Detection tuning | Role-based anomaly identification |
+| Access reviews | Justify group memberships |
+| Insider threat | Behavioral baseline by department |
+
+📁 Full IAM documentation:  
+**[Identity & Access Management Section](identity-access-management/)**
+
+---
+
+## 📧 Email Infrastructure & Identity Integration
+
+The lab includes a **Zimbra mail server** integrated with Active Directory
+to model email as a monitored attack surface.
+
+This enables:
+
+- Email authentication telemetry tied to AD user identities
+- Detection of:
+  - Failed mail logins
+  - Password spraying against webmail
+  - Account compromise patterns
+  - Suspicious administrative access
+- Cross-layer correlation:
+
+| Attack Chain Example | Detection Flow |
+|----------------------|----------------|
+| Phishing credential reuse | Zimbra login → AD login → endpoint activity |
+| Password spraying | Zimbra failures across many users → SIEM alert |
+| Compromised mailbox | Mail login → PowerShell execution on endpoint |
+
+Mail telemetry is forwarded to **Splunk**, making email activity part of the SOC visibility model.
+
+This mirrors real enterprise SOC environments where **email, identity, endpoint, and network telemetry are correlated**.
+
+---
+
 ## 🛡️ GRC Overlay (Audit-Ready Control Validation)
 
 In addition to SOC detections, this repository includes a lightweight **GRC (Governance, Risk, and Compliance)** layer to ensure detections are not only functional, but also **documented, measurable, and auditable**.
@@ -89,6 +152,7 @@ Each simulation (SIM-001 → SIM-XXX) may also be treated as a **security contro
 |------|------|
 | **pfSense** | Firewall, routing, NAT, DNS resolver, DHCP, traffic mirroring |
 | **Windows Server 2025** | Active Directory (identity, authentication, domain services) |
+| **Zimbra Mail Server** | Email services + identity-aware authentication telemetry |
 | **Security Onion (Eval)** | Network Security Monitoring (Zeek, Suricata, limited PCAP) |
 | **Windows 11** | User endpoint (Sysmon, Windows Security Logs) |
 | **Kali Linux** | Attack simulation |
@@ -109,20 +173,25 @@ Each simulation (SIM-001 → SIM-XXX) may also be treated as a **security contro
 ```mermaid
 flowchart TB
     Internet["Internet"]
-    pfSense["pfSense\Firewall | DNS | DHCP"]
+    pfSense["pfSense\nFirewall | DNS | DHCP"]
 
-    AD["Windows Server 2025 \ Active Directory"]
-    SO["Security Onion (EVAL) \ Zeek | Suricata"]
+    AD["Windows Server 2025\nActive Directory"]
+    Zimbra["Zimbra Mail Server"]
+    SO["Security Onion (EVAL)\nZeek | Suricata"]
     Win11["Windows 11 Endpoint"]
     Kali["Kali Linux"]
     Splunk["Splunk Enterprise"]
 
     Internet --> pfSense
     pfSense --> AD
+    pfSense --> Zimbra
     pfSense --> SO
     pfSense --> Win11
     pfSense --> Kali
     pfSense --> Splunk
+
+    Zimbra --> Splunk
+    AD --> Splunk
 ```
 
 ---
