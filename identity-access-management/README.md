@@ -124,16 +124,16 @@ Each document focuses on a specific component of identity architecture, access c
 
 ### 🔍 Core Identity References
 
-- 👤 **[AD User Inventory](ad-user-inventory.md)** – Human identities, roles, and departmental structure  
-- 👥 **[AD Group Inventory](ad-group-inventory.md)** – RBAC, application, and resource group definitions  
-- 🧩 **[RBAC Model](rbac-model.md)** – Role-based access control architecture and privilege tiering  
+- 👤 **[AD User Inventory](AD-user-inventory.md)** – Human identities, roles, and departmental structure  
+- 👥 **[AD Group Inventory](AD-group-inventory.md)** – RBAC, application, and resource group definitions  
+- 🧩 **[RBAC Model](RBAC-model.md)** – Role-based access control architecture and privilege tiering  
 - ⚙ **[Service Account Governance](service-accounts.md)** – Non-human identity controls and monitoring
 
 ---
 
 ### 🏗 Identity Architecture & Governance
 
-- 🗺 **[IAM Topology Diagram](iam-topology.md)** – Visual overview of users, RBAC groups, service accounts, and resource relationships  
+- 🗺 **[IAM Topology Diagram](IAM-topology.md)** – Visual overview of users, RBAC groups, service accounts, and resource relationships  
 - 🧾 **[Delegation Model](delegation-model.md)** – Least-privilege administrative delegation boundaries  
 - 🕵️ **[Identity-Driven Detection Use Cases](identity-detection-usecases.md)** – How identity context improves SOC detections
 
