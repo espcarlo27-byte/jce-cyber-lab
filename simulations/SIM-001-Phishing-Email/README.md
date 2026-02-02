@@ -1,253 +1,191 @@
 # SIM-001 – Phishing Email (T1566.002) – Spearphishing Link
 
+---
+
 ## 🎯 Goal
 
-Simulate a phishing email that delivers a suspicious URL to a user, then validate that:
+Detect phishing-based initial access where a user receives a malicious email, clicks a link, and launches a browser process containing a suspicious URL in the command line.
 
-- **Endpoint telemetry** (Windows Security Event 4688 with command-line logging)
-  records browser execution
-- **Splunk** correlates endpoint execution and URL activity into a detection
-- A **validated alert** is generated for analyst review
-
-> **Note:**  
-> Network telemetry via Security Onion (Suricata/Zeek) is **optional** and
-> used only for supplemental validation.  
-> The authoritative detection signal for SIM-001 is **endpoint telemetry**.
-
-This simulation supports the **LAB-SIM-001** row in the
-`detection-validation-matrix.md`.
+The simulation validates **endpoint-authoritative detection** enhanced with **email telemetry context**, modeling how real SOC investigations trace phishing attacks from delivery to execution.
 
 ---
 
-## 🧩 MITRE ATT&CK Mapping
+## 🧬 MITRE ATT&CK Mapping
 
-- **Technique:** T1566.002 – Spearphishing Link  
-- **Tactic:** Initial Access (TA0001)
+| Tactic | Technique | Description |
+|-------|-----------|-------------|
+| Initial Access | **T1566.002** | Phishing – Link |
+| Execution | T1204 | User Execution |
+| Command & Control (simulated) | T1071.001 | Web Protocols |
 
 ---
 
 ## 🏗 Lab Components Used
 
-### Attacker (Simulation Host)
-- **Kali Linux**
-  - IP address assigned via **DHCP**
-  - Hosts a phishing landing page using a lightweight Python HTTP server
-  - *(Optional — may be replaced with a symbolic or local URL for endpoint-only validation)*
-
-### Victim Endpoint
-- **Windows 11**
-  - IP address assigned via **DHCP**
-  - Windows Security Auditing enabled (EventCode 4688)
-  - Command-line process auditing enabled
-  - Splunk Universal Forwarder installed and running
-
-### Security & Infrastructure Stack
-- **pfSense (10.0.0.1)**
-  - Primary **DHCP server**
-  - Primary **DNS resolver**
-  - Routing, NAT, and traffic visibility point
-
-- **Ubuntu Server – Splunk Enterprise**
-  - IP address assigned via **DHCP**
-  - Central log ingestion, correlation, and alerting platform
-
-### Optional Network Validation
-- **Security Onion (Optional)**
-  - Suricata + Zeek for passive network visibility
-  - Used only for **supplemental confirmation**
-  - Not required for SIM-001 detection or alert validation
+| Component | Purpose |
+|----------|---------|
+| Windows 11 Endpoint | Victim machine executing phishing link |
+| Windows Server (AD) | User identity & authentication context |
+| Mail Server (Zimbra) | Phishing email delivery & mailbox access logs |
+| Splunk Enterprise | Log ingestion, correlation, alerting |
+| Splunk Universal Forwarder | Endpoint log forwarding |
+| Kali Linux | Hosts phishing landing page |
+| Security Onion (Optional) | Supplemental network telemetry |
 
 ---
 
-## 🧠 Network & DNS Design Rationale
+## 🧠 Detection Architecture & Philosophy
 
-This simulation intentionally uses **pfSense as the DHCP server and DNS resolver**
-to reflect real-world SOC environments where:
+SIM-001 follows a **layered evidence model**:
 
-- Endpoint IP addresses are **dynamic**
-- DNS visibility is centralized at the **network layer**
-- Detections do not rely on domain-joined behavior
-- Correlation is based on **user context, hostnames, and process execution**
-  rather than fixed IP addresses
+| Layer | Role | Authority Level |
+|------|------|----------------|
+| Email System | Phishing delivery & mailbox activity | Context |
+| Identity (AD) | User attribution | Attribution |
+| Endpoint (Windows) | Process execution visibility | **Primary Detection Signal** |
+| SIEM | Cross-source correlation | Investigation Platform |
+| Network (Optional) | DNS / HTTP traces | Supplemental |
 
-This ensures detection logic remains **portable, resilient, and environment-agnostic**.
+**Authoritative Detection Source:**  
+Windows Security Event ID **4688** and/or **Sysmon Event ID 1** containing suspicious URL data in the process command line.
 
----
-
-## 📂 Files in This Simulation
-
-- `steps.md` – Exact steps used to perform the simulation
-- `logs.md` – Symbolic sample logs (endpoint and alert evidence)
-- `queries.md` – SPL used to hunt and detect this activity
-- `alert-config.md` – Splunk alert configuration and symbolic ID
-- `screenshots/` – Evidence:
-  - Email being viewed / phishing content
-  - Chrome execution evidence
-  - URL detection in Splunk
-  - Correlation query
-  - Alert configuration
-  - Alert firing
+Network telemetry may supplement investigation when available, but endpoint process telemetry remains the detection authority.
 
 ---
 
-## ✅ Success Criteria (Validated)
+## 🧪 Attack Scenario Overview
 
-- A user on the Windows 11 endpoint opens a **test phishing email**
-  and clicks a suspicious URL ✅  
-- Windows generates **EventCode 4688** for `chrome.exe` ✅  
-- The phishing URL appears in **`Process_Command_Line`** ✅  
-- Splunk correlates endpoint execution and URL activity ✅  
-- Splunk triggers an alert with symbolic ID:
-
-### LAB-SIM-001-PHISHING-ALERT
-
-✅ **All success criteria met and validated with screenshots.**
+1. Phishing email delivered to user mailbox  
+2. User logs into mail and opens message  
+3. User clicks malicious link  
+4. Browser launches with URL in command line  
+5. Endpoint logs record process creation  
+6. SIEM correlates activity for detection and investigation  
 
 ---
 
-## 🔍 Detection Summary
+## 🧭 Simulation Paths
 
-| Component | Evidence |
-|----------|----------|
-| Endpoint Execution | Windows Security EventCode 4688 |
-| Command-Line Capture | `Process_Command_Line` |
-| Phishing URL | URL passed to browser |
-| Primary Detection | Endpoint telemetry |
-| SIEM Correlation | Splunk SPL |
-| Alerting | `LAB-SIM-001-PHISHING-ALERT` |
-| Validation | Screenshots + Symbolic Logs |
+### Path A – Full Email Chain (Recommended)
+Mail delivery → Mail login → Link click → Browser execution → Endpoint logs → SIEM detection
 
-> Network telemetry (Suricata/Zeek) may be used as **optional supporting evidence**
-> when available, but is not required for detection validity.
+### Path B – Endpoint-Only Execution
+Manual browser launch with URL when mail layer is offline → Endpoint logs → SIEM detection
+
+Both paths validate the same detection logic.
 
 ---
 
-## 🛡 GRC Control Validation (Governance / Risk / Compliance)
+## 📊 Detection Logic Summary
 
-This simulation is also treated as a **security control test** to support audit readiness
-and continuous improvement in the JCE Cyber Lab security program.
+Primary detection identifies:
 
-### 🎯 Control Objective
+- Browser process (chrome.exe, msedge.exe, firefox.exe)
+- Command line containing HTTP/HTTPS URL
+- User context
+- Time correlation
 
-Ensure the environment can **detect and alert on phishing link execution**
-using **authoritative endpoint telemetry** with repeatable evidence.
+Email logs provide investigation context:
 
-### 🧩 Applicable Framework Mapping (NIST CSF)
-
-| Function | Category | Mapping |
-|---------|----------|---------|
-| Protect | PR.AT | Security Awareness & user-risk simulation validation |
-| Detect | DE.CM | Continuous monitoring via endpoint telemetry + SIEM correlation |
-| Detect | DE.AE | Detect anomalous/suspicious activity (URL invocation via browser execution) |
-| Respond | RS.AN | Analyst validation using logs + SIEM evidence |
-
-### ✅ Control(s) Validated
-
-| Control Area | Control Statement | Validation Method | Result |
-|-------------|-------------------|------------------|--------|
-| Logging & Monitoring | Process execution events are logged with command-line details | Windows Security EventCode 4688 with command-line logging | Pass ✅ |
-| Detection Engineering | Suspicious URL invocation is detectable via correlation logic | Splunk SPL correlation search | Pass ✅ |
-| Alerting | A validated alert is generated for review | Splunk alert firing with symbolic ID | Pass ✅ |
-
-### 📌 Evidence Collected (Audit-Ready)
-
-| Evidence ID | Description | Source | Location |
-|------------|-------------|--------|----------|
-| E-SIM001-001 | Email viewed / phishing content | Windows 11 | `screenshots/` |
-| E-SIM001-002 | Browser execution log (EventCode 4688) | Windows Security Logs | `logs.md` + `screenshots/` |
-| E-SIM001-003 | URL present in `Process_Command_Line` | Windows Security Logs | `logs.md` |
-| E-SIM001-004 | Splunk correlation query results | Splunk | `queries.md` + `screenshots/` |
-| E-SIM001-005 | Alert configuration + alert firing evidence | Splunk | `alert-config.md` + `screenshots/` |
-
-### 🧾 Compliance/Audit Readiness Notes
-
-- This simulation produces defensible evidence suitable for **audit validation**
-  of monitoring and detection controls in a SOC/SIEM environment.
-- Optional network telemetry (Zeek/Suricata) may support investigation but is
-  **not required** for control validity in this SIM.
-
-### 👤 Control Ownership & Governance
-
-| Item | Value |
-|------|-------|
-| Control Owner | JCE (Lab Owner / Security Program Owner) |
-| Control Type | Preventive + Detective |
-| Test Frequency | Quarterly (or after major environment changes) |
-| Evidence Retention | 90 days minimum (lab standard) |
-| Exception Handling | If telemetry/alert fails → record issue in Issues & Resolutions and re-test after remediation |
-
-### 🟢 Control Test Status
-
-**Control Test Result:** Pass ✅  
-**Control Status:** Implemented and Verified  
-**Linked Detection ID:** `LAB-SIM-001-PHISHING-ALERT`
+- Message delivery
+- Mailbox access
+- Pre-execution user activity
 
 ---
 
-## 🧪 Final Validation
+## 📁 Simulation Files
 
-End-to-end validation confirmed that phishing-related **endpoint activity**
-was successfully captured, correlated, and surfaced through the detection pipeline.
-
-- **Endpoint Validation:**  
-  Windows Security EventCode **4688** with command-line logging confirmed browser
-  execution and URL invocation by the user.
-
-- **Correlation Validation:**  
-  Splunk successfully correlated endpoint execution events and produced
-  a validated detection.
-
-- **Alert Validation:**  
-  The detection alert (`LAB-SIM-001-PHISHING-ALERT`) fired as expected and was
-  confirmed with supporting screenshots and symbolic logs.
-
-**Result:**  
-SIM-001 successfully validates phishing link detection using authoritative
-endpoint telemetry, with optional network confirmation when available.
-
----
-
-## 🧾 Status Checklist (Final)
-
-- [x] Steps executed  
-- [x] Logs captured and saved to `logs.md`  
-- [x] SPL queries tested and refined  
-- [x] Splunk alert configured and tested  
-- [x] Screenshots captured and saved to `screenshots/`  
-- [x] Detection matrix updated to “Validated”  
+- **README.md** — Overview & detection logic  
+- **steps.md** — Reproduction procedure  
+- **queries.md** — SPL detection queries  
+- **logs.md** — Evidence artifacts  
+- **alert-config.md** — Detection alert configuration  
+- **issues-and-resolutions.md** — Troubleshooting log  
+- **screenshots/** — Evidence images and validation proof  
 
 ---
 
 ## ⚠️ Issues Encountered & Resolutions
 
-During execution of this simulation, multiple real-world operational and detection
-engineering challenges were encountered and resolved, including:
+Operational challenges encountered during SIM-001 setup, telemetry validation, and detection tuning are documented in the dedicated log:
 
-- Log ingestion failures
-- Forwarder authentication problems
-- Missing audit policies
-- Endpoint execution gaps
-- Network visibility constraints
+👉 **[SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing-email.md)**
 
-Each issue was investigated, root-caused, and resolved using standard SOC
-troubleshooting techniques.
+This log includes:
 
-👉 **Full technical breakdown:**  
-[SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing-email.md)
+- Telemetry ingestion issues  
+- Field parsing and normalization problems  
+- Detection logic tuning adjustments  
+- Lab environment constraints  
+- Validation re-tests after fixes  
+
+Each issue entry follows a structured format:
+
+**Issue → Root Cause → Resolution → Verification → Overall Takeaway → Status**
+
+Maintaining a formal Issues & Resolutions log ensures:
+
+- Reproducibility  
+- Change tracking  
+- Detection reliability  
+- Professional troubleshooting documentation practices  
 
 ---
 
-## ✅ FINAL STATUS
+## ✅ Success Criteria
 
-**SIM-001 – Phishing Email Detection is COMPLETE, VALIDATED, and PRODUCTION-READY.**
+| Validation Requirement | Expected Result |
+|------------------------|-----------------|
+| Phishing email delivered | Mail server logs confirm message |
+| User interaction | Mail access or browser launch observed |
+| Process execution logged | Event ID 4688 / Sysmon EID 1 recorded |
+| URL present in command line | Suspicious URL visible in logs |
+| Log ingestion | Events searchable in Splunk |
+| Detection logic triggered | Correlation query returns results |
+| Alert generated | Detection alert fires successfully |
 
-This simulation demonstrates a realistic SOC workflow:
+---
 
-- User-driven attack execution  
-- Authoritative endpoint telemetry validation  
-- Detection engineering and alerting  
-- Operational troubleshooting  
-- Defensible analyst conclusions  
+## 🛡 Governance & Control Alignment
 
-It serves as a **defensible, interview-ready detection project** in the
-JCE Cyber Lab.
+This simulation supports formal detection control validation.  
+Full governance, framework alignment, and compliance documentation are maintained in:
+
+**CV-SIM001 — Endpoint Phishing Link Detection Control Validation**
+
+---
+
+## 📁 Evidence Naming Convention
+
+| Evidence ID Format | Example |
+|-------------------|---------|
+| Execution Evidence | `E-SIM001-###` |
+| Screenshot | `sim001-evidence-###-description.png` |
+
+---
+
+## 🔍 Final Validation & Status Check
+
+| Check | Status |
+|------|--------|
+| Endpoint telemetry confirmed | ✅ |
+| SIEM ingestion verified | ✅ |
+| Correlation search validated | ✅ |
+| Detection alert fired | ✅ |
+| Evidence captured | ✅ |
+| Simulation reproducible | ✅ |
+
+---
+
+## 🏁 Outcome
+
+This simulation demonstrates the ability to:
+
+- Detect phishing-triggered execution at the endpoint  
+- Attribute activity to a user  
+- Investigate multi-layer telemetry in a SIEM  
+- Map detection to MITRE ATT&CK  
+
+**Status:** Detection validated and reproducible  
+**Detection Authority:** Endpoint Telemetry (4688 / Sysmon)
+
