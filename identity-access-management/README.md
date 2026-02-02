@@ -115,5 +115,48 @@ Export commands are documented to maintain audit traceability.
 
 ---
 
+## 🧭 IAM Section Navigation
+
+This IAM section is structured to mirror enterprise identity governance documentation.  
+Each document focuses on a specific component of identity architecture, access control, or evidence generation.
+
+---
+
+### 🔍 Core Identity References
+
+- 👤 **[AD User Inventory](ad-user-inventory.md)** – Human identities, roles, and departmental structure  
+- 👥 **[AD Group Inventory](ad-group-inventory.md)** – RBAC, application, and resource group definitions  
+- 🧩 **[RBAC Model](rbac-model.md)** – Role-based access control architecture and privilege tiering  
+- ⚙ **[Service Account Governance](service-accounts.md)** – Non-human identity controls and monitoring
+
+---
+
+### 🏗 Identity Architecture & Governance
+
+- 🗺 **[IAM Topology Diagram](iam-topology.md)** – Visual overview of users, RBAC groups, service accounts, and resource relationships  
+- 🧾 **[Delegation Model](delegation-model.md)** – Least-privilege administrative delegation boundaries  
+- 🕵️ **[Identity-Driven Detection Use Cases](identity-detection-usecases.md)** – How identity context improves SOC detections
+
+---
+
+### 📤 Evidence & Validation
+
+- 📁 **[Export Commands](export-commands.md)** – Reproducible AD evidence generation  
+- CSV evidence files (generated via documented commands):
+  - `ad_users_FINAL.csv`
+  - `ad_groups_FINAL.csv`
+  - `group_membership_FINAL.csv`
+
+---
+
+This structure separates identity architecture into clear layers:
+
+| Layer | Purpose |
+|------|---------|
+| Identity Structure | Users + groups |
+| Access Control Design | RBAC + delegation |
+| Security Operations | Detection use cases |
+| Governance Evidence | Exports and validation |
+
 > This IAM model demonstrates enterprise-style identity governance supporting SOC operations, GRC traceability, and detection engineering workflows.
 
