@@ -31,6 +31,33 @@ This structure mirrors **enterprise incident investigation workflows**, not stan
 
 ---
 
+## 🔐 Identity & Email Telemetry Integration
+
+The JCE Cyber Lab detection program extends beyond traditional network and endpoint monitoring.  
+The environment integrates:
+
+- **Active Directory Identity & Access Management (IAM)**
+- **Zimbra Mail Server authentication telemetry**
+
+This enables detection workflows that incorporate **identity context and email activity** into correlation logic.
+
+As a result, the Detection Validation Matrix represents coverage across **four telemetry layers**:
+
+| Layer | Example Data Source |
+|------|---------------------|
+| Network | Zeek logs, Suricata alerts |
+| Endpoint | Sysmon, Windows Security Events |
+| Identity | Active Directory authentication, group membership changes |
+| Email | Zimbra login, authentication, and administrative activity |
+
+This multi-layer integration mirrors enterprise SOC environments where investigations span:
+
+**Email → Identity → Endpoint → Network**
+
+Detection scenarios may therefore include identity-aware or email-based evidence chains in addition to traditional telemetry.
+
+---
+
 # 🧪 Simulation Validation Matrix
 
 | SIM ID | Scenario | MITRE ATT&CK | Data Sources | Detection Logic | Alert | Evidence | Status |
