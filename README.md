@@ -45,6 +45,8 @@ Simulations are mapped to **attack progression stages** commonly observed in ent
 
 This mapping allows detections to be understood in the context of **real incident investigation workflows**, rather than isolated lab tests.
 
+---
+
 ### 🔢 About Simulation Numbering
 
 Simulation IDs (**SIM-001 → SIM-XXX**) represent **chronological development of detections**, not the order of an attack chain.
@@ -56,8 +58,6 @@ In enterprise security programs:
 - Coverage is organized by **behavior and risk**, not numeric sequence  
 
 For that reason, simulation numbers **do not imply attack order**. The authoritative view of detection coverage is the **Detection Validation Matrix**, which maps each simulation to attacker behavior stages.
-
----
 
 ---
 
