@@ -151,7 +151,7 @@ Maintaining a formal Issues & Resolutions log ensures:
 This simulation supports formal detection control validation.  
 Full governance, framework alignment, and compliance documentation are maintained in:
 
-**CV-SIM001 — Endpoint Phishing Link Detection Control Validation**
+**[CV-SIM001 — Endpoint Phishing Link Detection Control Validation](GRC-Program/control-validations/CV-SIM001-Endpoint-Execution-Control.md)**
 
 ---
 
