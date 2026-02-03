@@ -1,77 +1,38 @@
-# SIM-001 – Phishing Email (T1566.002) – Steps
+# SIM-001 – Phishing Email (T1566.002) – Execution Steps
+
+**Detection Focus:** Endpoint Execution via Browser Command Line  
+**Primary Telemetry:** Windows Security Event ID 4688  
+**MITRE ATT&CK:** T1566.002 – Spearphishing Link
+
+---
 
 ## 1. Prerequisites
 
-Before running this simulation, ensure the following **required** lab components
-are online and communicating.
+Ensure the following components are operational before starting SIM-001.
 
-### Required Components
+| Component | Required? | Purpose in SIM-001 |
+|-----------|-----------|-------------------|
+| **Windows 11 Endpoint** | ✅ | Generates authoritative telemetry (Event 4688, process command line) |
+| **Splunk Enterprise** | ✅ | Ingests logs, validates detection, and triggers alerts |
+| **Splunk Universal Forwarder** | ✅ | Sends Windows logs to Splunk |
+| **Kali Linux** | Optional | Hosts phishing landing page used in URL |
+| **Mail Server (Zimbra)** | Optional | Delivers phishing email for realistic attack path |
+| **Security Onion** | Optional | Provides supplemental network telemetry (not required) |
 
-- **Windows 11 Endpoint**
-  - IP address assigned via **DHCP**
-  - Windows Security Auditing enabled
-  - Process Creation logging (EventCode 4688)
-  - Command-line auditing enabled
-  - Splunk Universal Forwarder running
-  - Log forwarding to Splunk confirmed
-
-- **Ubuntu Server – Splunk Enterprise**
-  - IP address assigned via **DHCP**
-  - Hosts Splunk Enterprise SIEM
-  - Ingesting:
-    - Windows Security Logs (`winevent_security`)
-    - Windows System Logs (`winevent_system`)
-  - Serves as the central correlation and alerting platform
-
-- **pfSense (10.0.0.1)**
-  - Primary **DHCP server**
-  - Primary **DNS resolver**
-  - Routing, NAT, and firewall enforcement
-
-### Optional Components (Supplemental Validation Only)
-
-- **Kali Linux – Attack Simulation Host**
-  - IP address assigned via **DHCP**
-  - Used to host a lightweight phishing landing page
-  - Optional — may be replaced with a symbolic or local URL
-
-- **Security Onion (Optional)**
-  - Suricata + Zeek for passive network visibility
-  - Used only for **supplemental confirmation**
-  - Not required for SIM-001 detection or alert validation
+> Detection for SIM-001 depends on **endpoint process telemetry**, not network logs.
 
 ---
 
-### Design Rationale – DHCP, DNS, and Telemetry Scope
+# 2. Execution – Option A: Email-Based Phishing (Zimbra)
 
-This simulation intentionally uses **pfSense as the DHCP server and DNS resolver**
-to reflect real-world SOC environments where:
-
-- Endpoint IP addresses are **dynamic**
-- DNS visibility is centralized at the **network layer**
-- Detections do not depend on domain-joined behavior
-- Phishing detection relies on **user context, hostnames, and process execution**
-  rather than fixed IP addresses
-
-SIM-001 is designed as an **endpoint-driven detection**.
-Network telemetry is **supporting evidence**, not a dependency.
-
-> Before continuing, verify Splunk is receiving recent Windows logs:
-
-```spl
-(index=winevent_security OR index=winevent_system)
-| head 10
-```
+Use this path when validating phishing detection using **realistic internal email delivery**.
 
 ---
 
-## 2. (Optional) Prepare a Phishing Landing Page
+## 2.1 Prepare Phishing Landing Page (Kali Linux)
 
-This step is optional and may be skipped if performing
-endpoint-only validation.
+On Kali Linux:
 
-### Option A – Kali Linux (Optional)
-On Kali Terminal :
 ```bash
 mkdir -p ~/sim001-phish
 cd ~/sim001-phish
@@ -87,221 +48,15 @@ cat > index.html << 'EOF'
 EOF
 ```
 
-**Start a Lightweight Web Server**
+**Start a lightweight web server:**
 ```bash
 python3 -m http.server 8080
 ```
 
-**Confirm Server Is Running**  
-Open in a browser:
-```cpp
+**Confirm accessibility:**
+```text
 http://<kali-ip>:8080/
 ```
-***Take note — this URL will be used in the simulated phishing email.***  
 
-### Option B – Endpoint-Only / Symbolic URL (Recommended)
-
-If Kali is not running, use any URL string that will appear in the
-browser command line, for example:
-```text
-http://phish-sim.local/policy
-```
-***The presence of a URL in the command line is the key detection signal.***
-
----
-
-## 3. Simulate a Phishing Email on Windows 11
-### Option A – With a Mail Client(Optional)
-Send an email to your test user containing the phishing URL:
-```text
-Subject: HR Policy Update – Action Required
-
-Body:
-Dear user,
-
-Please review the HR policy update:
-http://<kali-ip>:8080/
-
-Regards,
-HR Team
-```
-
-
-
-### Option B – Without a Mail Server (Text-Based Simulation)
-
-1. Open Notepad on Windows 11
-2. Paste the following:
-```text
-From: hr@lab.local
-To: user@lab.local
-Subject: HR Policy Update – Action Required
-
-Dear user,
-
-Please review the new HR policy:
-http://phish-sim.local/policy
-
-Thanks,
-HR Team
-```
-3. Save it as: 
-```makefile
-C:\Users\testuser\Desktop\sim001-email.txt
-```
-
-***The important element is the phishing URL that the user will click, not the delivery mechanism.***
-
----
-
-## 4. User Clicks the Link (Windows 11) — Generate Endpoint Telemetry
-
-On Windows 11:
-- Open the email or text file
-- Click the link or copy/paste into Google Chrome
-
-This generates authoritative endpoint telemetry:  
-**Windows Endpoint Telemetry (Windows Security Event 4688)**
-- Browser process creation
-- New_Process_Name = chrome.exe
-- Command line contains the phishing URL
-
-***Capture approximate timestamps for easier hunting later.***
-
----
-
-## 5. (Optional) Validate Network Telemetry (Security Onion)
-
-This step is **optional** and not required for SIM-001 completion.
-
-If Security Onion is available, network telemetry may show outbound
-HTTP traffic generated by the phishing link click.
-
-If Security Onion is not available, proceed using **endpoint telemetry only**.
-
-On Security Onion, observe HTTP events:
-
-```bash
-sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
-```
-
-**Expected fields (if available):**  
-- src_ip – Windows 11 endpoint (DHCP-assigned)
-- dest_ip – Phishing host (e.g., Kali, DHCP-assigned)
-- dest_port – 8080
-- http.method – GET
-
-> Note:
-> Network telemetry is supplemental and used only to support endpoint
-> validation. Detection logic for SIM-001 does not depend on network data.
-
-***Symbolic versions are stored in logs.md.***
-
----
-
-## 6. Validate Endpoint Telemetry in Splunk (FINAL WORKING QUERY)
-
-In Splunk, run:
-~~~spl
-(index=winevent_security OR index=winevent_system)
-EventCode=4688
-New_Process_Name="*\\chrome.exe"
-| table _time, host, user, New_Process_Name, Process_Command_Line
-| sort - _time
-~~~
-
-Look for:
-- chrome.exe execution
-- URL present in Process_Command_Line
-```cpp
-http://<Kali IP>:8080
-```
-
-**📌 Evidence ID:** `E-SIM001-002`  
-**📸 Screenshot:** `sim001-evidence-002-splunk-url-detection.png`
-
----
-
-## 7. Correlate Phishing Click in Splunk (FINAL CORRELATION)
-~~~spl
-(index=winevent_security OR index=winevent_system)
-EventCode=4688
-New_Process_Name="*\\chrome.exe"
-Process_Command_Line="*http*"
-| eval simulation_id="SIM-001"
-| eval symbolic_id="LAB-SIM-001-PHISHING-ALERT"
-| table _time, host, user, New_Process_Name, Process_Command_Line, simulation_id, symbolic_id
-| sort - _time
-~~~
-
-**📌 Evidence ID:** `E-SIM001-003`  
-**📸 Screenshot:** `sim001-evidence-003-splunk-correlation.png`
-
-This confirms:
-***“User clicked phishing link → browser executed → URL captured → detection validated.”***
-
----
-
-## 8. Configure Splunk Alert (LAB-SIM-001-PHISHING-ALERT)
-
-Use the correlation query above to configure the alert:
-- Schedule: Every 5 minutes
-- Time Window: Last 15 minutes
-- Trigger When: Number of Results > 0
-- Trigger Type: Per Result
-- Throttle: 10 minutes
-- Severity: Medium
-
-***Paste the final configuration into:***  `alert-config.md`  
-
-**📌 Evidence ID:** `E-SIM001-004`  
-**📸 Screenshots:**
-- `sim001-evidence-004-alert-config.png`
-- `sim001-evidence-005-alert-fired.png`
-
----
-
-## 9. Save Evidence
-
-Store all evidence in:  
-`simulations/SIM-001-Phishing-Email/screenshots/`  
-
-***📸 Evidence Naming Standard (SIM-001)***
-- Evidence IDs: `E-SIM001-###`  
-- Screenshot file format: `sim001-evidence-###-<short-description>.png`
-
-**✅ Required Evidence (Endpoint + SIEM)**
-- `sim001-evidence-001-email-view.png`
-Purpose: Show the simulated phishing message containing the URL
-- `sim001-evidence-002-splunk-url-detection.png`
-Purpose: Show 4688 evidence with chrome.exe + URL in command line
-- `sim001-evidence-003-splunk-correlation.png`
-Purpose: Show correlation query output including simulation_id + symbolic_id
-- `sim001-evidence-004-alert-config.png`
-Purpose: Show Splunk alert configuration (schedule, trigger, throttle)
-- `sim001-evidence-005-alert-fired.png`
-Purpose: Show Splunk triggered alert proving end-to-end validation  
-
-**🟡 Optional Evidence (Network Confirmation)**
-- `sim001-evidence-006-network-http-confirmation.png`
-Purpose: Optional Suricata/Zeek HTTP evidence supporting the URL click
-
----
-
-## 10. Mark Simulation Completion
-
-Update the checklist in README.md:
-- [x] Steps executed
-- [x] Logs captured
-- [x] Queries tested
-- [x] Alert triggered
-- [x] Screenshots saved
-- [x] Validation matrix updated
-
----
-
-## ✅ FINAL STATUS
-
-**SIM-001 – Phishing Email Detection is COMPLETE and FULLY VALIDATED**  
-Endpoint telemetry is authoritative.  
-Network telemetry is optional and supplemental.
+**📸 Evidence:**  
+sim001-A-evidence-001-phishing-page-hosted.png
