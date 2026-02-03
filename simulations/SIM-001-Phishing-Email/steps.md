@@ -70,9 +70,164 @@ python3 -m http.server 8080
 ```
 7. Confirm the server is listening on port 8080
 
-**This URL will be used in the phishing email:** `http://<KALI_IP>:8080`
+**This URL will be used in the phishing email:** `http://<KALI_IP>:8080`  
 
+📸 **Evidence:**  
+`sim001-A-evidence-001-kali-http-server.png`
 
+---
+
+### 2.2 Send Phishing Email (Zimbra Mail Server)
+
+This step simulates a **realistic internal phishing scenario** where an email
+appears to originate from **HR**.
+
+The email is sent from an existing HR user to a target internal user.
+
+On the **Zimbra Web Interface**:
+
+1. Log in as an HR user  
+   *(example: `hr.generalist1`)*
+2. Create a new email
+3. Populate the fields:
+   ```text
+   From: HR user mailbox  
+   To: `it.helpdesk1`  
+   Subject: `Action Required: Benefits Review`  
+   Body:
+     
+     Please review your updated benefits information at the link below:
+
+     http://<KALI_IP>:8080
+   ```
+4. Send the email  
+5. Confirm the email is successfully delivered  
+
+📸 **Evidence:**  
+`sim001-A-evidence-002-email-sent.png`
+
+---
+
+### 2.3 User Receives Phishing Email (Windows 11)
+
+This step confirms successful delivery of the phishing message.
+
+On the **Windows 11 endpoint**:
+
+- Log in as `it.helpdesk1`  
+- Open the mailbox  
+- Confirm the phishing email is present  
+- Open the email **without clicking the link**
+
+📸 **Evidence:**  
+`sim001-A-evidence-003-email-received.png`
+
+---
+
+### 2.4 User Clicks Phishing Link (Windows 11)
+
+This step generates the **authoritative endpoint telemetry** used for detection.
+
+On the **Windows 11 endpoint**:
+
+- Open the phishing email  
+- Click the embedded URL  
+
+This action launches the browser and initiates endpoint execution.
+
+📸 **Evidence:**  
+`sim001-A-evidence-004-email-link-click.png`
+
+---
+
+### 2.5 Validate Endpoint Telemetry (Windows)
+
+The phishing click generates **Windows Security Event ID 4688**.
+
+Validate that:
+
+- `chrome.exe` is executed  
+- The phishing URL is present in the command line  
+
+📸 **Evidence:**  
+`sim001-A-evidence-005-endpoint-4688.png`
+
+---
+
+### 2.6 (Optional) Validate Network Telemetry (Security Onion)
+
+This step is optional and not required for SIM-001 completion.
+
+If Security Onion is available, observe outbound HTTP traffic.
+
+On **Security Onion**:
+
+```bash
+sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
+```
+
+Expected fields (if available):
+
+- **src_ip** – Windows 11 endpoint  
+- **dest_ip** – Kali host  
+- **dest_port** – 8080  
+- **http.method** – GET  
+
+📸 **Optional Evidence:**  
+`sim001-A-evidence-006-network-http.png`
+
+> Network telemetry is supplemental and used only to support endpoint validation.  
+> Detection logic does **not** depend on network data.
+
+---
+
+### 2.7 Validate Detection in Splunk
+
+In Splunk, run the validated detection query.
+
+Confirm:
+
+- `chrome.exe` execution  
+- URL visible in `Process_Command_Line`
+
+📸 **Evidence:**  
+`sim001-A-evidence-007-splunk-url-detection.png`
+
+---
+
+### 2.8 Correlate Event in Splunk
+
+Correlate the phishing click to the simulation.
+
+📸 **Evidence:**  
+`sim001-A-evidence-008-splunk-correlation.png`
+
+---
+
+### 2.9 Configure Splunk Alert
+
+Configure the alert using the correlation query.
+
+- **Alert Name:** `LAB-SIM-001-PHISHING-ALERT`  
+- **Schedule:** Every 5 minutes  
+- **Time Window:** Last 15 minutes  
+- **Trigger:** Number of Results > 0  
+- **Trigger Type:** Per Result  
+- **Throttle:** 10 minutes  
+- **Severity:** Medium  
+
+📸 **Evidence:**  
+`sim001-A-evidence-009-alert-config.png`  
+`sim001-A-evidence-010-alert-fired.png`
+
+---
+
+### 2.10 Save Evidence & Mark Completion
+
+Store all evidence in:
+```text
+simulations/SIM-001-Phishing-Email/screenshots/
+```
    
 ***📌 Option A Status:*** **COMPLETE**
 
