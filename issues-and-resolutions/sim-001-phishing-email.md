@@ -343,6 +343,76 @@ intent and architecture.
 
 ---
 
+## 🧩 Issue 8: Phishing Email Delivered but User Click Was Not Generating Browser Telemetry
+
+**Description:**  
+The phishing email was successfully delivered to the target mailbox (`it.helpdesk1`), and the user opened the message, but clicking the embedded URL did not consistently generate the expected browser process execution logs.
+
+**Impact:**  
+- No Event ID 4688 for `chrome.exe` was generated  
+- Splunk correlation queries returned no results  
+- Alert did not trigger despite successful email delivery  
+- Confusion between email delivery success vs detection failure  
+
+**Root Cause:**  
+The issue stemmed from **user interaction flow differences** in a lab environment:
+
+- The link was opened in preview mode without full browser launch  
+- Default browser association was temporarily changed  
+- The link opened inside a mail client sandbox instead of Chrome  
+- The URL was copied but not executed  
+
+SIM-001 detection depends on **actual browser process creation**, not email artifacts.
+
+**Resolution:**  
+1. Verified default browser was set to Google Chrome.  
+2. Confirmed the link was clicked in a way that launched a new browser process.  
+3. Ensured the email client did not open links inside a restricted preview mode.  
+4. Re-executed the click and confirmed Chrome launched.  
+5. Verified Event ID 4688 appeared locally and in Splunk.
+
+**Validation:**  
+Once Chrome executed normally, process creation telemetry was captured and detection logic validated successfully.
+
+**Evidence Reference:**  
+- `E-SIM001-002` (Chrome execution with phishing URL)
+
+**Lessons Learned:**  
+> Email delivery does not equal detection.  
+> Detection requires **behavioral execution**, not just message receipt.
+
+---
+
+## 🧩 Issue 9: Alert Triggered but Analyst Interpretation Was Initially Incorrect
+
+**Description:**  
+The Splunk alert triggered as expected, but initial interpretation suggested a broader compromise rather than a controlled phishing simulation.
+
+**Impact:**  
+- Alert appeared more severe than intended  
+- Required manual review to confirm it was lab-generated activity  
+- Highlighted the need for simulation tagging  
+
+**Root Cause:**  
+The alert output did not initially include clear **simulation identifiers**, making it indistinguishable from real malicious activity.
+
+**Resolution:**  
+1. Added `simulation_id="SIM-001"` to correlation query.  
+2. Added `symbolic_id="LAB-SIM-001-PHISHING-ALERT"` for traceability.  
+3. Updated alert configuration to preserve these fields.  
+
+**Validation:**  
+Subsequent alerts clearly displayed simulation identifiers, preventing confusion during review.
+
+**Evidence Reference:**  
+- `E-SIM001-008` (Correlation event with simulation_id + symbolic_id)
+
+**Lessons Learned:**  
+> Simulation environments must include tagging to distinguish lab activity from real incidents.  
+> Detection engineering includes **alert clarity**, not just triggering logic.
+
+---
+
 ## 🧠 Overall Takeaways
 
 SIM-001 reinforced foundational SOC and detection engineering principles:
