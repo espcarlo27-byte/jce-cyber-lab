@@ -1,33 +1,22 @@
 # SIM-001 – Phishing Email (T1566.002) – Log Evidence
 
-This file contains **symbolic and representative log evidence** captured during
-SIM-001, demonstrating **user-driven phishing link execution** resulting in
-endpoint process creation.
+This document captures the **actual telemetry evidence** generated during
+SIM-001 execution and used to validate detection logic.
 
-SIM-001 is designed as an **endpoint-driven detection**.
-Windows Security Event ID **4688** is treated as the **authoritative telemetry source**.
-Network telemetry, when available, is included as **optional supplemental context**.
-
-The logs below are used to validate:
-- Detection logic in `queries.md`
-- Alert logic in `alert-config.md`
+SIM-001 is an **endpoint-driven phishing detection simulation**.  
+Windows Security Event **ID 4688 (Process Creation)** is treated as the
+**authoritative detection signal**. Network telemetry, when present, is
+supplemental.
 
 ---
 
-## 🧾 Log Sources Used
+## Log Sources Used
 
-### Required (Authoritative)
-- **Windows Security Log (Event ID 4688)** – Process creation and command-line telemetry
-
-### Optional (Supplemental)
-- **Network / Web Server Logs (HTTP)** – Supporting confirmation of link access
-- **SIEM Alert Event** – Detection validation artifact
-
-> ⚠️ **Important Behavior Note**  
-> Phishing detections commonly involve **benign parent processes**
-> (e.g., browsers or email clients).  
-> Detection logic must therefore rely on **user context, command-line parameters,
-> and execution timing**, not process name alone.
+| Source | Purpose |
+|--------|---------|
+| Windows Security Log | Process creation visibility (Event ID 4688) |
+| Splunk Indexes | Event ingestion, searching, and alerting |
+| Security Onion (Optional) | Network HTTP confirmation |
 
 ---
 
@@ -36,19 +25,34 @@ The logs below are used to validate:
 The following field mappings were confirmed as reliable in this lab environment:
 
 ### Windows Security (Event ID 4688)
-- `user` → normalized as **actor**
-- `New_Process_Name`
-- `Process_Command_Line`
-- `host`
+
+| Field | Description |
+|------|-------------|
+| `user` | Normalized as actor |
+| `New_Process_Name` | Executed process |
+| `Process_Command_Line` | Contains execution arguments (URL artifact) |
+| `host` | Endpoint hostname |
 
 ### Optional Network Telemetry (HTTP)
-- `src_ip` (endpoint, DHCP-assigned)
-- `dest_ip` (phishing host, DHCP-assigned)
-- `dest_port`
-- `http.method`
-- `user_agent`
+
+| Field | Description |
+|------|-------------|
+| `src_ip` | Endpoint IP (DHCP-assigned) |
+| `dest_ip` | Phishing host IP (Kali) |
+| `dest_port` | Destination port (8080) |
+| `http.method` | HTTP method (GET) |
+| `user_agent` | Browser agent string |
 
 Alert metadata fields were preserved to support simulation traceability.
+
+---
+
+### Email Delivery Context (SIM-001 Option A)
+
+In the updated SIM-001 design, the phishing link was delivered through the lab
+mail server (**Zimbra**) from an HR user to `it.helpdesk1`. While email delivery
+provides realistic attack context, detection validation relies on endpoint
+process creation evidence (Event ID 4688).
 
 ---
 
@@ -61,148 +65,149 @@ This simulation follows the standardized evidence naming convention:
 
 ---
 
-## 1. Baseline User Activity (Browser Execution)
+## 1. Baseline Chrome Execution (Pre-Phishing Validation)
 
-**Evidence ID:** `E-SIM001-001`  
-**Source:** Windows Security  
-**Event ID:** 4688  
-**User Context:** `LAB\labuser`
-
-**Screenshot Reference (Optional):**  
-- `sim001-evidence-002-splunk-url-detection.png` *(shows baseline + URL executions depending on view)*
+This confirms that the endpoint is correctly logging browser activity before
+the phishing event.
 
 ```text
-Time: 2025-12-09 01:13:03
-Host: Windows11Pro
-Account_Name: LAB\labuser
+_time: 2026-01-30 01:10:44
+host: WIN11-LAB
+user: LAB\it.helpdesk1
+EventCode: 4688
 New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
-Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe"
+Parent_Process_Name: C:\Windows\explorer.exe
+Process_Command_Line: "chrome.exe"
 ```
 
-Interpretation:
-- Standard browser execution by a non-privileged user
-- No immediate indication of malicious activity
-- Establishes baseline user behavior
+📌 **Evidence ID:** `E-SIM001-001`
+
+📸 **Screenshot Reference (Optional):**  
+- `sim001-evidence-001-baseline-chrome.png`
+
+**Description:** Baseline Chrome execution confirms Event 4688 visibility.
 
 ---
 
-## 2. Phishing Link Execution (Primary Detection Signal)
+## 2. Phishing URL Execution (Primary Detection Signal)
 
-**Evidence ID:** `E-SIM001-002`
-**Source:** Windows Security
-**Event ID:** 4688
-**User Context:** `LAB\labuser`
+This event shows Chrome launched with the phishing URL in the command line.
+This is the **core SIM-001 detection artifact**.
 
-**Screenshot References:**  
+```text
+_time: 2026-01-30 01:13:03
+host: WIN11-LAB
+user: LAB\it.helpdesk1
+EventCode: 4688
+New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
+Parent_Process_Name: C:\Windows\explorer.exe
+Process_Command_Line: "chrome.exe http://<KALI_IP>:8080"
+```
+
+📌 **Evidence ID:** `E-SIM001-002`
+
+📸 **Screenshot Reference:**  
 - `sim001-evidence-002-splunk-url-detection.png`
 
-```text
-Time: 2025-12-09 01:13:03
-Host: Windows11Pro
-Account_Name: LAB\labuser
-New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
-Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://phish-sim.local/policy
-```
-
-Interpretation:
-- Browser launched with direct URL argument
-- Indicates a user-initiated link click
-- Serves as the authoritative phishing execution signal
+**Description:** Chrome executed with phishing URL — authoritative endpoint signal.
 
 ---
 
-## 3. (Optional) Network Access Confirmation
+## 3. User Workflow Context (Mail → Click Behavior)
 
-**Evidence ID:** `E-SIM001-006`
-**Source:** Network Telemetry (Optional)
-**Protocol:** HTTP
+This context shows browser activity in the same timeframe as user email
+interaction, supporting a **user-driven phishing click** conclusion.
 
-**Screenshot Reference (Optional):**  
+```text
+_time: 2026-01-30 01:12:59
+host: WIN11-LAB
+user: LAB\it.helpdesk1
+EventCode: 4688
+New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
+Parent_Process_Name: C:\Windows\explorer.exe
+Process_Command_Line: "chrome.exe http://<KALI_IP>:8080"
+```
+
+📌 **Evidence ID:** `E-SIM001-003`
+
+📸 **Screenshot Reference:**  
+- `sim001-evidence-003-splunk-parent-process.png`
+
+**Description:** Browser launch aligned with mailbox interaction timeframe.
+
+---
+
+## 4. Optional Network Telemetry (Security Onion)
+
+If Security Onion is active, HTTP traffic may be observed from the endpoint to
+the Kali phishing host.
+
+```text
+event_type: http
+src_ip: 10.x.x.25
+dest_ip: <KALI_IP>
+dest_port: 8080
+http.method: GET
+```
+
+📌 **Evidence ID:** `E-SIM001-007`
+
+📸 **Screenshot Reference (Optional):**  
 - `sim001-evidence-006-network-http-confirmation.png`
 
-```text
-Source IP: <Windows endpoint – DHCP-assigned>
-Destination IP: <Phishing host – DHCP-assigned>
-Destination Port: 8080
-Protocol: HTTP
-Method: GET
-User-Agent: Chrome
-```
+**Description:** Supplemental network confirmation of HTTP request.
 
-Interpretation:
-- Outbound HTTP request consistent with a phishing link click
-- Provides supporting context when network telemetry is available
-- Not required for SIM-001 detection validation
-
-> Note:
-> Network telemetry may not always be present due to TLS encryption,
-> sensor placement, or lab resource constraints.
+> Network telemetry is not required for SIM-001 detection validation.
 
 ---
 
-## 4. Alert Trigger Confirmation
+## 5. Correlated Detection Event (SIEM)
 
-**Evidence ID:** `E-SIM001-005`
-**Source:** SIEM Alert Event
-**Alert Name:** `LAB-SIM-001-PHISHING-ALERT`
+This event shows the phishing execution was detected and tagged by the
+correlation query used for alerting.
 
-**Screenshot Reference:**  
+```text
+_time: 2026-01-30 01:13:10
+host: WIN11-LAB
+user: LAB\it.helpdesk1
+New_Process_Name: chrome.exe
+Process_Command_Line: http://<KALI_IP>:8080
+simulation_id: SIM-001
+symbolic_id: LAB-SIM-001-PHISHING-ALERT
+```
+
+📌 **Evidence ID:** `E-SIM001-008`
+
+📸 **Screenshot Reference:**  
+- `sim001-evidence-004-splunk-correlation.png`
 - `sim001-evidence-005-alert-fired.png`
 
-```text
-Trigger Time: 2025-12-09 01:13:10
-Host: Windows11Pro
-User: LAB\labuser
-Process: chrome.exe
-URL: http://phish-sim.local/policy
-Severity: Medium
-Status: Triggered
-```
+**Description:** Correlation logic successfully identified phishing execution.
 
-Interpretation:
-- Detection logic successfully correlated endpoint and network signals
-- Alert fired within seconds of user interaction
-- Confirms operational detection and alerting pipeline
-  
+> Detection logic successfully correlated endpoint process execution.  
+> Network telemetry, when present, provided supplemental confirmation.
+
 ---
 
-## 🔗 Correlated Phishing Execution Timeline
+## Timeline of Key Events
+
 ```text
-01:13:03 – User launches Chrome (baseline execution) [E-SIM001-001]
+01:12:55 – Phishing email delivered to it.helpdesk1 mailbox
+01:13:03 – User opens email and clicks link
 01:13:03 – Chrome executed with phishing URL argument [E-SIM001-002]
-01:13:10 – SIEM alert triggered [E-SIM001-005]
+01:13:10 – SIEM alert triggered [E-SIM001-008]
 ```
 
-Conclusion:  
-A user-initiated phishing link resulted in browser execution with a
-suspicious destination, followed by successful detection and alerting
-based on authoritative endpoint telemetry.
-
 ---
 
-# 🧠 Detection Relevance
+## Final Validation Statement
 
-These log events directly support:
-- Detection queries in `queries.md`
-- Alert logic in `alert-config.md`
-- Symbolic ID: LAB-SIM-001-PHISHING-ALERT
+SIM-001 successfully demonstrates:
 
-The combination of:
-- User context
-- Browser execution
-- URL presence in command line
+- Phishing link delivery via email (context)  
+- User-driven browser execution  
+- URL artifact captured in endpoint telemetry  
+- Detection via SIEM correlation  
+- Alert generation  
 
-provides a high-confidence phishing execution signal suitable for SOC alerting
-and triage.
-
----
-
-## 🏁 Status
-- [x] Endpoint process execution captured
-- [x] Network access validated
-- [x] Correlated timeline established
-- [x] Alert successfully triggered
-- [x] Simulation complete
-
-> Endpoint telemetry is authoritative.
-> Network telemetry is optional and supplemental.
+**Endpoint process telemetry remains the authoritative detection source.**
