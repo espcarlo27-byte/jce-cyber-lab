@@ -15,50 +15,66 @@ The purpose of these queries is to:
 
 - Detect browser execution on the endpoint
 - Identify the presence of a URL in the browser command line
-- Check for optional follow-on PowerShell activity
+- (Optional) Check for follow-on PowerShell activity
 - Correlate relevant activity into a single detection
 - Support alerting and analyst investigation
+- Provide **email workflow context** (Zimbra delivery path) without changing detection logic
 
 ---
 
-## 1. Chrome Browser Process Execution  
-*(Windows Security – Baseline Validation)*
+## Email Context (Supplemental – Not Required for Detection)
+
+SIM-001 includes an email delivery path using the lab **Mail Server (Zimbra)**.
+Email delivery provides realistic context (sender → recipient → click), but the
+**detection signal remains endpoint process execution**.
+
+These queries help analysts reconstruct the chain:
+
+Email delivery → user interaction → browser execution → URL artifact captured
+
+> Note: These are **context enrichment** queries. SIM-001 validation does **not**
+> depend on mail server telemetry.
+
+---
+
+## 1. Baseline Chrome Process Execution (4688)
 
 **Purpose:**  
 Confirms that Google Chrome executed on the Windows 11 endpoint using
-Windows Security Event ID **4688**.
-
-This establishes baseline browser execution prior to URL analysis.
+Windows Security Event ID **4688**. This establishes baseline browser execution
+prior to URL analysis.
 
 ```spl
 (index=winevent_security OR index=winevent_system)
 EventCode=4688
 New_Process_Name="*\\chrome.exe"
-| table _time, host, user, New_Process_Name, Process_Command_Line
+| table _time, host, user, Parent_Process_Name, New_Process_Name, Process_Command_Line
 | sort - _time
 ```
 
 **What This Confirms:**
 - Chrome was launched
 - Which user launched it
-- What command line was used
+- Parent process context (user-driven vs automated)
+- Command line visibility is present
 
-**Related Log Evidence:**
-- `E-SIM001-001` (Baseline Chrome Execution – 4688)
+**Related Log Evidence:**  
+`E-SIM001-001` (Baseline Chrome Execution – 4688)
 
 ---
 
 ### 2. Chrome With Suspicious URL in Command Line (Primary Phishing Click Indicator)
 
 **Purpose:**  
-Confirms that Chrome executed with a URL passed directly in the
-command line, which strongly indicates a user-driven phishing link click.
+Confirms that Chrome executed with a URL passed directly in the command line,
+which strongly indicates a user-driven phishing link click. In the Zimbra path,
+this aligns with the user clicking a link from the mailbox.
 ```spl
 (index=winevent_security OR index=winevent_system)
 EventCode=4688
 New_Process_Name="*\\chrome.exe"
 Process_Command_Line="*http*"
-| table _time, host, user, New_Process_Name, Process_Command_Line
+| table _time, host, user, Parent_Process_Name, New_Process_Name, Process_Command_Line
 | sort - _time
 ```
 
@@ -67,17 +83,85 @@ Process_Command_Line="*http*"
 - The activity is user-driven
 - This is the primary detection signal for SIM-001
 
-**Related Log Evidence:**
-- `E-SIM001-002` (Chrome executed with URL in command line – authoritative signal)
+**Related Log Evidence:**  
+`E-SIM001-002` (Chrome executed with URL in command line – authoritative signal)
 
 ---
 
-## 3. Optional - PowerShell Fallback Detection (Post-Click Payload Check)
+## 3. Mailbox/User Workflow Context (Chrome + Email Client Proximity)
 
 **Purpose:**  
-Checks whether PowerShell was executed after the phishing click.
-This query is supplemental and used to identify potential
-payload execution or secondary compromise.
+Provides investigation context by showing browser execution alongside common
+mailbox interaction processes (if present), such as Outlook or other mail clients.
+> This does not require mail telemetry; it uses endpoint process evidence only.
+```spl
+(index=winevent_security OR index=winevent_system)
+EventCode=4688
+(New_Process_Name="*\\chrome.exe" OR New_Process_Name="*\\outlook.exe")
+| table _time, host, user, Parent_Process_Name, New_Process_Name, Process_Command_Line
+| sort - _time
+```
+
+**What This Helps With:**
+- Identifying user workflow around the click
+- Showing if a mail client launched near the click timeframe
+- Strengthening investigation narratives (email → click → execution)
+
+**Related Log Evidence:**  
+`E-SIM001-003`
+
+---
+
+## 4. Parent Process Context (User-Driven Launch Validation)
+
+**Purpose:**  
+Validates that chrome.exe was launched from typical user context
+(e.g., explorer.exe or a mail client), supporting a user-driven phishing interaction
+conclusion.
+```spl
+(index=winevent_security OR index=winevent_system)
+EventCode=4688
+New_Process_Name="*\\chrome.exe"
+| table _time, host, user, Parent_Process_Name, New_Process_Name, Process_Command_Line
+| sort - _time
+```
+
+**What This Helps With:**
+- Confirming the parent process aligns with user-driven behavior
+- Differentiating user interaction vs automated spawning
+
+**Related Log Evidence:**  
+`E-SIM001-004`
+
+---
+
+## 5. User-Focused Timeline (Investigation View)
+
+**Purpose:**  
+Shows a quick timeline of process creation activity for the target user during
+SIM-001 execution (especially useful for Option A: Zimbra delivery path).
+```spl
+(index=winevent_security OR index=winevent_system)
+EventCode=4688
+user="it.helpdesk1"
+| table _time, host, user, Parent_Process_Name, New_Process_Name, Process_Command_Line
+| sort - _time
+```
+
+**What This Helps With:**
+- Quickly viewing activity immediately before/after the click
+- Confirming the correct user account is associated with the event
+
+**Related Log Evidence:**  
+`E-SIM001-005`
+
+---
+
+## 6. (Optional) PowerShell Follow-On Activity (Post-Click Payload Check)
+
+**Purpose:**  
+Checks whether PowerShell was executed after the phishing click. This query is
+supplemental and used to identify potential payload execution or secondary compromise.
 ```spl
 index=winevent_powershell
 | table _time, host, user, Process_Command_Line, ScriptBlockText
@@ -86,46 +170,52 @@ index=winevent_powershell
 
 **What This May Detect:**
 - Encoded PowerShell commands
-- Invoke-WebRequest activity
-- IEX / DownloadString usage
+- `Invoke-WebRequest` activity
+- `IEX` / `DownloadString` usage
 - Script-based payload execution
 
-> Note:
-> PowerShell execution is not required for SIM-001 validation.
+> Note: PowerShell execution is not required for SIM-001 validation.
 > This query supports deeper investigation if additional activity occurs.
+
+**Related Log Evidence:**  
+`E-SIM001-006`
 
 ---
 
-## 4. Broad Phishing Keyword Hunt (Exploratory / Analyst Context)
+## 7. Broad Phishing Keyword Hunt (Exploratory / Analyst Context)
 
 **Purpose:**  
-Performs a wide keyword-based search across Windows logs to identify
-phishing-related artifacts that may not be captured by strict
-process-based detection.
+Performs a wide keyword-based search across Windows logs to identify phishing-related
+artifacts that may not be captured by strict process-based detection.
+
 ```spl
 (index=winevent_security OR index=winevent_system)
 ("phish" OR "policy" OR "update" OR "http://" OR "https://")
-| table _time, host, user, New_Process_Name, Process_Command_Line
+| table _time, host, user, Parent_Process_Name, New_Process_Name, Process_Command_Line
 | sort - _time
 ```
 
 **What This Helps With:**
-- Catching edge cases
-- Providing analyst context during investigation
-- Identifying alternate delivery methods
+
+- Catching edge cases  
+- Providing analyst context during investigation  
+- Identifying alternate delivery methods (email vs non-email)
+
+**Related Log Evidence:**  
+`E-SIM001-007`
 
 ---
 
-## 5. ✅ PRIMARY CORRELATION QUERY (ALERT-READY – VALIDATED)
-
-**Evidence ID:** `E-SIM001-004`
+## 8. ✅ Primary Correlation Query (Alert-Ready – Validated)
 
 **Purpose:**  
-This is the authoritative detection query for SIM-001.  
-It is the query used to:
-- Validate the phishing link click
-- Generate a dashboard signal
+This is the authoritative detection/correlation query for SIM-001.  
+It is used to:
+
+- Validate the phishing link click  
+- Generate an investigation signal  
 - Trigger the Splunk alert
+
 ```spl
 (index=winevent_security OR index=winevent_system)
 EventCode=4688
@@ -138,21 +228,22 @@ Process_Command_Line="*http*"
 ```
 
 **What This Confirms:**
-- A phishing link was clicked
-- Chrome executed with a URL
-- The event is tagged with:
-   - simulation_id = `SIM-001`
-   - symbolic_id = `LAB-SIM-001-PHISHING-ALERT`
 
-***✅ This query is directly reused in the live alert configuration.***
+- A phishing link was clicked  
+- Chrome executed with a URL in the command line  
+- The event is tagged for SIM tracking and alerting  
+
+**Related Log Evidence:**  
+`E-SIM001-008`
 
 ---
 
-## 6. Last 15 Minutes Validation (Post-Execution Sanity Check)
+## 9. Last 15 Minutes Validation (Post-Execution Sanity Check)
 
 **Purpose:**  
-Used immediately after simulation execution to confirm real-time activity
-and verify ingestion and indexing health.
+Used immediately after simulation execution to confirm real-time activity and verify  
+ingestion and indexing health.
+
 ```spl
 (index=winevent_security OR index=winevent_system)
 EventCode=4688
@@ -164,18 +255,26 @@ earliest=-15m
 ```
 
 **Expected Outcome:**
-- If results appear → SIM-001 executed successfully
-- If no results → something in the lab pipeline requires troubleshooting
 
-**✅ Interpretation Guide**
-- Results in Section 2 → Confirmed phishing link click
-- Results in Section 3 → Follow-on payload activity (if any)
-- Results in Section 5 → Alert should fire
-- Results in Section 6 → Real-time validation successful
+- Results appear → SIM-001 executed successfully  
+- No results → investigate ingestion, logging, or execution path  
+
+**Related Log Evidence:**  
+`E-SIM001-009`
 
 ---
 
-***✅ This file represents the finalized detection engineering logic for SIM-001.
-Endpoint telemetry is authoritative; additional data sources are supplemental.***
+## Interpretation Guide
 
+- **Query 2 results present:** Confirmed phishing link click signal  
+- **Query 6 results present:** Potential follow-on payload behavior  
+- **Query 8 results present:** Correlation/alert logic is functioning  
+- **Query 9 results present:** Real-time validation successful  
 
+---
+
+## ✅ Final Note
+
+> This file represents the finalized detection engineering logic for SIM-001.  
+> Endpoint telemetry is authoritative; additional data sources (mail workflow context, network telemetry)  
+> are supplemental.
