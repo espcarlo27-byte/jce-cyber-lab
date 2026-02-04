@@ -19,26 +19,18 @@ This simulation follows the standardized evidence naming convention:
 - Evidence IDs: `E-SIM001-###`
 - Screenshot files: `sim001-evidence-###-<short-description>.png`
 
-Key evidence referenced throughout this I&R:
-- `E-SIM001-001` – Baseline 4688 visibility + ingestion proof
-- `E-SIM001-002` – Phishing click execution evidence (chrome.exe + URL in command line)
-- `E-SIM001-003` – Splunk correlation query results (detection logic validation)
-- `E-SIM001-004` – Alert configuration + alert fired confirmation
-- `E-SIM001-005` – Optional network confirmation (if captured)
+### 🧾 Key Evidence Referenced Throughout This I&R
 
----
-
-## 🧠 Lab Network Context (Important)
-
-This simulation uses the following intentional network design:
-
-- **pfSense** acts as the primary **DHCP server** and **DNS resolver**
-- Endpoints and simulation hosts receive **dynamic IP addresses via DHCP**
-- Detections rely on **user context, hostname, and process execution**
-  rather than static IP assignments
-
-This context is critical for interpreting network-related issues and resolutions
-documented below.
+- **E-SIM001-001** – Baseline Event ID 4688 visibility + log ingestion proof  
+- **E-SIM001-002** – Phishing click execution evidence (`chrome.exe` with URL in command line)  
+- **E-SIM001-003** – User workflow context (mail interaction timeframe aligned with execution)  
+- **E-SIM001-004** – Parent process context supporting user-driven execution  
+- **E-SIM001-005** – User-focused timeline view of activity  
+- **E-SIM001-006** – Optional PowerShell follow-on activity check  
+- **E-SIM001-007** – Optional network HTTP confirmation (Security Onion)  
+- **E-SIM001-008** – Correlation query result showing tagged detection event  
+- **E-SIM001-009** – Alert configuration screen evidence  
+- **E-SIM001-010** – Alert fired confirmation screenshot
 
 ---
 
