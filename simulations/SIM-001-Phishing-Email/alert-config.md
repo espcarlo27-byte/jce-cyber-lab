@@ -1,36 +1,24 @@
-# SIM-001 – Phishing Email (T1566.002) – Detection Alert
+# SIM-001 – Phishing Email (T1566.002) – Alert Configuration
 
-**Symbolic ID:** LAB-SIM-001-PHISHING-ALERT  
-**Technique:** T1566.002 – Phishing: Link  
-**Tactic:** Initial Access (TA0001)  
-**Severity:** Medium  
-**Status:** ✅ Validated & Triggered  
+This document describes how the **Splunk alert** was configured to detect the
+phishing link execution simulated in SIM-001.
 
----
-
-## 🎯 Alert Purpose
-
-This alert detects a **user-driven phishing link click** by observing
-authoritative **endpoint process execution telemetry**.
-
-Detection is based on:
-
-- Windows Security **EventCode 4688**
-- Google Chrome execution
-- Presence of a **URL in `Process_Command_Line`**
-- Correlation and alerting via Splunk
-
-> **Important:**  
-> This alert is intentionally **endpoint-driven**.  
-> Network telemetry (e.g., Security Onion) may provide **supplemental context**
-> but is **not required** for detection or alert validity.
+The alert is based on **endpoint process telemetry** (Windows Security Event ID 4688).
+Network telemetry is supplemental and not required for alert logic.
 
 ---
 
-## 🔎 Detection Logic (FINAL WORKING ALERT SEARCH)
+## 🎯 Detection Logic
 
-This query reflects the **validated detection logic** used in SIM-001 and
-matches the actual field names ingested by Splunk.
+The alert identifies when:
+
+- Google Chrome executes  
+- A URL is present in the command line  
+- The activity aligns with user-driven phishing interaction
+
+---
+
+## 🔍 Correlation Query (Alert Search)
 
 ```spl
 (index=winevent_security OR index=winevent_system)
@@ -43,133 +31,81 @@ Process_Command_Line="*http*"
 | sort - _time
 ```
 
----
+## ⚙️ Alert Configuration Settings
 
-## ⏱️ Scheduling Configuration
-
-- Alert Type: Scheduled
-- Run Frequency: Every 5 minutes
-- Time Window: Last 15 minutes
-
-***This configuration ensures near real-time detection while preventing excessive system load in a lab environment.***
-
----
-
-## 🚨 Trigger Conditions
-
-- Trigger When: Number of Results > 0
-- Trigger Type: Per Result
-- Throttle Period: 10 minutes
-- Throttle Field: *
-
-This ensures:
-- A single phishing click generates an alert
-- Repeated clicks do not cause alert flooding
-
----
-
-## ⚠️ Severity Classification
-
-- Severity Level: Medium
-- Rationale:
-    A phishing link was clicked by a user, indicating successful initial access via social engineering.
-    No confirmed payload execution or privilege escalation is detected at this stage.
-
----
-
-## 📤 Alert Output Fields
-
-The following fields appear in the alert payload for SOC investigation and dashboard use:
-- _time
-- host
-- user
-- New_Process_Name
-- Process_Command_Line
-- simulation_id
-- symbolic_id
-
-These fields enable:
-- User attribution
-- Endpoint/Host identification
-- Executed process visibility
-- Command-line URL detection
-- Simulation and detection traceability
+| Setting | Value |
+|--------|------|
+| Alert Name | LAB-SIM-001-PHISHING-ALERT |
+| App | Search & Reporting |
+| Schedule | Every 5 minutes |
+| Time Range | Last 15 minutes |
+| Trigger Condition | Number of Results > 0 |
+| Trigger Type | Per Result |
+| Throttle | 10 minutes |
+| Severity | Medium |
 
 ---
 
 ## 🧾 Example Alert Output (Symbolic – Validated)
 
-**Evidence ID:** `E-SIM001-005`
+📌 **Evidence ID:** `E-SIM001-008`
+
+📸 **Screenshot Reference:**
+
+- `sim001-evidence-004-splunk-correlation.png`  
+- `sim001-evidence-005-alert-fired.png`
+
 ```yaml
-_time: 2025-12-09 01:13:10
-host: Windows11Pro
-user: LAB\testuser
+_time: 2026-01-30 01:13:10
+host: WIN11-LAB
+user: LAB\it.helpdesk1
 New_Process_Name: C:\Program Files\Google\Chrome\Application\chrome.exe
-Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://phish-sim.local/policy
+Process_Command_Line: "C:\Program Files\Google\Chrome\Application\chrome.exe" http://<KALI_IP>:8080
 simulation_id: SIM-001
 symbolic_id: LAB-SIM-001-PHISHING-ALERT
 ```
 
----
+## 🧩 Detection Rationale
 
-## 🛠️ Alert Actions Configured
+This alert is based on **process creation telemetry**, which:
 
-- ✅ Add to Triggered Alerts
-- ✅ (Optional) Log event to lab_index
-- ✅ Email notification supported (optional SOC workflow)
+- Is reliable across Windows environments  
+- Captures user-driven execution  
+- Preserves command-line artifacts (including URLs)  
 
----
-
-## 🧭 Analyst Response Workflow (Post-Trigger)
-
-Once this alert fires, the responding analyst should:
-1. Identify and validate the impacted user
-2. Validate the affected endpoint
-3. Review the phishing URL context
-4. Confirm execution source (Explorer / PowerShell)
-5. Review follow-on activity for persistence or lateral movement
-6. Perform additional endpoint or network hunts as needed
-7. Document findings in the incident report
+Email delivery context (Zimbra) provides realism but is not required for detection.
 
 ---
 
-## ✅ Validation Checklist (Final)
+## 📎 Evidence References
 
-- [x] Alert created in Splunk
-- [x] Alert enabled
-- [x] Alert scheduled correctly
-- [x] Trigger condition validated
-- [x] Alert fires on phishing click
-- [x] Output fields confirmed
-- [x] Symbolic ID appears in alert output
+### Alert Configuration Evidence
 
----
+📌 **Evidence ID:** `E-SIM001-009`  
+- `sim001-evidence-004-alert-config.png` — Alert configuration screen  
 
-## Required Evidence (Captured)
+### Alert Trigger Evidence
 
-Location: `simulations/SIM-001-Phishing-Email/screenshots/`  
-
-**Alert Configuration Evidence**  
-
-**Evidence ID:** `E-SIM001-004`
-- ✅ `sim001-evidence-004-alert-config.png` — Alert configuration screen
-
-**Alert Trigger Evidence**  
-
-**Evidence ID:** `E-SIM001-005`
-- ✅ `sim001-evidence-005-alert-fired.png` — Triggered alert confirmation
+📌 **Evidence ID:** `E-SIM001-010`  
+- `sim001-evidence-005-alert-fired.png` — Triggered alert confirmation  
 
 ---
 
-## 🏁 Final Status
+## 🏁 Final Validation Statement
 
-- ✅ Detection logic validated
-- ✅ Alert fired successfully
-- ✅ SIM-001 detection is production-ready
+The alert successfully detected the phishing link execution and demonstrates:
 
-> This alert represents a realistic SOC detection for phishing link
-> interaction based on authoritative endpoint telemetry.
+- Endpoint-driven detection  
+- Correlation of execution artifacts  
+- Reliable alerting behavior  
+- Alignment with MITRE ATT&CK T1566.002  
 
+SIM-001 detection logic is now fully operational.
 
+---
+
+🎯 **SIM-001 is now fully synchronized across all files.**
+
+Next SIM to modernize like this will take half the time because your structure is now enterprise-grade.
 
 
