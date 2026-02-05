@@ -6,9 +6,8 @@ This document captures real operational issues encountered during **SIM-001**
 and the structured methodology used to identify, resolve, and validate each one.
 
 SIM-001 is designed as an **endpoint-driven detection simulation**.
-Windows Security Event ID **4688** is treated as the **authoritative source**.
-Network telemetry (Security Onion / Suricata / Zeek), when available, is treated
-as **optional supplemental validation**.
+Windows Security Event ID **4688** is treated as the **authoritative detection source**.  
+Identity telemetry (Active Directory and mail authentication logs) provides **user attribution and correlation context**, while network telemetry (Security Onion / Suricata / Zeek), when available, is treated as **optional supplemental validation**.
 
 ---
 
@@ -19,18 +18,29 @@ This simulation follows the standardized evidence naming convention:
 - Evidence IDs: `E-SIM001-###`
 - Screenshot files: `sim001-evidence-###-<short-description>.png`
 
-### 🧾 Key Evidence Referenced Throughout This I&R
+### 🧾 Evidence Referenced in Issues & Resolutions
+
+These evidence artifacts were directly used to diagnose and validate issues encountered during SIM-001:
 
 - **E-SIM001-001** – Baseline Event ID 4688 visibility + log ingestion proof  
 - **E-SIM001-002** – Phishing click execution evidence (`chrome.exe` with URL in command line)  
 - **E-SIM001-003** – User workflow context (mail interaction timeframe aligned with execution)  
+- **E-SIM001-008** – Correlation query result showing tagged detection event  
+- **E-SIM001-009** – Alert configuration screen evidence  
+- **E-SIM001-010** – Alert fired confirmation screenshot  
+
+---
+
+### 📁 Additional Simulation Evidence (Scenario Validation)
+
+These artifacts validate simulation completeness but were not tied to specific troubleshooting issues:
+
 - **E-SIM001-004** – Parent process context supporting user-driven execution  
 - **E-SIM001-005** – User-focused timeline view of activity  
 - **E-SIM001-006** – Optional PowerShell follow-on activity check  
 - **E-SIM001-007** – Optional network HTTP confirmation (Security Onion)  
-- **E-SIM001-008** – Correlation query result showing tagged detection event  
-- **E-SIM001-009** – Alert configuration screen evidence  
-- **E-SIM001-010** – Alert fired confirmation screenshot
+- **E-SIM001-011** – Identity authentication evidence (AD logon event for simulation user)  
+- **E-SIM001-012** – Identity-to-endpoint correlation timeline view  
 
 ---
 
@@ -414,6 +424,7 @@ SIM-001 reinforced foundational SOC and detection engineering principles:
 - Network visibility is valuable but often partial or unavailable  
 - Dynamic IP addressing requires **context-based correlation**  
 - Troubleshooting methodology is as critical as detection logic itself  
+- Identity telemetry strengthens phishing investigations by validating that suspicious activity is tied to a governed enterprise account
 
 These lessons align directly with the lab’s intentional design and real-world
 SOC operating conditions.
@@ -423,7 +434,7 @@ SOC operating conditions.
 ## 🛡 GRC Note (Control Impact)
 
 These issues affected the lab’s ability to Detect and Respond to phishing link execution
-using endpoint telemetry and SIEM correlation.
+using endpoint telemetry, identity attribution, and SIEM correlation.
 
 - Impacted Control Area: Endpoint Logging / SIEM Monitoring / Alerting
 - Control Status: Restored ✅
