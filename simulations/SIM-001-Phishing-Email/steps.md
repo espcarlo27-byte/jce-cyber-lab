@@ -124,6 +124,31 @@ On the **Windows 11 endpoint**:
 
 ---
 
+### 2.3.1 Identity Context Validation (IAM Layer)
+
+Before the phishing link is clicked, it is important to establish that the user
+participating in SIM-001 is a **known enterprise identity** and that the email
+workflow is backed by Identity & Access Management (IAM).
+
+In this lab environment:
+
+- The user account `it.helpdesk1` is an **Active Directory identity**
+- The mailbox is integrated with AD via **LDAP/LDAPS**
+- Email access requires successful authentication
+- Identity telemetry is logged and monitored by the SIEM
+
+This ensures the phishing scenario involves a **governed enterprise identity**,
+not an anonymous or local-only account.
+
+This step establishes the identity chain:
+
+**Enterprise Identity → Mail Authentication → User Interaction → Endpoint Execution**
+
+📸 **Evidence:**  
+`sim001-A-evidence-004-identity-context.png`
+
+---
+
 ### 2.4 User Clicks Phishing Link (Windows 11)
 
 This step generates the **authoritative endpoint telemetry** used for detection.
@@ -198,6 +223,26 @@ This is the core detection signal for **MITRE ATT&CK T1566.002**.
 
 > Endpoint telemetry is the authoritative detection source for SIM-001.  
 > Network logs may supplement context but are not required for validation.
+
+---
+
+### 2.5.5 Validate Identity Telemetry (IAM Signal)
+
+In addition to endpoint process telemetry, enterprise SOC investigations rely on
+identity telemetry to confirm that user activity is tied to a legitimate account.
+
+Run identity validation searches in Splunk to confirm:
+
+- The user `it.helpdesk1` has authentication events in AD logs
+- Mail system authentication events exist
+- Identity activity aligns with the phishing click timeframe
+
+This provides a cross-layer validation chain:
+
+**Identity Authentication → Endpoint Execution → URL Artifact**
+
+📸 **Evidence:**  
+`sim001-A-evidence-006-identity-telemetry.png`
 
 ---
 
@@ -322,9 +367,7 @@ Confirm the following appear in the results:
 
 Ensure the data supports a logical detection chain:
 
-> Email delivery → user interaction → browser execution → URL artifact captured
-
-This demonstrates **behavior-based detection**, not just a static indicator match.
+> Identity authentication → email delivery → user interaction → browser execution → URL artifact captured
 
 ---
 
@@ -523,5 +566,7 @@ Verify that the alert fires when the phishing activity is detected.
 **SIM-001 – Phishing Email Detection** is **COMPLETE and FULLY VALIDATED**.
 
 - Endpoint telemetry is **authoritative**
+- Identity telemetry provides **context and correlation**
 - Network telemetry is **optional and supplemental**
+
 
