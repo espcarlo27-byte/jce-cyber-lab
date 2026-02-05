@@ -24,10 +24,11 @@ These evidence artifacts were directly used to diagnose and validate issues enco
 
 - **E-SIM001-001** – Baseline Event ID 4688 visibility + log ingestion proof  
 - **E-SIM001-002** – Phishing click execution evidence (`chrome.exe` with URL in command line)  
-- **E-SIM001-003** – User workflow context (mail interaction timeframe aligned with execution)  
+- **E-SIM001-003** – User workflow context (mail interaction timeframe aligned with execution)
+- **E-SIM001-004** – Parent process context supporting user-driven execution
+- **E-SIM001-005** – User-focused timeline view of activity  
 - **E-SIM001-008** – Correlation query result showing tagged detection event  
 - **E-SIM001-009** – Alert configuration screen evidence  
-- **E-SIM001-010** – Alert fired confirmation screenshot  
 
 ---
 
@@ -35,10 +36,9 @@ These evidence artifacts were directly used to diagnose and validate issues enco
 
 These artifacts validate simulation completeness but were not tied to specific troubleshooting issues:
 
-- **E-SIM001-004** – Parent process context supporting user-driven execution  
-- **E-SIM001-005** – User-focused timeline view of activity  
 - **E-SIM001-006** – Optional PowerShell follow-on activity check  
-- **E-SIM001-007** – Optional network HTTP confirmation (Security Onion)  
+- **E-SIM001-007** – Optional network HTTP confirmation (Security Onion)
+- **E-SIM001-010** – Alert fired confirmation screenshot  
 - **E-SIM001-011** – Identity authentication evidence (AD logon event for simulation user)  
 - **E-SIM001-012** – Identity-to-endpoint correlation timeline view  
 
@@ -69,7 +69,7 @@ The Splunk Universal Forwarder on the Windows 11 endpoint was either:
 After these corrections, Windows Security logs and related process execution events appeared correctly in Splunk, allowing the phishing detection to be fully validated.  
 
 **Evidence Reference:**  
-- `E-SIM001-001` (Ingestion proof: 4688 events visible in Splunk)
+- `` (Ingestion proof: 4688 events visible in Splunk)
   
 **Lessons Learned:**  
 > Log ingestion must always be validated before testing detection logic.  
@@ -119,7 +119,7 @@ In this case, the issue resulted from a mismatch between the Splunk Web credenti
 After correcting the authentication configuration, the forwarder successfully registered with the Splunk server, and endpoint logs began flowing consistently.  
 
 **Evidence Reference:**
-- `E-SIM001-001` (Forwarder health + logs flowing into Splunk)
+- `` (Forwarder health + logs flowing into Splunk)
 
 **Lessons Learned:**  
 > Splunk authentication is platform-specific and separate from OS credentials.  
@@ -206,7 +206,7 @@ On a default installation, Event ID 4688 may be missing due to:
 Event ID 4688 began appearing consistently in both Event Viewer and Splunk searches, enabling SIM-001 detections to trigger successfully.  
 
 **Evidence Reference:**
-- `E-SIM001-001` (4688 enabled + visible)
+- `` (4688 enabled + visible)
 - `E-SIM001-002` (phishing click evidence tied to 4688)
 
 **Lessons Learned:**  
