@@ -273,6 +273,94 @@ earliest=-15m
 
 ---
 
+## 10. Zimbra Mail Authentication Activity (Identity Signal)
+
+**Purpose:**  
+Validates that the mailbox involved in SIM-001 is associated with a known enterprise
+identity and that authentication events from the mail system are observable.
+
+```spl
+index=zimbra_logs
+("auth" OR "login" OR "authentication")
+user="it.helpdesk1"
+| table _time, host, user, message
+| sort - _time
+```
+
+**What This Confirms:**
+
+- The mailbox is identity-backed  
+- Mail authentication telemetry exists  
+- Email activity is tied to enterprise IAM  
+
+**Detection Role:**  
+Identity-layer evidence supporting phishing investigation.
+
+**Related Log Evidence:**  
+`E-SIM001-010` (Zimbra authentication event for user mailbox – identity validation)
+
+---
+
+## 11. Active Directory Authentication Events (Identity Context)
+
+**Purpose:**  
+Confirms that the user involved in the phishing simulation is an Active Directory identity with observable authentication activity.
+
+```spl
+index=winevent_security
+(EventCode=4624 OR EventCode=4625)
+Account_Name="it.helpdesk1"
+| table _time, host, Account_Name, EventCode, Logon_Type, Authentication_Package_Name
+| sort - _time
+```
+
+**What This Confirms:**
+
+- The user is a valid AD account  
+- Successful and failed logons are visible  
+- Identity monitoring is active in the lab  
+
+**Detection Role:**  
+Provides identity telemetry independent of endpoint process logs.
+
+**Related Log Evidence:**  
+`E-SIM001-011` (AD logon event for simulation user – IAM telemetry proof)
+
+---
+
+## 12. Identity → Endpoint Correlation (Enterprise SOC View)
+
+**Purpose:**  
+Correlates identity authentication activity with endpoint phishing execution to demonstrate cross-layer detection capability.
+
+```spl
+(
+    index=winevent_security EventCode=4624 Account_Name="it.helpdesk1"
+) OR (
+    (index=winevent_security OR index=winevent_system)
+    EventCode=4688
+    New_Process_Name="*\\chrome.exe"
+    Process_Command_Line="*http*"
+)
+| eval event_type=case(EventCode==4624,"AD Logon", EventCode==4688,"Process Execution")
+| table _time, host, Account_Name, event_type, New_Process_Name, Process_Command_Line
+| sort - _time
+```
+
+**What This Proves:**
+
+- The same identity authenticated to AD  
+- That identity executed the phishing link  
+- The attack chain spans IAM → Endpoint  
+
+**Detection Role:**  
+Demonstrates SOC-level identity correlation.
+
+**Related Log Evidence:**  
+`E-SIM001-012` (Correlated identity authentication and phishing execution timeline)
+
+---
+
 ## ✅ Final Note
 
 > This file represents the finalized detection engineering logic for SIM-001.  
