@@ -4,9 +4,14 @@
 
 ## 🎯 Goal
 
-Detect phishing-based initial access where a user receives a malicious email, clicks a link, and launches a browser process containing a suspicious URL in the command line.
+Detect phishing-based initial access where a user receives a malicious email,
+authenticates to their enterprise mailbox, clicks a link, and launches a browser
+process containing a suspicious URL in the command line.
 
-The simulation validates **endpoint-authoritative detection** enhanced with **email telemetry context**, modeling how real SOC investigations trace phishing attacks from delivery to execution.
+The simulation validates **endpoint-authoritative detection** enhanced with
+**identity (IAM) telemetry** and **email workflow context**, modeling how real
+SOC investigations trace phishing attacks from identity authentication through
+endpoint execution.
 
 ---
 
@@ -25,8 +30,8 @@ The simulation validates **endpoint-authoritative detection** enhanced with **em
 | Component | Purpose |
 |----------|---------|
 | Windows 11 Endpoint | Victim machine executing phishing link |
-| Windows Server (AD) | User identity & authentication context |
-| Mail Server (Zimbra) | Phishing email delivery & mailbox access logs |
+| Windows Server (AD) | Identity provider, authentication telemetry, and user attribution |
+| Mail Server (Zimbra) | Phishing email delivery and identity-backed mailbox authentication logs |
 | Splunk Enterprise | Log ingestion, correlation, alerting |
 | Splunk Universal Forwarder | Endpoint log forwarding |
 | Kali Linux | Hosts phishing landing page |
@@ -40,27 +45,29 @@ SIM-001 follows a **layered evidence model**:
 
 | Layer | Role | Authority Level |
 |------|------|----------------|
-| Email System | Phishing delivery & mailbox activity | Context |
-| Identity (AD) | User attribution | Attribution |
+| Email System | Phishing delivery & mailbox authentication | Context |
+| Identity (AD) | User identity & authentication telemetry | Attribution |
 | Endpoint (Windows) | Process execution visibility | **Primary Detection Signal** |
-| SIEM | Cross-source correlation | Investigation Platform |
+| SIEM | Cross-source correlation (identity + email + endpoint) | Investigation Platform |
 | Network (Optional) | DNS / HTTP traces | Supplemental |
 
 **Authoritative Detection Source:**  
 Windows Security Event ID **4688** and/or **Sysmon Event ID 1** containing suspicious URL data in the process command line.
 
-Network telemetry may supplement investigation when available, but endpoint process telemetry remains the detection authority.
+> Identity telemetry provides user attribution and authentication context, while
+> endpoint process telemetry remains the authoritative detection source.
 
 ---
 
 ## 🧪 Attack Scenario Overview
 
-1. Phishing email delivered to user mailbox  
-2. User logs into mail and opens message  
-3. User clicks malicious link  
-4. Browser launches with URL in command line  
-5. Endpoint logs record process creation  
-6. SIEM correlates activity for detection and investigation  
+1. Enterprise identity authenticates to mailbox  
+2. Phishing email delivered  
+3. User opens message  
+4. User clicks malicious link  
+5. Browser launches with URL in command line  
+6. Endpoint logs record process creation  
+7. SIEM correlates identity, email, and endpoint activity
 
 ---
 
@@ -90,6 +97,14 @@ Email logs provide investigation context:
 - Message delivery
 - Mailbox access
 - Pre-execution user activity
+
+Identity telemetry strengthens investigation by providing:
+
+- Verified enterprise account context  
+- Authentication event history  
+- Correlation between identity activity and endpoint execution  
+
+This mirrors enterprise SOC workflows where identity signals are foundational.
 
 ---
 
@@ -143,6 +158,7 @@ Maintaining a formal Issues & Resolutions log ensures:
 | Log ingestion | Events searchable in Splunk |
 | Detection logic triggered | Correlation query returns results |
 | Alert generated | Detection alert fires successfully |
+| Identity telemetry present | AD and/or mail authentication events observable |
 
 ---
 
@@ -182,7 +198,8 @@ Full governance, framework alignment, and compliance documentation are maintaine
 This simulation demonstrates the ability to:
 
 - Detect phishing-triggered execution at the endpoint  
-- Attribute activity to a user  
+- Validate the activity is tied to a known enterprise identity  
+- Correlate identity, email, and endpoint telemetry  
 - Investigate multi-layer telemetry in a SIEM  
 - Map detection to MITRE ATT&CK  
 
