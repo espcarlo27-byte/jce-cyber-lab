@@ -12,14 +12,16 @@ Ensure the following components are operational before starting SIM-001.
 
 | Component | Required? | Purpose in SIM-001 |
 |-----------|-----------|-------------------|
+| **Windows Server (Active Directory)** | ✅ | Provides enterprise identity, authentication telemetry, and user attribution |
 | **Windows 11 Endpoint** | ✅ | Generates authoritative telemetry (Event 4688, process command line) |
 | **Splunk Enterprise** | ✅ | Ingests logs, validates detection, and triggers alerts |
 | **Splunk Universal Forwarder** | ✅ | Sends Windows logs to Splunk |
 | **Kali Linux** | Optional | Hosts phishing landing page used in URL |
-| **Mail Server (Zimbra)** | Optional | Delivers phishing email for realistic attack path |
+| **Mail Server (Zimbra)** | Optional | Delivers phishing email and generates mailbox authentication logs |
 | **Security Onion** | Optional | Provides supplemental network telemetry (not required) |
 
-> Detection for SIM-001 depends on **endpoint process telemetry**, not network logs.
+> Detection for SIM-001 depends on **endpoint process telemetry**.  
+> Identity telemetry from Active Directory provides **user attribution and correlation context**, while network logs are supplemental.
 
 ---
 
