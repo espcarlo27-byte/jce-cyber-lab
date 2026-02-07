@@ -55,14 +55,56 @@ nano index.html
 ```
 4. Insert basic content, for example:
 ```html
-<html>
-  <head>
-    <title>HR Benefits Update</title>
-  </head>
-  <body>
-    <h2>Benefits Update</h2>
-    <p>Your benefits information is being reviewed.</p>
-  </body>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Benefits Confirmation | Human Resources</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background:#f5f6f8; margin:0; }
+    .wrap { max-width: 720px; margin: 48px auto; padding: 0 16px; }
+    .card { background:#fff; border:1px solid #e3e6ea; border-radius:8px; padding:24px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    p { margin: 0 0 12px; color:#333; line-height:1.5; }
+    .meta { font-size: 12px; color:#666; margin-top: 16px; }
+    .badge { display:inline-block; font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2ff; color:#2b3a67; margin-bottom:12px; }
+    .btn { display:inline-block; margin-top:12px; padding:10px 14px; border-radius:6px; background:#1f2937; color:#fff; text-decoration:none; }
+    .btn:hover { opacity:.92; }
+    .footer { font-size: 12px; color:#666; margin-top: 18px; border-top:1px solid #eef0f3; padding-top: 12px; }
+    code { background:#f0f2f5; padding:2px 6px; border-radius:4px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="badge">Human Resources • Benefits Administration</div>
+      <h1>Benefits Confirmation Required</h1>
+
+      <p>
+        Our records indicate your annual benefits review is pending.
+        Please confirm your current selections to complete the audit process.
+      </p>
+
+      <p>
+        Status: <strong>In Review</strong><br />
+        Action: <strong>Employee Confirmation</strong>
+      </p>
+
+      <a class="btn" href="#">Continue</a>
+
+      <p class="meta">
+        Reference: <code>BEN-AR-2026</code> • Updated: <code>02/07/2026</code>
+      </p>
+
+      <div class="footer">
+        If you believe you received this page in error, contact HR Support.
+        Do not reply to automated messages.
+      </div>
+    </div>
+  </div>
+</body>
 </html>
 ```
 5. Save and exit the editor
@@ -89,18 +131,25 @@ The email is sent from an existing HR user to a target internal user.
 On the **Zimbra Web Interface**:
 
 1. Log in as an HR user  
-   *(example: `hr.generalist1`)*
+   *(example: `hr.rep1`)*
 2. Create a new email
 3. Populate the fields:
    ```text
-   From: HR user mailbox  
-   To: `it.helpdesk1`  
-   Subject: `Action Required: Benefits Review`  
-   Body:
-     
-     Please review your updated benefits information at the link below:
+   From: Human Resources <[hr.rep1@local.lab](mailto:hr.rep1@local.lab)>
+   To: [it.helpdesk1@local.lab](mailto:it.helpdesk1@local.lab)
 
-     http://<KALI_IP>:8080
+   Hello,
+
+   As part of our annual benefits audit, we require all employees to review and confirm their current benefits selections.
+   Please review your information using the secure link below and complete the confirmation no later than 5:00 pm today to avoid any disruption to coverage.
+
+   http://<KALI_IP>:8080
+
+   If you have already completed this review, no further action is required.
+   Thank you for your prompt attention.
+
+   Human Resources
+   Benefits Administration Team
    ```
 4. Send the email  
 5. Confirm the email is successfully delivered  
