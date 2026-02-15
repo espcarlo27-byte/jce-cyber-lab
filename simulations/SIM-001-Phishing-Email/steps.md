@@ -186,7 +186,7 @@ The phishing simulation requires the following files to be deployed on the Kali 
 - phish_log.txt
 
 These files are located in this repository under:  
-`SIM-001/phishing-files/`
+[SIM-001 – Phishing Files](simulations/SIM-001-Phishing-Email/phishing-files/)
 
 ---
 
