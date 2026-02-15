@@ -258,7 +258,7 @@ Test click:
 
 - Click Continue
 - You should be redirected to Microsoft
-- Check log file:
+- Check log file in Kali (terminal):
    ```bash
    cat /var/www/html/phish_log.txt
    ```
