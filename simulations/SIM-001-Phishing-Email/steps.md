@@ -88,8 +88,8 @@ auditpol /get /category:"Detailed Tracking"
 **Event Viewer** → **Windows Logs** → **Security**  
 **Filter Current Log** → **Event ID** = `4688`
 
-📸 Evidence Required:
-sim001-A-evidence-001-4688-eventviewer.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-001-4688-eventviewer.png`
 
 Screenshot must show:
 - Event ID 4688
@@ -110,8 +110,8 @@ Screenshot must show:
 - winevent_security
 - winevent_sysmon (if enabled)
 
-📸 Evidence Required:
-sim001-A-evidence-002-index-validation.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-002-index-validation.png`
 
 Screenshot must show:
 - winevent_security index
@@ -155,8 +155,8 @@ sudo netstat -tulnp | grep apache
 0.0.0.0:80
 ```
 
-📸 Evidence Required:
-sim001-A-evidence-003-apache-status.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-003-apache-status.png`
 
 Screenshot must show:
 - apache2 service running
@@ -216,8 +216,8 @@ http://<KALI_IP>/
 - No directory listing
 - Continue button visible
 
-📸 Evidence Required:
-sim001-A-evidence-004-landing-page.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-004-landing-page.png`
 
 Screenshot must show:
 - Phishing landing page loaded
@@ -248,8 +248,8 @@ http://<KALI_IP>/
 - Confirm phishing email present
 - Capture screenshot BEFORE clicking
 
-📸 Evidence Required:
-sim001-A-evidence-005-email-received.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-005-email-received.png`
 
 Screenshot must show:
 - Email subject
@@ -278,8 +278,8 @@ index=winevent_security EventCode=4624 user="it.helpdesk1"
 
 **Enterprise Identity** → **Active Session** → **User Context**
 
-📸 Evidence Required:
-sim001-A-evidence-006-4624-logon.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-006-4624-logon.png`
 
 Screenshot must show:
 - EventCode = 4624
@@ -299,8 +299,8 @@ Screenshot must show:
 
 ***Record exact timestamp.***
 
-📸 Evidence Required:
-sim001-A-evidence-007-link-clicked.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-007-link-clicked.png`
 
 Screenshot must show:
 - Landing page loaded
@@ -334,8 +334,8 @@ user="it.helpdesk1"
 > the URL may **not** appear in `Process_Command_Line`.  
 > This is expected browser behavior and does not indicate detection failure.
 
-📸 Evidence Required:
-sim001-A-evidence-008-4688-browser.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-008-4688-browser.png`
 
 Screenshot must show:
 - EventCode = 4688
@@ -371,8 +371,8 @@ sudo tail -n 20 /var/log/apache2/access.log
 - GET / or GET /track.php
 - Timestamp aligns with click
 
-📸 Evidence Required:
-sim001-A-evidence-009-apache-access-log.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-009-apache-access-log.png`
 
 Screenshot must show:
 - Windows IP address
@@ -389,8 +389,9 @@ cat /var/www/html/phish_log.txt
 - IP logged
 - Timestamp logged
 - User agent present
-📸 Evidence Required:
-sim001-A-evidence-010-phish-log.png
+
+**📸 Evidence Required:**  
+`sim001-A-evidence-010-phish-log.png`
 
 Screenshot must show:
 - IP logged
@@ -453,8 +454,8 @@ Create the following alert in Splunk:
 
 Validate that the alert successfully triggers during simulation execution.
 
-📸 Evidence Required:
-sim001-A-evidence-011-alert-triggered.png
+**📸 Evidence Required:**  
+`sim001-A-evidence-011-alert-triggered.png`
 
 Screenshot must show:
 - Alert name
