@@ -1,0 +1,22 @@
+Subject: Benefits Confirmation Required – Action Needed
+
+From: hr-rep1@local.lab
+To: it.helpdesk1@local.lab
+
+Hello,
+
+Our records indicate that your annual benefits confirmation is pending.
+To complete the audit process and ensure there are no disruptions to your coverage,
+please confirm your information using the link below:
+
+http://<KALI_IP>/
+
+If you do not complete this confirmation by end of day,
+your benefits enrollment may be temporarily suspended.
+
+If you believe this message was sent in error,
+please contact HR Support immediately.
+
+Thank you,
+Human Resources
+Benefits Administration
