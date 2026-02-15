@@ -185,12 +185,12 @@ The phishing simulation requires the following files to be deployed on the Kali 
 - track.php
 - phish_log.txt
 
-These files are located in this repository under:  
-[SIM-001 - Phishing Files](./phishing-files/)
-
 ---
 
 #### 3.2.1 – Download Files from GitHub
+
+These files are located in this repository under:  
+[SIM-001 - Phishing Files](./phishing-files/)
 
 Option A – Download Entire Repository (Recommended)
 
@@ -220,6 +220,13 @@ You may also:
 Apache default web directory:
 ```css
 /var/www/html/
+```
+
+Move files:
+```bash
+sudo cp index.html /var/www/html/
+sudo cp track.php /var/www/html/
+sudo cp phish_log.txt /var/www/html/
 ```
 
 ---
@@ -254,6 +261,15 @@ Confirm:
 - No directory listing
 - "Continue" button visible
 
+**📸 Evidence Required:** 
+`sim001-A-evidence-004-landing-page.png`  
+
+Screenshot must show:
+
+- Phishing landing page loaded
+- URL visible in browser
+- Correct Kali IP in address bar
+
 Test click:
 
 - Click Continue
@@ -273,35 +289,6 @@ You should see a log entry similar to:
 - This simulation is for controlled lab use only.
 - Do NOT commit runtime logs (with IP addresses) back to GitHub.
 - If permissions are incorrect, track.php will fail silently.
-
----
-
-### 3.3 Restart Apache
-```bash
-sudo systemctl restart apache2
-```
-
----
-
-### 3.4 Validate Landing Page
-
-**From Windows 11 browser:**
-```cpp
-http://<KALI_IP>/
-```
-
-**Confirm:**
-
-- Landing page loads
-- No directory listing
-- Continue button visible
-
-**📸 Evidence Required:**  
-`sim001-A-evidence-004-landing-page.png`
-
-Screenshot must show:
-- Phishing landing page loaded
-- URL visible in browser address bar
 
 ---
 
