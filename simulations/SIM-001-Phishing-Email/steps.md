@@ -186,7 +186,7 @@ The phishing simulation requires the following files to be deployed on the Kali 
 - phish_log.txt
 
 These files are located in this repository under:  
-[SIM-001 - Phishing Files/](./phishing-files/)
+[SIM-001 - Phishing Files](./phishing-files/)
 
 ---
 
@@ -317,7 +317,7 @@ Screenshot must show:
 ## 4. Send Phishing Email (Zimbra)
 ### 4.1 Compose Email
 
-- Log into Zimbra
+- Log into Zimbra (as `hr.rep1@local.lab`)
 - Send email to it.helpdesk1
 - Insert link:
 ```cpp
@@ -326,13 +326,16 @@ http://<KALI_IP>/
 
 ***Record timestamp of delivery.***
 
+Sample email can be found in this repository under:  
+[SIM-001 - HR Sample Email](./phishing-files/hr_email.txt)
+
 ---
 
 ### 4.2 Confirm Email Receipt
 
 **On Windows 11:**
 
-- Log in as it.helpdesk1
+- Log in as `it.helpdesk1`
 - Open mailbox
 - Confirm phishing email present
 - Capture screenshot BEFORE clicking
