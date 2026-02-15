@@ -179,20 +179,109 @@ DocumentRoot /var/www/html
 
 ### 3.2 Place Phishing Files
 
-**Ensure the following files exist in:**
-```text
-/var/www/html/
-```
+The phishing simulation requires the following files to be deployed on the Kali web server:
 
 - index.html
 - track.php
 - phish_log.txt
 
-**If needed:**
-```bash
-sudo touch /var/www/html/phish_log.txt
-sudo chmod 666 /var/www/html/phish_log.txt
+These files are located in this repository under:  
+`SIM-001/phishing-files/`
+
+---
+
+#### 3.2.1 – Download Files from GitHub
+
+Option A – Download Entire Repository (Recommended)
+
+1. On your Kali VM, open Terminal.
+2. Clone the repository:
+   ```bash
+   git clone <YOUR_GITHUB_REPO_URL>
+   ```
+3. Navigate to the phishing files directory:
+   ```bash
+   cd <repo-name>/SIM-001/phishing-files
+   ```
+
+Option B – Download Individually  
+
+You may also:  
+
+- Open each file in GitHub
+- Click Raw
+- Right-click → Save As
+- Save to Kali Desktop
+
+---
+
+#### 3.2.2 – Move Files to Apache Web Root
+
+Apache default web directory:
+```css
+/var/www/html/
 ```
+
+---
+
+#### 3.2.3 – Set Proper Permissions
+
+Ensure Apache can write to phish_log.txt:
+```bash
+sudo chown www-data:www-data /var/www/html/phish_log.txt
+sudo chmod 664 /var/www/html/phish_log.txt
+```
+
+---
+
+#### 3.2.4 – Restart Apache
+```bash
+sudo systemctl restart apache2
+```
+
+---
+
+#### 3.2.5 – Validate Deployment
+
+From Windows 11 browser:
+```cpp
+http://<KALI_IP>/
+```
+
+Confirm:
+
+- Landing page loads
+- No directory listing
+- "Continue" button visible
+
+Test click:
+
+- Click Continue
+- You should be redirected to Microsoft
+- Check log file:
+   ```bash
+   cat /var/www/html/phish_log.txt
+   ```
+
+You should see a log entry similar to:
+   ```yaml
+   TIME: 2026-02-16 23:57:12 | IP: 192.168.1.25 | ...
+   ```
+
+> ⚠ Important Notes
+- Do NOT expose this server to the internet.
+- This simulation is for controlled lab use only.
+- Do NOT commit runtime logs (with IP addresses) back to GitHub.
+- If permissions are incorrect, track.php will fail silently.
+
+**📸 Evidence Required:**  
+`sim001-A-evidence-003-landing-page.png`
+
+Screenshot must show:
+
+- Phishing landing page loaded
+- URL visible in browser
+- Correct Kali IP in address bar
 
 ---
 
