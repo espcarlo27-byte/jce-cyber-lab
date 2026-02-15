@@ -290,7 +290,7 @@ Screenshot must show:
 ---
 
 ## 6. Execute Phishing Link Click
-###6.1 Click Link
+### 6.1 Click Link
 
 - Click phishing link in webmail
 - Landing page loads
@@ -310,7 +310,7 @@ Screenshot must show:
 ---
 
 ## 7. SOC Investigation Phase
-###7.1 Endpoint Telemetry – Process Creation
+### 7.1 Endpoint Telemetry – Process Creation
 
 ***Search in Splunk:**
 ```spl
@@ -346,7 +346,7 @@ Screenshot must show:
 
 ---
 
-## 7.2 Sysmon Validation (If Enabled)
+### 7.2 Sysmon Validation (If Enabled)
 
 If Sysmon is configured, validate browser execution telemetry:
 ```spl
@@ -358,7 +358,7 @@ Image="*chrome.exe"
 
 ---
 
-## 7.3 Network Telemetry – Authoritative Confirmation
+### 7.3 Network Telemetry – Authoritative Confirmation
 
 On Kali:
 ```bash
