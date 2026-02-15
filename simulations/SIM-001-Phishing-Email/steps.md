@@ -1,7 +1,7 @@
 # SIM-001 – Phishing Email (T1566.002)
 ## Spearphishing Link – Multi-Layer SOC Validation
 
-# 🎯 Simulation Objective
+## 🎯 Simulation Objective
 
 Simulate phishing-based initial access where:
 
@@ -15,7 +15,7 @@ This simulation models real-world SOC investigative methodology.
 
 ---
 
-# 1. Prerequisites
+## 1. Prerequisites
 
 Ensure the following components are operational before starting SIM-001.
 
@@ -46,11 +46,8 @@ When phishing is delivered via webmail in an existing browser session, the phish
 
 ---
 
-# 2. Environment Validation (Pre-Execution Checks)
-
----
-
-## 2.1 Verify Windows Endpoint Logging
+## 2. Environment Validation (Pre-Execution Checks)
+### 2.1 Verify Windows Endpoint Logging
 
 On Windows 11 (Administrator PowerShell):
 
@@ -69,7 +66,7 @@ auditpol /get /category:"Detailed Tracking"
 
 ---
 
-## 2.2 Verify Splunk Ingestion
+### 2.2 Verify Splunk Ingestion
 
 **In Splunk:**
 ```spl
@@ -83,7 +80,7 @@ auditpol /get /category:"Detailed Tracking"
 
 ---
 
-## 2.3 Verify Splunk Universal Forwarder
+### 2.3 Verify Splunk Universal Forwarder
 
 **On Windows 11:**
 ```powershell
@@ -97,7 +94,7 @@ Running
 
 ---
 
-## 2.4 Verify Kali Web Server
+### 2.4 Verify Kali Web Server
 
 **On Kali:**
 ```bash
@@ -120,8 +117,8 @@ sudo netstat -tulnp | grep apache
 
 ---
 
-# 3. Prepare Phishing Landing Page (Kali Linux)
-## 3.1 Confirm Apache Document Root
+## 3. Prepare Phishing Landing Page (Kali Linux)
+### 3.1 Confirm Apache Document Root
 ```bash
 sudo cat /etc/apache2/sites-enabled/000-default.conf | grep DocumentRoot
 ```
@@ -133,7 +130,7 @@ DocumentRoot /var/www/html
 
 ---
 
-## 3.2 Place Phishing Files
+### 3.2 Place Phishing Files
 
 **Ensure the following files exist in:**
 ```text
@@ -152,14 +149,14 @@ sudo chmod 666 /var/www/html/phish_log.txt
 
 ---
 
-## 3.3 Restart Apache
+### 3.3 Restart Apache
 ```bash
 sudo systemctl restart apache2
 ```
 
 ---
 
-## 3.4 Validate Landing Page
+### 3.4 Validate Landing Page
 
 **From Windows 11 browser:**
 ```cpp
@@ -174,8 +171,8 @@ http://<KALI_IP>/
 
 ---
 
-# 4. Send Phishing Email (Zimbra)
-## 4.1 Compose Email
+## 4. Send Phishing Email (Zimbra)
+### 4.1 Compose Email
 
 - Log into Zimbra
 - Send email to it.helpdesk1
@@ -188,7 +185,7 @@ http://<KALI_IP>/
 
 ---
 
-## 4.2 Confirm Email Receipt
+### 4.2 Confirm Email Receipt
 
 **On Windows 11:**
 
@@ -199,7 +196,7 @@ http://<KALI_IP>/
 
 ---
 
-# 5. Identity Context Validation
+## 5. Identity Context Validation
 
 **In Splunk:**
 ```spl
@@ -220,20 +217,161 @@ index=winevent_security EventCode=4624 user="it.helpdesk1"
 
 ---
 
-# 6. Execute Phishing Link Click
-##6.1 Click Link
+## 6. Execute Phishing Link Click
+###6.1 Click Link
 
-Click phishing link in webmail
+- Click phishing link in webmail
+- Landing page loads
+- Click “Continue”
+- Browser redirects to Microsoft
 
-Landing page loads
+***Record exact timestamp.***
 
-Click “Continue”
+---
 
-Browser redirects to Microsoft
+## 7. SOC Investigation Phase
+###7.1 Endpoint Telemetry – Process Creation
 
-Record exact timestamp.
+***Search in Splunk:**
+```spl
+index=winevent_security EventCode=4688
+user="it.helpdesk1"
+| table _time host user new_process_name parent_process_name
+| sort - _time
+```
 
-7️⃣ SOC Investigation Phase
-7.1 Endpoint Telemetry – Process Creation
+**Confirm the Following Indicators**
 
-Search in Splunk:
+| Field              | Expected Value        |
+|--------------------|-----------------------|
+| new_process_name   | `chrome.exe`          |
+| user               | `it.helpdesk1`        |
+| host               | `Windows11Pro`        |
+| Timestamp          | Aligns with click time |
+
+> ⚠ **Note:**  
+> When phishing is delivered via webmail inside an existing browser session,  
+> the URL may **not** appear in `Process_Command_Line`.  
+> This is expected browser behavior and does not indicate detection failure.
+
+---
+
+## 7.2 Sysmon Validation (If Enabled)
+
+If Sysmon is configured, validate browser execution telemetry:
+```spl
+index=winevent_sysmon EventCode=1
+Image="*chrome.exe"
+| table _time host user Image ParentImage CommandLine
+| sort - _time
+```
+
+---
+
+## 7.3 Network Telemetry – Authoritative Confirmation
+
+On Kali:
+```bash
+sudo tail -n 20 /var/log/apache2/access.log
+```
+
+**Confirm:**
+
+- Windows IP present
+- GET / or GET /track.php
+- Timestamp aligns with click
+
+**Optional:**
+```bash
+cat /var/www/html/phish_log.txt
+```
+
+**Confirm:**
+
+- IP logged
+- Timestamp logged
+- User agent present
+
+---
+
+## 8. Timeline Correlation
+
+Construct the following correlation table based on collected evidence:
+
+| Time     | Source              | Observation                    |
+|----------|--------------------|--------------------------------|
+| HH:MM:SS | Event ID 4624      | User session active            |
+| HH:MM:SS | Event ID 4688      | Browser execution              |
+| HH:MM:SS | Apache access.log  | HTTP request from victim host  |
+| HH:MM:SS | phish_log.txt      | Click event logged             |
+
+If all timestamps align within a 1–2 minute window, detection is considered validated.
+
+This confirms the chain:
+
+**Identity → Endpoint Execution → Outbound Connection → Attacker Receipt**
+
+---
+
+## 9. Detection & Alert Configuration
+
+### Primary Detection Logic
+
+The detection model for SIM-001 is based on correlation of:
+
+- Browser process execution  
+- Outbound connection to attacker-controlled IP  
+- Timestamp proximity
+
+**Example SPL:**
+```spl
+(
+    index=winevent_security EventCode=4688 new_process_name="chrome.exe"
+)
+OR
+(
+    index=network_logs dest_ip="<KALI_IP>"
+)
+| sort - _time
+```
+
+### Alert Configuration
+
+Create the following alert in Splunk:
+
+| Setting        | Value                              |
+|---------------|--------------------------------------|
+| **Name**       | LAB-SIM-001-PHISHING-CLICK           |
+| **Time Range** | Last 15 minutes                     |
+| **Trigger**    | Number of results > 0               |
+| **Severity**   | Medium                              |
+
+Validate that the alert successfully triggers during simulation execution.
+
+---
+
+## 10. Simulation Completion Checklist
+
+| Validation Requirement              | Status |
+|-------------------------------------|--------|
+| Phishing email delivered            | ✅     |
+| User interaction observed           | ✅     |
+| Browser execution logged            | ✅     |
+| Outbound HTTP request validated     | ✅     |
+| Server-side confirmation present    | ✅     |
+| SIEM correlation reproducible       | ✅     |
+| Alert triggered                     | ✅     |
+
+---
+
+## 🏁 Final Status
+
+| Category            | Result |
+|---------------------|--------|
+| Detection Authority | Multi-Layer Correlation |
+| MITRE Technique     | T1566.002 – Spearphishing Link |
+| Simulation Status   | COMPLETE & REPRODUCIBLE |
+
+
+
+
