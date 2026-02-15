@@ -220,8 +220,8 @@ index=winevent_security EventCode=4624 user="it.helpdesk1"
 
 ---
 
-6️⃣ Execute Phishing Link Click
-6.1 Click Link
+# 6. Execute Phishing Link Click
+##6.1 Click Link
 
 Click phishing link in webmail
 
