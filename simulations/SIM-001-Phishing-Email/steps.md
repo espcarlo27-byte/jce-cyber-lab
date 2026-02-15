@@ -60,12 +60,12 @@ auditpol /get /category:"Detailed Tracking"
 
 **Confirm:**  
 
-Process Creation = Success  
+**Process Creation** = ***Success***  
 
-Verify Event ID 4688 exists:  
+**Verify Event ID 4688 exists:**  
 
-Event Viewer → Windows Logs → Security  
-Filter Current Log → Event ID = `4688`
+**Event Viewer** → **Windows Logs** → **Security**  
+**Filter Current Log** → **Event ID** = `4688`
 
 ---
 
@@ -85,4 +85,12 @@ Filter Current Log → Event ID = `4688`
 
 ## 2.3 Verify Splunk Universal Forwarder
 
-On Windows 11:
+**On Windows 11:**
+```powershell
+Get-Service splunkforwarder
+```
+
+**Status must be:**
+```sql
+Running
+```
