@@ -116,7 +116,6 @@ Screenshot must show:
 Screenshot must show:
 - winevent_security index
 - Event count
-- Host field visible
 
 ---
 
