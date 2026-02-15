@@ -274,15 +274,6 @@ You should see a log entry similar to:
 - Do NOT commit runtime logs (with IP addresses) back to GitHub.
 - If permissions are incorrect, track.php will fail silently.
 
-**📸 Evidence Required:**  
-`sim001-A-evidence-003-landing-page.png`
-
-Screenshot must show:
-
-- Phishing landing page loaded
-- URL visible in browser
-- Correct Kali IP in address bar
-
 ---
 
 ### 3.3 Restart Apache
@@ -386,18 +377,26 @@ Screenshot must show:
 
 - Click phishing link in webmail
 - Landing page loads
-- Click “Continue”
-- Browser redirects to Microsoft
-
-***Record exact timestamp.***
+- Record exact timestamp
 
 **📸 Evidence Required:**  
 `sim001-A-evidence-007-link-clicked.png`
 
 Screenshot must show:
 - Landing page loaded
-- Continue button clicked
-- Timestamp recorded manually
+
+---
+
+### 6.2 Click “Continue”
+
+- Browser redirects to Microsoft
+- Record exact timestamp
+
+**📸 Evidence Required:**  
+`sim001-A-evidence-008-continue-clicked.png`
+
+Screenshot must show:
+- Microsoft Landing page loaded
 
 ---
 
@@ -427,7 +426,7 @@ user="it.helpdesk1"
 > This is expected browser behavior and does not indicate detection failure.
 
 **📸 Evidence Required:**  
-`sim001-A-evidence-008-4688-browser.png`
+`sim001-A-evidence-009-4688-browser.png`
 
 Screenshot must show:
 - EventCode = 4688
@@ -464,7 +463,7 @@ sudo tail -n 20 /var/log/apache2/access.log
 - Timestamp aligns with click
 
 **📸 Evidence Required:**  
-`sim001-A-evidence-009-apache-access-log.png`
+`sim001-A-evidence-010-apache-access-log.png`
 
 Screenshot must show:
 - Windows IP address
@@ -483,7 +482,7 @@ cat /var/www/html/phish_log.txt
 - User agent present
 
 **📸 Evidence Required:**  
-`sim001-A-evidence-010-phish-log.png`
+`sim001-A-evidence-011-phish-log.png`
 
 Screenshot must show:
 - IP logged
@@ -547,7 +546,7 @@ Create the following alert in Splunk:
 Validate that the alert successfully triggers during simulation execution.
 
 **📸 Evidence Required:**  
-`sim001-A-evidence-011-alert-triggered.png`
+`sim001-A-evidence-012-alert-triggered.png`
 
 Screenshot must show:
 - Alert name
