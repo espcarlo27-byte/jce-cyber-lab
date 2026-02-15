@@ -31,6 +31,30 @@ Ensure the following components are operational before starting SIM-001.
 
 ---
 
+## 📸 Evidence Capture Standard
+
+For every validation step, capture screenshots that clearly show:
+
+- Timestamp visible
+- Hostname visible
+- Username visible (if applicable)
+- Event ID visible (for Windows logs)
+- IP address visible (for network logs)
+- Query used (for Splunk validation)
+
+Screenshot Naming Convention:
+
+sim001-A-evidence-###-description.png
+
+Example:
+sim001-A-evidence-005-4688-browser.png
+
+All screenshots must be stored in:
+
+/SIM-001/screenshots/
+
+---
+
 ## Detection Model Clarification
 
 Detection for SIM-001 relies on **multi-layer correlation**, including:
@@ -64,6 +88,14 @@ auditpol /get /category:"Detailed Tracking"
 **Event Viewer** → **Windows Logs** → **Security**  
 **Filter Current Log** → **Event ID** = `4688`
 
+📸 Evidence Required:
+sim001-A-evidence-001-4688-eventviewer.png
+
+Screenshot must show:
+- Event ID 4688
+- Event Viewer path (Windows Logs → Security)
+- Timestamp column visible
+
 ---
 
 ### 2.2 Verify Splunk Ingestion
@@ -77,6 +109,14 @@ auditpol /get /category:"Detailed Tracking"
 
 - winevent_security
 - winevent_sysmon (if enabled)
+
+📸 Evidence Required:
+sim001-A-evidence-002-index-validation.png
+
+Screenshot must show:
+- winevent_security index
+- Event count
+- Host field visible
 
 ---
 
@@ -114,6 +154,13 @@ sudo netstat -tulnp | grep apache
 ```makefile
 0.0.0.0:80
 ```
+
+📸 Evidence Required:
+sim001-A-evidence-003-apache-status.png
+
+Screenshot must show:
+- apache2 service running
+- Port 80 listening
 
 ---
 
@@ -169,6 +216,13 @@ http://<KALI_IP>/
 - No directory listing
 - Continue button visible
 
+📸 Evidence Required:
+sim001-A-evidence-004-landing-page.png
+
+Screenshot must show:
+- Phishing landing page loaded
+- URL visible in browser address bar
+
 ---
 
 ## 4. Send Phishing Email (Zimbra)
@@ -194,6 +248,15 @@ http://<KALI_IP>/
 - Confirm phishing email present
 - Capture screenshot BEFORE clicking
 
+📸 Evidence Required:
+sim001-A-evidence-005-email-received.png
+
+Screenshot must show:
+- Email subject
+- Sender
+- Timestamp
+- Link visible (do not click yet)
+
 ---
 
 ## 5. Identity Context Validation
@@ -215,6 +278,15 @@ index=winevent_security EventCode=4624 user="it.helpdesk1"
 
 **Enterprise Identity** → **Active Session** → **User Context**
 
+📸 Evidence Required:
+sim001-A-evidence-006-4624-logon.png
+
+Screenshot must show:
+- EventCode = 4624
+- user = it.helpdesk1
+- host = Windows11Pro
+- Timestamp visible
+
 ---
 
 ## 6. Execute Phishing Link Click
@@ -226,6 +298,14 @@ index=winevent_security EventCode=4624 user="it.helpdesk1"
 - Browser redirects to Microsoft
 
 ***Record exact timestamp.***
+
+📸 Evidence Required:
+sim001-A-evidence-007-link-clicked.png
+
+Screenshot must show:
+- Landing page loaded
+- Continue button clicked
+- Timestamp recorded manually
 
 ---
 
@@ -254,6 +334,16 @@ user="it.helpdesk1"
 > the URL may **not** appear in `Process_Command_Line`.  
 > This is expected browser behavior and does not indicate detection failure.
 
+📸 Evidence Required:
+sim001-A-evidence-008-4688-browser.png
+
+Screenshot must show:
+- EventCode = 4688
+- new_process_name = chrome.exe
+- user = it.helpdesk1
+- Timestamp visible
+- Splunk query visible
+
 ---
 
 ## 7.2 Sysmon Validation (If Enabled)
@@ -281,6 +371,14 @@ sudo tail -n 20 /var/log/apache2/access.log
 - GET / or GET /track.php
 - Timestamp aligns with click
 
+📸 Evidence Required:
+sim001-A-evidence-009-apache-access-log.png
+
+Screenshot must show:
+- Windows IP address
+- GET / or GET /track.php
+- Timestamp aligned with click
+
 **Optional:**
 ```bash
 cat /var/www/html/phish_log.txt
@@ -291,6 +389,13 @@ cat /var/www/html/phish_log.txt
 - IP logged
 - Timestamp logged
 - User agent present
+📸 Evidence Required:
+sim001-A-evidence-010-phish-log.png
+
+Screenshot must show:
+- IP logged
+- Timestamp logged
+- User agent visible
 
 ---
 
@@ -347,6 +452,14 @@ Create the following alert in Splunk:
 | **Severity**   | Medium                              |
 
 Validate that the alert successfully triggers during simulation execution.
+
+📸 Evidence Required:
+sim001-A-evidence-011-alert-triggered.png
+
+Screenshot must show:
+- Alert name
+- Triggered status
+- Time fired
 
 ---
 
