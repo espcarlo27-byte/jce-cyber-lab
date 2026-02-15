@@ -1,623 +1,88 @@
-# SIM-001 – Phishing Email (T1566.002) – Execution Steps
+# SIM-001 – Phishing Email (T1566.002)
+## Spearphishing Link – Multi-Layer SOC Validation
 
-**Detection Focus:** Endpoint Execution via Browser Command Line  
-**Primary Telemetry:** Windows Security Event ID 4688  
-**MITRE ATT&CK:** T1566.002 – Spearphishing Link
+# 🎯 Simulation Objective
+
+Simulate phishing-based initial access where:
+
+1. A malicious link is delivered via enterprise email
+2. An authenticated AD user clicks the link
+3. Browser execution telemetry is recorded
+4. Outbound communication to attacker infrastructure occurs
+5. Multi-layer correlation validates the event in SIEM
+
+This simulation models real-world SOC investigative methodology.
 
 ---
 
-## 1. Prerequisites
+# 1️⃣ Prerequisites
 
 Ensure the following components are operational before starting SIM-001.
 
 | Component | Required? | Purpose in SIM-001 |
-|-----------|-----------|-------------------|
-| **Windows Server (Active Directory)** | ✅ | Provides enterprise identity, authentication telemetry, and user attribution |
-| **Windows 11 Endpoint** | ✅ | Generates authoritative telemetry (Event 4688, process command line) |
-| **Splunk Enterprise** | ✅ | Ingests logs, validates detection, and triggers alerts |
-| **Splunk Universal Forwarder** | ✅ | Sends Windows logs to Splunk |
-| **Kali Linux** | Optional | Hosts phishing landing page used in URL |
-| **Mail Server (Zimbra)** | Optional | Delivers phishing email and generates mailbox authentication logs |
-| **Security Onion** | Optional | Provides supplemental network telemetry (not required) |
-
-> Detection for SIM-001 depends on **endpoint process telemetry**.  
-> Identity telemetry from Active Directory provides **user attribution and correlation context**, while network logs are supplemental.
+|------------|------------|--------------------|
+| Windows Server (Active Directory) | ✅ | Provides enterprise identity, authentication telemetry, and user attribution |
+| Windows 11 Endpoint | ✅ | Generates authoritative process execution telemetry (Event ID 4688 / Sysmon Event ID 1) |
+| Splunk Enterprise | ✅ | Ingests logs, enables multi-layer correlation, and triggers alerts |
+| Splunk Universal Forwarder | ✅ | Sends Windows logs to Splunk |
+| Kali Linux | ✅ | Hosts phishing landing page and records inbound HTTP requests |
+| Mail Server (Zimbra) | Optional | Delivers phishing email and generates mailbox authentication logs |
+| Security Onion | Optional | Provides supplemental network telemetry |
 
 ---
 
-## 2. Execution – Option A: Phishing via Mail Server (Zimbra)
+## Detection Model Clarification
 
-This execution path validates phishing detection using a **realistic email delivery flow**
-while maintaining **endpoint telemetry as the authoritative detection source**.
+Detection for SIM-001 relies on **multi-layer correlation**, including:
 
-Email infrastructure is used only as the **delivery mechanism**.
+- Endpoint process execution telemetry (Event ID 4688 / Sysmon)
+- Identity telemetry (Active Directory logon events)
+- Outbound HTTP connection to attacker infrastructure
+- Server-side confirmation via Apache access logs
+
+⚠ Note:
+
+When phishing is delivered via webmail in an existing browser session, the phishing URL may **not** appear in `Process_Command_Line`. Detection authority is established through timestamp-aligned correlation across endpoint and network layers.
 
 ---
 
-### 2.1 Prepare Phishing Landing Page (Kali Linux)
+# 2️⃣ Environment Validation (Pre-Execution Checks)
 
-This step prepares the **phishing destination** that the user will later access
-after clicking the link in the email.
+---
 
-The Kali host simulates a **malicious external web server**.
+## 2.1 Verify Windows Endpoint Logging
 
-On the **Kali Linux VM**:
+On Windows 11 (Administrator PowerShell):
 
-1. Open a terminal
-2. Create a working directory for the phishing page:
-```text
-mkdir ~/phishing
-cd ~/phishing
+```powershell
+auditpol /get /category:"Detailed Tracking"
 ```
-3. Create a simple HTML file:
-```html
-nano index.html
-```
-4. Insert basic content, for example:
-```html
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Benefits Confirmation | Human Resources</title>
-  <style>
-    body { font-family: Arial, Helvetica, sans-serif; background:#f5f6f8; margin:0; }
-    .wrap { max-width: 720px; margin: 48px auto; padding: 0 16px; }
-    .card { background:#fff; border:1px solid #e3e6ea; border-radius:8px; padding:24px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
-    h1 { font-size: 20px; margin: 0 0 12px; }
-    p { margin: 0 0 12px; color:#333; line-height:1.5; }
-    .meta { font-size: 12px; color:#666; margin-top: 16px; }
-    .badge { display:inline-block; font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2ff; color:#2b3a67; margin-bottom:12px; }
-    .btn { display:inline-block; margin-top:12px; padding:10px 14px; border-radius:6px; background:#1f2937; color:#fff; text-decoration:none; }
-    .btn:hover { opacity:.92; }
-    .footer { font-size: 12px; color:#666; margin-top: 18px; border-top:1px solid #eef0f3; padding-top: 12px; }
-    code { background:#f0f2f5; padding:2px 6px; border-radius:4px; }
-  </style>
-</head>
 
-<body>
-  <div class="wrap">
-    <div class="card">
-      <div class="badge">Human Resources • Benefits Administration</div>
-      <h1>Benefits Confirmation Required</h1>
+**Confirm:**  
 
-      <p>
-        Our records indicate your annual benefits review is pending.
-        Please confirm your current selections to complete the audit process.
-      </p>
+Process Creation = Success  
 
-      <p>
-        Status: <strong>In Review</strong><br />
-        Action: <strong>Employee Confirmation</strong>
-      </p>
+Verify Event ID 4688 exists:  
 
-      <a class="btn" href="#">Continue</a>
-
-      <p class="meta">
-        Reference: <code>BEN-AR-2026</code> • Updated: <code>02/07/2026</code>
-      </p>
-
-      <div class="footer">
-        If you believe you received this page in error, contact HR Support.
-        Do not reply to automated messages.
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-```
-5. Save and exit the editor
-6. Start a simple HTTP server:
-```yaml
-python3 -m http.server 8080
-```
-7. Confirm the server is listening on port 8080
-
-**This URL will be used in the phishing email:** `http://<KALI_IP>:8080`  
-
-📸 **Evidence:**  
-`sim001-A-evidence-001-kali-http-server.png`
+Event Viewer → Windows Logs → Security  
+Filter Current Log → Event ID = `4688`
 
 ---
 
-### 2.2 Send Phishing Email (Zimbra Mail Server)
+## 2.2 Verify Splunk Ingestion
 
-This step simulates a **realistic internal phishing scenario** where an email
-appears to originate from **HR**.
-
-The email is sent from an existing HR user to a target internal user.
-
-On the **Zimbra Web Interface**:
-
-1. Log in as an HR user  
-   *(example: `hr.rep1`)*
-2. Create a new email
-3. Populate the fields:
-   ```text
-   From: Human Resources <[hr.rep1@local.lab](mailto:hr.rep1@local.lab)>
-   To: [it.helpdesk1@local.lab](mailto:it.helpdesk1@local.lab)
-
-   Hello,
-
-   As part of our annual benefits audit, we require all employees to review and confirm their current benefits selections.
-   Please review your information using the secure link below and complete the confirmation no later than 5:00 pm today to avoid any disruption to coverage.
-
-   http://<KALI_IP>:8080
-
-   If you have already completed this review, no further action is required.
-   Thank you for your prompt attention.
-
-   Human Resources
-   Benefits Administration Team
-   ```
-4. Send the email  
-5. Confirm the email is successfully delivered  
-
-📸 **Evidence:**  
-`sim001-A-evidence-002-email-sent.png`
-
----
-
-### 2.3 User Receives Phishing Email (Windows 11)
-
-This step confirms successful delivery of the phishing message.
-
-On the **Windows 11 endpoint**:
-
-- Log in as `it.helpdesk1`  
-- Open the mailbox  
-- Confirm the phishing email is present  
-- Open the email **without clicking the link**
-
-📸 **Evidence:**  
-`sim001-A-evidence-003-email-received.png`
-
----
-
-### 2.3.1 Identity Context Validation (IAM Layer)
-
-Before the phishing link is clicked, it is important to establish that the user
-participating in SIM-001 is a **known enterprise identity** and that the email
-workflow is backed by Identity & Access Management (IAM).
-
-In this lab environment:
-
-- The user account `it.helpdesk1` is an **Active Directory identity**
-- The mailbox is integrated with AD via **LDAP/LDAPS**
-- Email access requires successful authentication
-- Identity telemetry is logged and monitored by the SIEM
-
-This ensures the phishing scenario involves a **governed enterprise identity**,
-not an anonymous or local-only account.
-
-This step establishes the identity chain:
-
-**Enterprise Identity → Mail Authentication → User Interaction → Endpoint Execution**
-
-📸 **Evidence:**  
-`sim001-A-evidence-004-identity-context.png`
-
----
-
-### 2.4 User Clicks Phishing Link (Windows 11)
-
-This step generates the **authoritative endpoint telemetry** used for detection.
-
-On the **Windows 11 endpoint**:
-
-- Open the phishing email  
-- Click the embedded URL  
-
-This action launches the browser and initiates endpoint execution.
-
-📸 **Evidence:**  
-`sim001-A-evidence-004-email-link-click.png`
-
----
-
-### 2.5 Validate Endpoint Telemetry (Windows)
-
-This step confirms that the phishing link interaction generated **authoritative endpoint telemetry**.
-
-The user’s browser execution must produce a **Windows Security Event ID 4688** (Process Creation) containing the phishing URL in the command line.
-
----
-
-#### Step 2.5.1 — Capture Time of Click
-
-Immediately after clicking the phishing link, note the approximate time (within 1–2 minutes).  
-This helps narrow searches and confirms event alignment.
-
----
-
-#### Step 2.5.2 — Search for Process Creation Event
-
-On the **Splunk Search Head**, navigate to **Search & Reporting** and run:
-
+**In Splunk:**
 ```spl
-(index=winevent_security OR index=winevent_system)
-EventCode=4688
-| table _time, host, user, New_Process_Name, Process_Command_Line, Parent_Process_Name
-| sort - _time
+| tstats count where index=* by index
 ```
 
----
+**Confirm:**  
 
-#### Step 2.5.3 — Confirm Required Indicators
-
-Locate the event corresponding to the click and verify:
-
-| Field | Expected Value |
-|------|----------------|
-| **New_Process_Name** | `chrome.exe` |
-| **Process_Command_Line** | Contains phishing URL (`http://<KALI_IP>:8080`) |
-| **host** | Windows 11 endpoint hostname |
-| **user** | `it.helpdesk1` |
-| **Parent_Process_Name** | Typically `explorer.exe` or mail client process |
-
-This confirms that user interaction directly resulted in browser execution.
+- winevent_security
+- winevent_sysmon (if enabled)
 
 ---
 
-#### Step 2.5.4 — Validate URL Visibility
+## 2.3 Verify Splunk Universal Forwarder
 
-Ensure the phishing URL is clearly visible in the `Process_Command_Line` field.  
-This proves:
-
-> **User action → process execution → URL artifact captured**
-
-This is the core detection signal for **MITRE ATT&CK T1566.002**.
-
-📸 **Evidence:**  
-`sim001-A-evidence-005-endpoint-4688.png`
-
-> Endpoint telemetry is the authoritative detection source for SIM-001.  
-> Network logs may supplement context but are not required for validation.
-
----
-
-### 2.5.5 Validate Identity Telemetry (IAM Signal)
-
-In addition to endpoint process telemetry, enterprise SOC investigations rely on
-identity telemetry to confirm that user activity is tied to a legitimate account.
-
-Run identity validation searches in Splunk to confirm:
-
-- The user `it.helpdesk1` has authentication events in AD logs
-- Mail system authentication events exist
-- Identity activity aligns with the phishing click timeframe
-
-This provides a cross-layer validation chain:
-
-**Identity Authentication → Endpoint Execution → URL Artifact**
-
-📸 **Evidence:**  
-`sim001-A-evidence-006-identity-telemetry.png`
-
----
-
-### 2.6 (Optional) Validate Network Telemetry (Security Onion)
-
-This step is optional and not required for SIM-001 completion.
-
-If Security Onion is available, observe outbound HTTP traffic.
-
-On **Security Onion**:
-
-```bash
-sudo tail -f /nsm/sensor_data/*/suricata/eve.json | grep '"event_type":"http"'
-```
-
-Expected fields (if available):
-
-- **src_ip** – Windows 11 endpoint  
-- **dest_ip** – Kali host  
-- **dest_port** – 8080  
-- **http.method** – GET  
-
-📸 **Optional Evidence:**  
-`sim001-A-evidence-006-network-http.png`
-
-> Network telemetry is supplemental and used only to support endpoint validation.  
-> Detection logic does **not** depend on network data.
-
----
-
-### 2.7 Validate Detection in Splunk
-
-This step confirms that the phishing activity is detectable using SIEM search logic
-based on **endpoint process telemetry**.
-
----
-
-#### Step 2.7.1 — Open Splunk Search & Reporting
-
-- Navigate to the Splunk web interface
-- Open the **Search & Reporting** app
-
----
-
-#### Step 2.7.2 — Run Detection Query
-
-Execute the validated search:
-
-```spl
-(index=winevent_security OR index=winevent_system)
-EventCode=4688
-New_Process_Name="*\\chrome.exe"
-| table _time, host, user, New_Process_Name, Process_Command_Line
-| sort - _time
-```
-
----
-
- #### Step 2.7.3 — Confirm Detection Conditions
-
-Locate the event generated by the phishing click and confirm:
-
-| Detection Signal | Expected Observation |
-|------------------|----------------------|
-| **Process** | `chrome.exe` execution |
-| **User** | `it.helpdesk1` |
-| **Host** | Windows 11 endpoint |
-| **Command Line** | Contains phishing URL (`http://<KALI_IP>:8080`) |
-| **Timestamp** | Matches user click timeframe |
-
-> This confirms that the detection logic successfully identifies browser-based URL execution.
-
----
-
-#### Step 2.7.4 — Validate Detection Reproducibility
-
-Repeat the phishing click if necessary and confirm that:
-
-- The query consistently returns results
-- Detection is not dependent on manual filtering
-
-This ensures the detection is **reliable**, not incidental.
-
-📸 **Evidence:**  
-`sim001-A-evidence-007-splunk-url-detection.png`
-
----
-
-### 2.8 Correlate Event in Splunk
-
-This step ties the phishing execution to the lab simulation using correlation logic.
-
-#### Step 2.8.1 — Run Correlation Query
-```spl
-(index=winevent_security OR index=winevent_system)
-EventCode=4688
-New_Process_Name="*\\chrome.exe"
-Process_Command_Line="*http*"
-| eval simulation_id="SIM-001"
-| eval symbolic_id="LAB-SIM-001-PHISHING-ALERT"
-| table _time, host, user, New_Process_Name, Process_Command_Line, simulation_id, symbolic_id
-| sort - _time
-```
-
----
-
-#### Step 2.8.2 — Validate Correlation Fields
-
-Confirm the following appear in the results:
-
-| Field | Purpose |
-|------|---------|
-| **simulation_id** | Ties event to SIM-001 |
-| **symbolic_id** | Represents alert identifier |
-| **host** | Affected endpoint |
-| **user** | User who executed the link |
-| **Process_Command_Line** | Shows phishing URL |
-
----
-
-#### Step 2.8.3 — Confirm Attack Chain Integrity
-
-Ensure the data supports a logical detection chain:
-
-> Identity authentication → email delivery → user interaction → browser execution → URL artifact captured
-
----
-
-#### Step 2.8.4 — Validate Alert Readiness
-
-Confirm this correlation query can be used as the basis for a Splunk alert  
-without modification.
-
-📸 **Evidence:**  
-`sim001-A-evidence-008-splunk-correlation.png`
-
----
-
-### 2.9 Configure Splunk Alert
-
-Configure the alert using the correlation query.
-
-- **Alert Name:** `LAB-SIM-001-PHISHING-ALERT`  
-- **Schedule:** Every 5 minutes  
-- **Time Window:** Last 15 minutes  
-- **Trigger:** Number of Results > 0  
-- **Trigger Type:** Per Result  
-- **Throttle:** 10 minutes  
-- **Severity:** Medium  
-
-📸 **Evidence:**  
-`sim001-A-evidence-009-alert-config.png`  
-`sim001-A-evidence-010-alert-fired.png`
-
----
-
-### 2.10 Save Evidence & Mark Completion
-
-Store all evidence in:
-```text
-simulations/SIM-001-Phishing-Email/screenshots/
-```
-   
-***📌 Option A Status:*** **COMPLETE**
-
----
-
-## 3. Execution – Option B: Endpoint-Only Phishing (No Mail Server)
-
-This execution path validates phishing detection **without relying on email infrastructure**.  
-It simulates a user interacting with a malicious link delivered through an out-of-band method
-(e.g., chat, SMS, shared document), while still generating **authoritative endpoint telemetry**.
-
----
-
-### 3.1 Prepare Symbolic Phishing Message
-
-On the **Windows 11 endpoint**:
-
-1. Log in as a standard user (e.g., `it.helpdesk1`)
-2. Open **Notepad**
-3. Create a new text file containing a phishing-style message, for example:
-```text
-HR Notice: Please review your updated benefits information.
-https://<KALI_IP>:8080/hr-benefits
-```
-4. Save the file to the Desktop as: `phishing_message.txt`
-
-📸 **Evidence:**  
-`sim001-B-evidence-001-phishing-text.png`
-
----
-
-### 3.2 User Clicks Phishing Link
-
-1. Open `phishing_message.txt`
-2. Highlight the phishing URL
-3. Either:
-- Click the URL directly, **or**
-- Copy and paste the URL into **Google Chrome**
-4. Press **Enter** to navigate to the link
-
-This action represents a user responding to a phishing lure delivered outside of email.
-
-📸 **Evidence:**  
-`sim001-B-evidence-002-link-click.png`
-
----
-
-### 3.3 Validate Endpoint Telemetry
-
-This user action must generate **authoritative endpoint telemetry**.
-
-On the **Splunk Search Head**:
-
-1. Navigate to **Search & Reporting**
-2. Run a search similar to:
-```spl
-index=wineventlog EventCode=4688
-```
-3. Confirm the following fields are present:
-- `New_Process_Name = chrome.exe`
-- `Process_Command_Line` contains the phishing URL
-- Timestamp aligns with the user click
-
-This confirms successful process execution tied to user interaction.  
-
-📸 **Evidence:**  
-`sim001-B-evidence-003-endpoint-4688.png`
-
----
-
-### 3.4 (Optional) Validate Network Telemetry
-
-If **Security Onion** or network monitoring is available:
-
-1. Review HTTP or connection logs
-2. Look for outbound traffic from the Windows endpoint to the Kali host
-3. Validate:
-- Source IP = Windows endpoint
-- Destination IP = Kali host
-- Destination port = `8080`
-- HTTP method = `GET`
-
-📸 **Optional Evidence:**  
-`sim001-B-evidence-004-network-http.png`
-
-> Network telemetry is **supplemental** and not required for SIM-001 validation.
-
----
-
-### 3.5 Validate Detection in Splunk
-
-1. In Splunk, search for detections related to:
-- URL execution
-- Suspicious browser activity
-2. Confirm that:
-- The phishing URL is visible
-- The executing process is `chrome.exe`
-- The event is indexed correctly
-
-📸 **Evidence:**  
-`sim001-B-evidence-005-splunk-url-detection.png`
-
----
-
-### 3.6 Correlate Event in Splunk
-
-1. Correlate the following data points:
-- User account
-- Endpoint hostname
-- Process execution event
-- URL accessed
-2. Confirm the activity forms a coherent attack chain:
-- User action → browser execution → URL access
-
-📸 **Evidence:**  
-`sim001-B-evidence-006-splunk-correlation.png`
-
----
-
-### 3.7 Configure Splunk Alert
-
-Create a new alert in Splunk with the following configuration:
-
-- **Alert Name:** `LAB-SIM-001-PHISHING-ALERT`
-- **Schedule:** Every 5 minutes
-- **Time Range:** Last 15 minutes
-- **Trigger Condition:** Number of Results > 0
-- **Trigger Type:** Per Result
-- **Throttle:** 10 minutes
-- **Severity:** Medium
-
-Verify that the alert fires when the phishing activity is detected.
-
-📸 **Evidence:**  
-`sim001-B-evidence-007-alert-config.png`  
-`sim001-B-evidence-008-alert-fired.png`
-
----
-
-### 3.8 Save Evidence & Mark Completion
-
-1. Store all screenshots using the approved naming convention
-2. Verify evidence completeness
-3. Confirm alert functionality
-
-📌 ***Option B Status:*** **COMPLETE**
-
----
-
-## 4. Evidence Naming Convention
-
-- **Option A:** `sim001-A-evidence-###-description.png`
-- **Option B:** `sim001-B-evidence-###-description.png`
-
----
-
-## 5. Final Status
-
-**SIM-001 – Phishing Email Detection** is **COMPLETE and FULLY VALIDATED**.
-
-- Endpoint telemetry is **authoritative**
-- Identity telemetry provides **context and correlation**
-- Network telemetry is **optional and supplemental**
-
-
+On Windows 11:
