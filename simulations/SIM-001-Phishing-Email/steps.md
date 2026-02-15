@@ -47,11 +47,11 @@ Screenshot Naming Convention:
 sim001-A-evidence-###-description.png
 
 Example:
-sim001-A-evidence-005-4688-browser.png
+`sim001-A-evidence-005-4688-browser.png`
 
 All screenshots must be stored in:
 
-/SIM-001/screenshots/
+`/SIM-001/screenshots/`
 
 ---
 
