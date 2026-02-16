@@ -74,7 +74,6 @@ When phishing is delivered via webmail in an existing browser session, the phish
 ### 2.1 Verify Windows Endpoint Logging
 
 On Windows 11 (Administrator PowerShell):
-
 ```powershell
 auditpol /get /category:"Detailed Tracking"
 ```
@@ -88,8 +87,22 @@ auditpol /get /category:"Detailed Tracking"
 **Event Viewer** → **Windows Logs** → **Security**  
 **Filter Current Log** → **Event ID** = `4688`
 
+---
+
+### 2.2 Verify Splunk Universal Forwarder
+
+On Windows 11:
+```powershell
+Get-Service splunkforwarder
+```
+
+**Status must be:**
+```sql
+Running
+```
+
 **📸 Evidence Required:**  
-`sim001-A-evidence-001-4688-eventviewer.png`
+`sim001-A-evidence-001-4688-eventviewer-splunkforwarder.png`
 
 Screenshot must show:
 - Event ID 4688
@@ -98,9 +111,9 @@ Screenshot must show:
 
 ---
 
-### 2.2 Verify Splunk Ingestion
+### 2.3 Verify Splunk Ingestion
 
-**In Splunk:**
+**In Splunk WebUI:**
 ```spl
 | tstats count where index=* by index
 ```
@@ -116,20 +129,6 @@ Screenshot must show:
 Screenshot must show:
 - winevent_security index
 - Event count
-
----
-
-### 2.3 Verify Splunk Universal Forwarder
-
-**On Windows 11:**
-```powershell
-Get-Service splunkforwarder
-```
-
-**Status must be:**
-```sql
-Running
-```
 
 ---
 
