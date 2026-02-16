@@ -176,7 +176,7 @@ DocumentRoot /var/www/html
 
 ---
 
-### 3.2.1 – Download Phishing Files from GitHub
+### 3.2 – Download Phishing Files from GitHub
 
 The required phishing simulation files are located in this repository:
 
@@ -242,7 +242,9 @@ sudo cp ~/Desktop/phish_log.txt /var/www/html/
 > Cloning the repository is not required to run the simulation.
 > However, it is recommended for maintaining reproducibility and version alignment with lab documentation.
 
-#### 3.2.2 – Set Proper Permissions
+---
+
+### 3.3 – Set Proper Permissions
 
 Ensure Apache can write to phish_log.txt:
 ```bash
@@ -252,14 +254,14 @@ sudo chmod 664 /var/www/html/phish_log.txt
 
 ---
 
-#### 3.2.3 – Restart Apache
+### 3.4 – Restart Apache
 ```bash
 sudo systemctl restart apache2
 ```
 
 ---
 
-#### 3.2.4 – Validate Deployment
+### 3.5 – Validate Deployment
 
 From Windows 11 browser:
 ```cpp
