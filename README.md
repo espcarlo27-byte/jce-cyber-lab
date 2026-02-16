@@ -21,8 +21,7 @@ In addition to network and endpoint telemetry, the lab includes:
 - 📧 A **Zimbra mail server integrated with Active Directory**
 - 📊 Identity-aware telemetry ingested into **Splunk SIEM**
 
-Each detection scenario has a **dedicated simulation folder (1:1 mapping)** to ensure
-results are **repeatable, auditable, and defensible**.
+Each simulation is maintained in a dedicated 1:1 folder structure to ensure results are repeatable, defensible, and traceable to specific security control validations.
 
 ---
 
