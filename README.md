@@ -1,18 +1,19 @@
-# JCE Cyber Lab 🛡️
+# # JCE Enterprise-Modeled Security Operations Environment 🛡️
 
 ## Executive Summary
 
-The JCE Cyber Lab demonstrates my ability to **design, deploy, operate, and validate**
-a complete **SOC detection engineering workflow** across **network, endpoint,
-identity, and email layers**.
+The JCE Enterprise-Modeled Security Operations Environment demonstrates the design, deployment, operation, and validation of a structured Security Operations program across network, endpoint, identity, and email layers.
 
-The lab consists of **hands-on attack simulations** with:
+This environment is intentionally built to mirror enterprise SOC workflows, emphasizing detection engineering, alert validation, telemetry correlation, and audit-ready documentation.
 
-- Reproducible execution steps  
-- Real and symbolic log evidence  
+The program includes:
+
+- Reproducible attack simulations  
 - Detection logic and alert definitions  
+- Real and symbolic log evidence  
 - MITRE ATT&CK–aligned validation  
-- Documented issues, resolutions, and analyst takeaways  
+- Structured Issues & Resolutions documentation  
+- NIST CSF–aligned control mapping  
 
 In addition to network and endpoint telemetry, the lab includes:
 
@@ -25,9 +26,26 @@ results are **repeatable, auditable, and defensible**.
 
 ---
 
+## 🏗 Enterprise Modeling Approach
+
+This environment is intentionally designed to reflect enterprise Security Operations and governance structures rather than isolated tool experimentation.
+
+Design principles include:
+
+- Centralized identity-aware telemetry  
+- Segmented network architecture  
+- Stable detection identifiers  
+- Alert lifecycle validation  
+- Risk register maintenance  
+- SOC 2–style evidence tracking  
+
+The objective is not tool demonstration, but structured security operations maturity aligned to real-world enterprise practices.
+
+---
+
 ## 🧠 Detection Coverage Philosophy
 
-The JCE Cyber Lab is structured as a **detection engineering program**, not a linear attack tutorial. Simulations are designed to collectively represent **how real breaches unfold**, and how SOC teams detect activity at different stages of attacker behavior.
+The JCE Enterprise-Modeled Security Operations Environment is structured as a **detection engineering program**, not a linear attack tutorial. Simulations are designed to collectively represent **how real breaches unfold**, and how SOC teams detect activity at different stages of attacker behavior.
 
 ### 🔗 Breach Lifecycle Mapping
 
@@ -146,7 +164,7 @@ Each simulation (SIM-001 → SIM-XXX) may also be treated as a **security contro
 
 ---
 
-## 🔧 Lab Topology (High-Level)
+## 🔧 Environment Topology (High-Level)
 
 | System | Role |
 |------|------|
@@ -276,7 +294,7 @@ Each simulation includes:
 
 ---
 
-## 📌 How to Replicate This Lab
+## 📌 How to Replicate This Environment
 
 1. Deploy VMs based on the topology
 2. Configure log ingestion into Splunk
@@ -309,6 +327,6 @@ All technical issues encountered during simulations are documented with:
 
 ---
 
-> “Every detection is documented. Every alert is validated. Every scenario is reproducible.”  
-> **— Carlo**
+> “Every detection is validated. Every alert is defensible. Every scenario is reproducible.”  
+> **— Carlo Espina**
 
