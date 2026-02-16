@@ -15,7 +15,7 @@ The program includes:
 - Structured Issues & Resolutions documentation  
 - NIST CSF–aligned control mapping  
 
-In addition to network and endpoint telemetry, the lab includes:
+In addition to network and endpoint telemetry, the environment includes:
 
 - 🔐 A structured **Active Directory Identity & Access Management (IAM) model**
 - 📧 A **Zimbra mail server integrated with Active Directory**
@@ -50,7 +50,7 @@ The JCE Enterprise-Modeled Security Operations Environment is structured as a **
 
 Simulations are mapped to **attack progression stages** commonly observed in enterprise incident response:
 
-| Breach Stage | Example Coverage in This Lab |
+| Breach Stage | Example Coverage in This Environment |
 |--------------|------------------------------|
 | Initial Access | SIM-001 (Phishing) |
 | Execution | SIM-004, SIM-008 |
@@ -60,7 +60,7 @@ Simulations are mapped to **attack progression stages** commonly observed in ent
 | Impact / Data Interaction | SIM-006, SIM-007 |
 | External Exploitation | SIM-003 |
 
-This mapping allows detections to be understood in the context of **real incident investigation workflows**, rather than isolated lab tests.
+This mapping allows detections to be understood in the context of **real incident investigation workflows**, rather than isolated environment tests.
 
 ---
 
@@ -80,7 +80,7 @@ For that reason, simulation numbers **do not imply attack order**. The authorita
 
 ## 🔐 Identity & Access Management (IAM) Layer
 
-The lab includes a structured **enterprise-style Active Directory IAM model**
+The environment includes a structured **enterprise-style Active Directory IAM model**
 that provides identity context for detections and investigations.
 
 The IAM design includes:
@@ -107,7 +107,7 @@ All human identities include **Title** and **Department** attributes, enabling:
 
 ## 📧 Email Infrastructure & Identity Integration
 
-The lab includes a **Zimbra mail server** integrated with Active Directory
+The environment includes a **Zimbra mail server** integrated with Active Directory
 to model email as a monitored attack surface.
 
 This enables:
@@ -215,7 +215,7 @@ flowchart TB
 
 ## 🏗 Architecture, Network Topology & Log Flow
 
-This lab is intentionally designed to demonstrate enterprise-style network architecture, centralized visibility, and end-to-end log flow across network and endpoint layers.
+This environment is intentionally designed to demonstrate enterprise-style network architecture, centralized visibility, and end-to-end log flow across network and endpoint layers.
 
 ### 📐 Architecture & Design Rationale
 - **[View Architecture Documentation](architecture/)**
@@ -238,7 +238,7 @@ Details how telemetry flows from endpoints and network devices into Security Oni
 
 ## 📊 Detection Validation Matrix (Authoritative)
 
-This lab follows a **1:1 mapping** between detection scenarios and simulations.  
+This environment follows a **1:1 mapping** between detection scenarios and simulations.  
 Each simulation folder contains complete technical evidence.
 
 ➡️ **[View the Detection Validation Matrix](detection-matrix/detection-validation-matrix.md)**
