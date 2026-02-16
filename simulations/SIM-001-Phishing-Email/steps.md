@@ -176,61 +176,73 @@ DocumentRoot /var/www/html
 
 ---
 
-### 3.2 Place Phishing Files
+### 3.2.1 – Download Phishing Files from GitHub
 
-The phishing simulation requires the following files to be deployed on the Kali web server:
+The required phishing simulation files are located in this repository:
 
-- index.html
-- track.php
-- phish_log.txt
+📁 [SIM-001/phishing-files/](./phishing-files/)
 
----
+This folder contains:
 
-#### 3.2.1 – Download Files from GitHub
-
-These files are located in this repository under:  
-[SIM-001 - Phishing Files](./phishing-files/)
-
-Option A – Download Entire Repository (Recommended)
-
-1. On your Kali VM, open Terminal.
-2. Clone the repository:
-   ```bash
-   git clone <YOUR_GITHUB_REPO_URL>
-   ```
-3. Navigate to the phishing files directory:
-   ```bash
-   cd <repo-name>/SIM-001/phishing-files
-   ```
-
-Option B – Download Individually  
-
-You may also:  
-
-- Open each file in GitHub
-- Click Raw
-- Right-click → Save As
-- Save to Kali Desktop
+- `index.html`
+- `track.php`
+- `phish_log.txt`
 
 ---
 
-#### 3.2.2 – Move Files to Apache Web Root
+### Option A – Version-Controlled Deployment (Recommended)
 
-Apache default web directory:
-```css
-/var/www/html/
+This method mirrors real-world DevSecOps workflows and ensures version consistency.
+
+On your Kali VM, open Terminal and clone the repository:
+
+```bash
+git clone https://github.com/<your-username>/<your-repo-name>.git
 ```
 
-Move files:
+Navigate to the phishing files directory:
+```bash
+cd <your-repo-name>/SIM-001/phishing-files
+```
+
+From here, you can copy the files into Apache’s web root:
 ```bash
 sudo cp index.html /var/www/html/
 sudo cp track.php /var/www/html/
 sudo cp phish_log.txt /var/www/html/
 ```
 
+Why this method is recommended:
+- Ensures file version consistency with documentation
+- Allows easy updates using git pull
+- Preserves repository structure
+- Reflects infrastructure-as-code discipline
+
 ---
 
-#### 3.2.3 – Set Proper Permissions
+### Option B – Manual File Download (Beginner-Friendly)
+
+If Git is not installed or you prefer manual setup:  
+1. Open the repository in a browser.
+2. Navigate to:  
+   `SIM-001/phishing-files/`
+3. Open each file individually.
+4. Click Raw.
+5. Right-click → Save As.
+6. Save files to your Kali Desktop.
+
+Then move them into Apache’s web directory:
+```bash
+sudo cp ~/Desktop/index.html /var/www/html/
+sudo cp ~/Desktop/track.php /var/www/html/
+sudo cp ~/Desktop/phish_log.txt /var/www/html/
+```
+
+> ⚠ Note:
+> Cloning the repository is not required to run the simulation.
+> However, it is recommended for maintaining reproducibility and version alignment with lab documentation.
+
+#### 3.2.2 – Set Proper Permissions
 
 Ensure Apache can write to phish_log.txt:
 ```bash
@@ -240,14 +252,14 @@ sudo chmod 664 /var/www/html/phish_log.txt
 
 ---
 
-#### 3.2.4 – Restart Apache
+#### 3.2.3 – Restart Apache
 ```bash
 sudo systemctl restart apache2
 ```
 
 ---
 
-#### 3.2.5 – Validate Deployment
+#### 3.2.4 – Validate Deployment
 
 From Windows 11 browser:
 ```cpp
