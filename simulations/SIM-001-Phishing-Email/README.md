@@ -1,15 +1,16 @@
 # SIM-001 – Phishing Email (T1566.002) – Spearphishing Link
-
 ## 🎯 Goal
 
 Detect phishing-based initial access where a user receives a malicious email,
 authenticates to their enterprise mailbox, clicks a link, and initiates outbound
 communication to attacker-controlled infrastructure.
 
-The simulation validates **endpoint-authoritative detection** enhanced with
-**identity (IAM) telemetry**, **email workflow context**, and **network correlation**,
-modeling how real SOC investigations trace phishing attacks from identity
-authentication through endpoint execution and external connection.
+This simulation validates **multi-layer detection correlation** using:
+
+- Identity telemetry (Active Directory)
+- Endpoint execution telemetry (Windows Security / Sysmon)
+- Network evidence (Apache access logs)
+- SIEM-based cross-source investigation (Splunk)
 
 ---
 
@@ -19,53 +20,88 @@ authentication through endpoint execution and external connection.
 |-------|-----------|-------------|
 | Initial Access | **T1566.002** | Phishing – Link |
 | Execution | T1204 | User Execution |
-| Command & Control (simulated) | T1071.001 | Web Protocols |
+| Command & Control (Simulated) | T1071.001 | Web Protocols |
 
 ---
 
 ## 🏗 Lab Components Used
 
-| Component | Purpose |
-|----------|---------|
+| Component | Role |
+|----------|------|
 | Windows 11 Endpoint | Victim machine executing phishing link |
-| Windows Server (AD) | Identity provider and authentication telemetry |
-| Mail Server (Zimbra) | Phishing email delivery and mailbox access logging |
-| Splunk Enterprise | Log ingestion, correlation, and alerting |
+| Windows Server (AD) | Enterprise identity & authentication telemetry |
+| Zimbra Mail Server | Phishing delivery & mailbox authentication |
+| Splunk Enterprise | Log ingestion, correlation, alerting |
 | Splunk Universal Forwarder | Endpoint log forwarding |
-| Kali Linux | Hosts phishing landing page |
+| Kali Linux | Hosts phishing landing page & tracking script |
 | Security Onion (Optional) | Supplemental network telemetry |
+
+---
+
+## 📁 Repository Structure
+```
+SIM-001/
+│
+├── README.md
+├── steps.md
+├── queries.md
+├── alert-config.md
+├── issues-and-resolutions.md
+│
+├── phishing-files/
+│   ├── index.html
+│   ├── track.php
+│   ├── phish_log.txt
+│   └── hr_email.txt
+│
+└── screenshots/
+```
+
+---
+
+### 🔎 Phishing Artifacts
+
+Phishing infrastructure files are version-controlled in:
+
+📁 `SIM-001/phishing-files/`
+
+This enables:
+
+- Reproducible deployment
+- Version alignment with documentation
+- Infrastructure-as-code style simulation management
 
 ---
 
 ## 🧠 Detection Architecture & Philosophy
 
-SIM-001 follows a **layered evidence model**:
+SIM-001 follows a **Layered Evidence Model**:
 
 | Layer | Role | Authority Level |
 |------|------|----------------|
-| Email System | Phishing delivery & mailbox authentication | Context |
-| Identity (AD) | User identity & authentication telemetry | Attribution |
-| Endpoint (Windows) | Process execution visibility | Primary Execution Signal |
-| Network | Outbound HTTP/DNS telemetry | **Primary Click Confirmation** |
+| Email System | Phishing delivery & mailbox access | Context |
+| Identity (AD) | User authentication telemetry | Attribution |
+| Endpoint (Windows) | Process execution visibility | Execution Signal |
+| Network | Outbound HTTP confirmation | **Primary Click Confirmation** |
 | SIEM | Cross-source correlation | Investigation Platform |
 
-**Authoritative Detection Model:**
+---
 
-Phishing link clicks delivered via webmail typically open within an existing
-browser session. In this scenario:
+### ⚠ Browser Behavior Clarification
 
-- The phishing URL may **not** appear in `Process_Command_Line`
-- Browser child processes may not contain navigation context
-- Endpoint telemetry alone may not reveal the full URL
+When phishing is delivered via webmail:
+
+- The link opens within an existing browser session.
+- The phishing URL may **not** appear in `Process_Command_Line`.
+- Child browser processes may lack full navigation context.
 
 Therefore, detection authority is established through:
 
-1. Browser execution evidence (Event ID 4688 / Sysmon Event ID 1)
-2. Time correlation with outbound HTTP connection to attacker host
-3. Server-side confirmation (Apache access logs / tracking script logs)
+1. Event ID 4688 / Sysmon Event ID 1 (browser execution)
+2. Time-aligned outbound HTTP request to attacker host
+3. Server-side confirmation via Apache access logs or tracking script
 
-This mirrors real-world SOC methodology where **multi-layer correlation**
-confirms user interaction.
+This mirrors real-world SOC methodology where detection depends on **correlation**, not string matching.
 
 ---
 
@@ -78,19 +114,59 @@ confirms user interaction.
 5. Existing browser session initiates outbound HTTP request  
 6. Endpoint logs record browser process activity  
 7. Attacker infrastructure logs inbound request  
-8. SIEM correlates identity, endpoint, and network activity  
+8. SIEM correlates identity, endpoint, and network evidence  
 
 ---
 
-## 🧭 Simulation Paths
+## 🔄 Deployment Model
 
-### Path A – Full Email Chain (Recommended)
-Mail delivery → Mail login → Link click → Outbound connection → Endpoint logs → SIEM correlation
+Phishing artifacts may be deployed using:
 
-### Path B – Endpoint-Only Execution
-Manual browser launch → Outbound connection → Endpoint logs → SIEM detection
+### Option A – Version-Controlled Deployment (Recommended)
 
-Both paths validate phishing click detection logic.
+```bash
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <repo>/SIM-001/phishing-files
+sudo cp * /var/www/html/
+```
+
+This ensures:
+
+- Version consistency  
+- Reproducibility  
+- Clean lab lifecycle management  
+
+---
+
+## Option B – Manual File Download
+
+Download individual files from GitHub and place them in:
+```css
+/var/www/html/
+```
+
+---
+
+## 📸 Evidence Capture Standard
+
+Each validation phase requires screenshot evidence including:
+
+- Timestamp visible  
+- Hostname visible  
+- Username visible (if applicable)  
+- Event ID visible (for Windows logs)  
+- IP address visible (for network logs)  
+- Splunk query visible  
+
+Evidence must be stored in:
+```css
+SIM-001/screenshots/
+```
+
+Naming format:
+```shell
+sim001-A-evidence-###-description.png
+```
 
 ---
 
@@ -98,112 +174,88 @@ Both paths validate phishing click detection logic.
 
 Primary detection identifies:
 
-- Browser process execution (`chrome.exe`, `msedge.exe`, `firefox.exe`)
-- User context (`it.helpdesk1`)
-- Time-aligned outbound HTTP request to Kali server
-- Server-side receipt of request (Apache access log / track.php)
+- Browser execution (`chrome.exe`, `msedge.exe`, etc.)  
+- User context (`it.helpdesk1`)  
+- Time-aligned outbound HTTP request to Kali server  
+- Server-side log confirmation  
 
-Detection relies on **correlation**, not URL string presence in command line.
+Detection relies on:
 
-Email logs provide investigation context:
+> **Multi-Layer Correlation** (Identity + Endpoint + Network)
 
-- Message delivery
-- Mailbox authentication
-- Pre-execution user behavior
-
-Identity telemetry strengthens attribution:
-
-- Verified enterprise account context  
-- Authentication event history  
-- Alignment between identity activity and endpoint execution  
-
-This reflects enterprise SOC workflows.
-
----
-
-## 📁 Simulation Files
-
-- **README.md** — Overview & detection logic  
-- **steps.md** — Reproduction procedure  
-- **queries.md** — SPL detection queries  
-- **logs.md** — Evidence artifacts  
-- **alert-config.md** — Detection alert configuration  
-- **issues-and-resolutions.md** — Troubleshooting log  
-- **screenshots/** — Evidence images and validation proof  
-
----
-
-## ⚠️ Issues Encountered & Resolutions
-
-Operational challenges encountered during SIM-001 setup, telemetry validation,
-index creation, and detection tuning are documented in:
-
-👉 **[SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing-email.md)**
-
-Each issue entry follows:
-
-**Issue → Root Cause → Resolution → Verification → Overall Takeaway → Status**
-
-This ensures reproducibility and professional troubleshooting documentation.
-
----
-
-## ✅ Success Criteria
-
-| Validation Requirement | Expected Result |
-|------------------------|-----------------|
-| Phishing email delivered | Mail server logs confirm message |
-| User interaction | Browser execution observed |
-| Process execution logged | Event ID 4688 / Sysmon EID 1 recorded |
-| Outbound connection observed | HTTP request to Kali IP confirmed |
-| Server-side confirmation | Apache access log / track.php log entry |
-| Log ingestion | Events searchable in Splunk |
-| Detection logic triggered | Correlation query returns results |
-| Alert generated | Detection alert fires successfully |
-| Identity telemetry present | AD and/or mail authentication events observable |
+Email and identity logs provide investigation context and user attribution.
 
 ---
 
 ## 🛡 Governance & Control Alignment
 
-This simulation supports detection control validation.  
-Full governance alignment is maintained in:
+This simulation validates endpoint phishing detection controls.
 
-**[CV-SIM001 — Endpoint Phishing Link Detection Control Validation](../../GRC-Program/control-validations/CV-SIM001-Endpoint-Execution-Control.md)**
+Control validation documentation:
 
----
-
-## 📁 Evidence Naming Convention
-
-| Evidence ID Format | Example |
-|-------------------|---------|
-| Execution Evidence | `E-SIM001-###` |
-| Screenshot | `sim001-evidence-###-description.png` |
+📄 `CV-SIM001 – Endpoint Phishing Link Detection`
 
 ---
 
-## 🔍 Final Validation & Status Check
+## ⚠ Issues & Resolutions
 
-| Check | Status |
-|------|--------|
-| Endpoint telemetry confirmed | ✅ |
-| SIEM ingestion verified | ✅ |
-| Network correlation validated | ✅ |
-| Detection alert fired | ✅ |
-| Evidence captured | ✅ |
-| Simulation reproducible | ✅ |
+All operational challenges, telemetry corrections, index adjustments, and detection tuning are documented in:  
+👉 **[SIM-001 – Issues & Resolutions](../../issues-and-resolutions/sim-001-phishing-email.md)**  
+
+Each issue entry follows:  
+
+**Issue → Root Cause → Resolution → Verification → Overall Takeaway → Status**  
+
+This ensures reproducibility and professional troubleshooting documentation.
 
 ---
 
-## 🏁 Outcome
+## 📁 Simulation Files
 
-This simulation demonstrates the ability to:
+- **README.md** — Simulation overview, detection architecture, and validation philosophy  
+- **steps.md** — Detailed execution and SOC investigation procedure  
+- **queries.md** — SPL detection queries and correlation logic  
+- **alert-config.md** — Alert configuration and trigger validation  
+- **issues-and-resolutions.md** — Troubleshooting log and telemetry corrections  
+- **phishing-files/** — Version-controlled phishing artifacts (`index.html`, `track.php`, `phish_log.txt`, `hr_email.txt`)  
+- **screenshots/** — Evidence images and validation proof  
+
+---
+
+## ✅ Success Criteria
+
+| Validation Requirement              | Expected Result                          |
+|-------------------------------------|------------------------------------------|
+| Phishing email delivered            | Confirmed in mailbox                     |
+| User interaction observed           | Browser execution logged                 |
+| Event ID 4688 recorded              | Visible in Splunk                        |
+| Outbound HTTP observed              | Apache access log confirms               |
+| Server-side confirmation            | `track.php` logs request                 |
+| Correlation query returns results   | Detection validated                      |
+| Alert generated                     | Alert triggers successfully              |
+| Identity telemetry present          | AD authentication events visible         |
+
+---
+
+## 🏁 Final Status
+
+| Category            | Result                                 |
+|---------------------|------------------------------------------|
+| Detection Authority | Multi-Layer Correlation                |
+| MITRE Technique     | T1566.002 – Spearphishing Link          |
+| Simulation Status   | COMPLETE & REPRODUCIBLE                |
+
+---
+
+## 🎓 Outcome
+
+SIM-001 demonstrates the ability to:
 
 - Detect phishing-triggered browser interaction  
 - Correlate identity, endpoint, and network telemetry  
-- Confirm outbound communication to attacker infrastructure  
-- Perform multi-layer SOC investigation  
-- Map detection to MITRE ATT&CK  
+- Confirm attacker infrastructure communication  
+- Apply SOC investigative methodology  
+- Align detection to MITRE ATT&CK  
 
-**Status:** Detection validated and reproducible  
-**Detection Authority:** Multi-Layer Correlation (Endpoint + Network)
+This simulation reflects enterprise-grade detection validation practices.
+
