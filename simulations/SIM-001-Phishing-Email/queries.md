@@ -62,8 +62,9 @@ What This Confirms:
 
 ## 3. Sysmon Execution Context (If Enabled)
 ```spl
-index=network_logs dest_ip="<KALI_IP>"
-| table _time src_ip dest_ip dest_port action
+index=winevent_sysmon EventCode=1
+Image="*chrome.exe"
+| table _time host user Image ParentImage
 | sort - _time
 ```
 
