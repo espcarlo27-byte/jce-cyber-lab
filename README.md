@@ -276,8 +276,8 @@ Each simulation includes:
 - **Network Security Monitoring:** Zeek + Suricata (Security Onion)  
 - **Endpoint Telemetry:** Sysmon, Windows Security Logs  
 - **Threat Hunting:** Hunt, SPL searches  
-- **Incident Response Framework:** NIST 800-61  
-
+- **Incident Response Framework:** NIST 800-61 lifecycle principles (Preparation, Detection & Analysis, Containment, Eradication, Recovery, Lessons Learned)
+  
 ---
 
 ## 🧑‍💻 Skills Demonstrated
