@@ -2,18 +2,16 @@
 
 ## Executive Summary
 
-The JCE Enterprise-Modeled Security Operations Environment demonstrates the design, deployment, operation, and validation of a structured Security Operations program across network, endpoint, identity, and email layers.
+The JCE Enterprise-Modeled Security Operations Environment demonstrates the design, deployment, operation, and validation of a structured **Security Operations and Incident Response program** across network, endpoint, identity, and email layers.
 
-This environment is intentionally built to mirror enterprise SOC workflows, emphasizing detection engineering, alert validation, telemetry correlation, and audit-ready documentation.
+This environment mirrors enterprise SOC workflows and emphasizes:
 
-The program includes:
-
-- Reproducible attack simulations  
-- Detection logic and alert definitions  
-- Real and symbolic log evidence  
-- MITRE ATT&CK–aligned validation  
-- Structured Issues & Resolutions documentation  
-- NIST CSF–aligned control mapping  
+- **Alert lifecycle management**
+- **Timeline reconstruction and root cause validation**
+- **Cross-layer telemetry correlation (network, endpoint, identity, and email)**
+- **Detection engineering aligned to MITRE ATT&CK**
+- **Evidence documentation with chain-of-custody awareness**
+- **Audit-ready control validation and governance traceability**
 
 In addition to network and endpoint telemetry, the environment includes:
 
@@ -21,7 +19,9 @@ In addition to network and endpoint telemetry, the environment includes:
 - 📧 A **Zimbra mail server integrated with Active Directory**
 - 📊 Identity-aware telemetry ingested into **Splunk SIEM**
 
-Each simulation is maintained in a dedicated 1:1 folder structure to ensure results are repeatable, defensible, and traceable to specific security control validations.
+Each simulation is structured as a defensible investigation, including reproducible attack execution, validated detection logic, structured evidence capture, and repeatable response workflows.  
+
+The objective is not tool experimentation, but operational maturity — demonstrating how real-world security teams investigate, validate, document, and continuously improve detection coverage over time.
 
 ---
 
