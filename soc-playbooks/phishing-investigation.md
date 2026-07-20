@@ -350,3 +350,15 @@ Following a structured investigation methodology ensures that evidence is collec
 If asked during an interview how you would investigate a phishing alert:
 
 > I would first validate the alert by confirming the email delivery, recipient, timestamp, and alert details. Next, I would gather context about the user, endpoint, and email. I would investigate endpoint telemetry such as process creation, browser activity, and PowerShell execution, then review authentication events for suspicious logons and network telemetry for outbound connections or malicious domains. After correlating evidence across endpoint, identity, and network logs, I would determine whether the activity was benign or malicious. If confirmed malicious, I would isolate the endpoint, reset credentials if necessary, escalate the incident, and follow the organization's incident response procedures.
+
+---
+
+# Analyst Notes
+
+Key investigation principles demonstrated in this playbook:
+
+- Validate the alert before assuming malicious activity.
+- Gather sufficient context before drawing conclusions.
+- Correlate endpoint, identity, and network telemetry.
+- Base decisions on evidence rather than assumptions.
+- Follow organizational incident response procedures.
