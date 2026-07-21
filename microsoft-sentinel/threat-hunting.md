@@ -273,3 +273,21 @@ Threat hunting complements automated analytics by improving visibility into atta
 - Microsoft Learn
 - MITRE ATT&CK Framework
 - Kusto Query Language (KQL) Documentation
+
+---
+
+## Related Documentation
+
+- [Microsoft Sentinel Overview](README.md)
+- [Architecture](architecture.md)
+- [Windows Endpoint Onboarding](windows-onboarding.md)
+- [Azure Monitor Agent Installation](ama-installation.md)
+- [Data Collection Rules](data-collection-rules.md)
+- [KQL Detection Queries](kql-detection-queries.md)
+- [Analytics Rules](analytics-rules.md)
+- [Automation Rules](automation-rules.md)
+- [Threat Hunting](threat-hunting.md)
+- [Incident Investigation](incident-investigation.md)
+- [MITRE ATT&CK Mapping](mitre-attack-mapping.md)
+- [Validation Tests](validation-tests.md)
+- [Cost Management](cost-management.md)
