@@ -205,8 +205,6 @@ This deployment successfully demonstrates the implementation and operational val
 
 ---
 
----
-
 ## Related Documentation
 
 - [Architecture](architecture.md)
