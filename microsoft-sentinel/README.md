@@ -81,19 +81,22 @@ This deployment demonstrates practical experience deploying, configuring, valida
 
 # Project Documentation
 
-This section contains detailed documentation covering each stage of the deployment.
+The following documents provide a comprehensive guide to the deployment, configuration, operation, and validation of Microsoft Sentinel within the JCE Enterprise-Modeled Security Operations Environment.
 
-| Document | Description |
-|----------|-------------|
-| architecture.md | Sentinel architecture and data flow |
-| ama-installation.md | Azure Monitor Agent deployment |
-| data-collection-rules.md | Data Collection Rule configuration |
-| kql-detection-queries.md | KQL queries used for validation and investigation |
-| analytics-rules.md | Detection rules and alert logic |
-| incident-investigation.md | Investigation workflow using Sentinel |
-| mitre-attack-mapping.md | ATT&CK technique mapping |
-| cost-management.md | Azure budgeting and cost controls |
-| lessons-learned.md | Challenges, troubleshooting, and improvements |
+| Document | Purpose |
+|----------|---------|
+| `architecture.md` | Microsoft Sentinel architecture and telemetry flow |
+| `windows-onboarding.md` | Onboard Windows endpoints into Microsoft Sentinel |
+| `ama-installation.md` | Deploy and validate Azure Monitor Agent (AMA) |
+| `data-collection-rules.md` | Configure Azure Data Collection Rules (DCR) |
+| `kql-detection-queries.md` | KQL queries for validation, detection, and threat hunting |
+| `analytics-rules.md` | Configure and manage Microsoft Sentinel Analytics Rules |
+| `automation-rules.md` | Automate incident response using Automation Rules and Logic Apps |
+| `incident-investigation.md` | Structured SOC investigation methodology using Microsoft Sentinel |
+| `threat-hunting.md` | Proactive threat hunting methodology and KQL examples |
+| `mitre-attack-mapping.md` | Map detections to MITRE ATT&CK techniques |
+| `validation-tests.md` | Validate deployment, telemetry, and detections |
+| `cost-management.md` | Azure budgeting and Microsoft Sentinel cost optimization |
 
 ---
 
