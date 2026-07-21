@@ -86,13 +86,12 @@ This section contains detailed documentation covering each stage of the deployme
 | Document | Description |
 |----------|-------------|
 | architecture.md | Sentinel architecture and data flow |
-| azure-resources.md | Azure resources created during deployment |
-| ama-onboarding.md | Azure Monitor Agent deployment |
+| ama-installation.md | Azure Monitor Agent deployment |
 | data-collection-rules.md | Data Collection Rule configuration |
-| kql-library.md | KQL queries used for validation and investigation |
+| kql-detection-queries.md | KQL queries used for validation and investigation |
 | analytics-rules.md | Detection rules and alert logic |
 | incident-investigation.md | Investigation workflow using Sentinel |
-| mitre-mapping.md | ATT&CK technique mapping |
+| mitre-attack-mapping.md | ATT&CK technique mapping |
 | cost-management.md | Azure budgeting and cost controls |
 | lessons-learned.md | Challenges, troubleshooting, and improvements |
 
