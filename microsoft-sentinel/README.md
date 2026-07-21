@@ -79,24 +79,24 @@ This deployment demonstrates practical experience deploying, configuring, valida
 
 ---
 
-# Project Documentation
+## 📚 Project Documentation
 
 The following documents provide a comprehensive guide to the deployment, configuration, operation, and validation of Microsoft Sentinel within the JCE Enterprise-Modeled Security Operations Environment.
 
 | Document | Purpose |
 |----------|---------|
-| `architecture.md` | Microsoft Sentinel architecture and telemetry flow |
-| `windows-onboarding.md` | Onboard Windows endpoints into Microsoft Sentinel |
-| `ama-installation.md` | Deploy and validate Azure Monitor Agent (AMA) |
-| `data-collection-rules.md` | Configure Azure Data Collection Rules (DCR) |
-| `kql-detection-queries.md` | KQL queries for validation, detection, and threat hunting |
-| `analytics-rules.md` | Configure and manage Microsoft Sentinel Analytics Rules |
-| `automation-rules.md` | Automate incident response using Automation Rules and Logic Apps |
-| `incident-investigation.md` | Structured SOC investigation methodology using Microsoft Sentinel |
-| `threat-hunting.md` | Proactive threat hunting methodology and KQL examples |
-| `mitre-attack-mapping.md` | Map detections to MITRE ATT&CK techniques |
-| `validation-tests.md` | Validate deployment, telemetry, and detections |
-| `cost-management.md` | Azure budgeting and Microsoft Sentinel cost optimization |
+| [architecture.md](architecture.md) | Microsoft Sentinel architecture and telemetry flow |
+| [windows-onboarding.md](windows-onboarding.md) | Onboard Windows endpoints into Microsoft Sentinel |
+| [ama-installation.md](ama-installation.md) | Deploy and validate Azure Monitor Agent (AMA) |
+| [data-collection-rules.md](data-collection-rules.md) | Configure Azure Data Collection Rules (DCR) |
+| [kql-detection-queries.md](kql-detection-queries.md) | KQL queries for validation, detection, and threat hunting |
+| [analytics-rules.md](analytics-rules.md) | Configure and manage Microsoft Sentinel Analytics Rules |
+| [automation-rules.md](automation-rules.md) | Automate incident handling and document SOAR workflows |
+| [incident-investigation.md](incident-investigation.md) | Structured SOC investigation methodology using Microsoft Sentinel |
+| [threat-hunting.md](threat-hunting.md) | Proactive threat hunting methodology and KQL examples |
+| [mitre-attack-mapping.md](mitre-attack-mapping.md) | Map detections and investigations to MITRE ATT&CK |
+| [validation-tests.md](validation-tests.md) | Validate deployment, telemetry collection, and query results |
+| [cost-management.md](cost-management.md) | Azure budgeting and Microsoft Sentinel cost management |
 
 ---
 
