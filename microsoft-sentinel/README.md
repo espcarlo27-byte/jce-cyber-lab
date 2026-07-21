@@ -205,8 +205,11 @@ This deployment successfully demonstrates the implementation and operational val
 
 ---
 
+---
+
 ## Related Documentation
 
+- [Microsoft Sentinel Overview](README.md)
 - [Architecture](architecture.md)
 - [Windows Endpoint Onboarding](windows-onboarding.md)
 - [Azure Monitor Agent Installation](ama-installation.md)
