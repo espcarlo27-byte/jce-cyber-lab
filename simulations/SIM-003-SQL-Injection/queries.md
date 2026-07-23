@@ -6,7 +6,7 @@ web application (DVWA).
 
 This simulation reflects a **network-centric detection model**, where:
 - **Suricata IDS alerts** are the authoritative detection signal
-- **SIEM-based SPL correlation is intentionally unavailable** due to lab design
+- **SIEM-based SPL correlation is intentionally unavailable** due to Enterprise Security Operations Environment (JCE) design
 
 Detection logic is therefore documented from a **SOC analyst and detection
 engineering perspective**, even when queries are conceptual rather than executed.
@@ -157,7 +157,7 @@ Detection confidence is derived from behavior + context, not signature naming al
 - No executable Splunk SPL queries exist for SIM-004
 - Suricata IDS alerts serve as the authoritative detection signal
 - Analyst workflows and correlation logic are fully documented
-- Detection engineering intent is preserved despite lab constraints
+- Detection engineering intent is preserved despite Enterprise Security Operations Environment (JCE) constraints
 
 > This file represents the finalized detection logic documentation for SIM-004
 > and accurately reflects the telemetry, constraints, and investigative reasoning
