@@ -11,7 +11,7 @@ and are used to validate:
 - Detection effectiveness in the absence of SIEM correlation
 
 Network and IDS telemetry are treated as the **primary authoritative sources**
-for this simulation due to lab design constraints.
+for this simulation due to Enterprise Security Operations Environment (JCE) design constraints.
 
 ---
 
