@@ -4,7 +4,7 @@
 Define incident response procedures to ensure security events are analyzed and handled consistently.
 
 ## 2. Scope
-Applies to all endpoints, servers, and network monitoring in the lab environment.
+Applies to all endpoints, servers, and network monitoring in the Enterprise Security Operations Environment (JCE) environment.
 
 ## 3. Incident Categories
 - Malware / Execution
