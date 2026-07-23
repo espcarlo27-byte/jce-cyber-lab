@@ -1,8 +1,8 @@
-# GRC Program – Governance, Risk, and Compliance (JCE Cyber Lab)
+# GRC Program – Governance, Risk, and Compliance (Enterprise Security Operations Environment (JCE))
 
 ## 🎯 Purpose
 
-This folder documents the **Governance, Risk, and Compliance (GRC)** layer of the JCE Cyber Lab.
+This folder documents the **Governance, Risk, and Compliance (GRC)** layer of the Enterprise Security Operations Environment (JCE).
 While the simulation folders validate detection engineering and SOC workflows, this GRC program ensures:
 
 - Security controls are **documented**
