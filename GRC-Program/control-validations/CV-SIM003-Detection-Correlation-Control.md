@@ -90,7 +90,7 @@ Related screenshots follow naming convention:
 
 ## ⚠️ Known Limitation (Documented Risk)
 
-IDS alerts were **not ingested into SIEM** due to intentional lab design.  
+IDS alerts were **not ingested into SIEM** due to intentional Enterprise Security Operations Environment (JCE) design.  
 This represents a **visibility gap** between detection and centralized correlation.
 
 This limitation is recorded for transparency and mirrors real-world SOC integration gaps.
