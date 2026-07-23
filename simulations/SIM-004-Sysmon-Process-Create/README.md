@@ -27,7 +27,7 @@ This simulation validates the **Execution** row in the
 
 ---
 
-## 🏗 Lab Components Used
+## 🏗 Enterprise Security Operations Environment (JCE) Components Used
 
 | Component | Role |
 |---------|-----|
@@ -38,7 +38,7 @@ This simulation validates the **Execution** row in the
 | **Windows Server** | SOC console (Splunk UI access) |
 
 > ❌ Kali and Security Onion are **not required** for this simulation.  
-> ℹ️ pfSense is present in the lab as the **DHCP gateway**, but is **not used for detection or correlation**.
+> ℹ️ pfSense is present in the Enterprise Security Operations Environment (JCE) as the **DHCP gateway**, but is **not used for detection or correlation**.
 
 ---
 
@@ -98,7 +98,7 @@ Detection is based on **Sysmon Process Create telemetry**, not Windows Security 
   - Living-off-the-land techniques
 
 > Sysmon baseline analysis was validated at the endpoint; SIEM ingestion is treated
-> as a lab enhancement rather than a prerequisite.
+> as a Enterprise Security Operations Environment (JCE) enhancement rather than a prerequisite.
 
 ---
 
@@ -154,7 +154,7 @@ During execution, real-world issues were encountered related to:
 - Hostname filtering assumptions
 - Disk pressure affecting searches
 
-All issues were **documented and resolved** as part of the lab workflow.
+All issues were **documented and resolved** as part of the Enterprise Security Operations Environment (JCE) workflow.
 
 👉 **Full technical breakdown:**  
 [SIM-004 – Issues & Resolutions](../../issues-and-resolutions/sim-004-sysmon-process-create.md)
