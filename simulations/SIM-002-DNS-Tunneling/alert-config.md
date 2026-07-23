@@ -122,7 +122,7 @@ When this alert fires:
 - Correlate with endpoint or process activity (if available)
 - Determine whether behavior aligns with known DNS tunneling tools
 
-No automated remediation is configured for this lab simulation.
+No automated remediation is configured for this Enterprise Security Operations Environment (JCE) simulation.
 
 ---
 
