@@ -7,7 +7,7 @@ Ensure third-party tools and services used in the environment are reviewed for s
 Applies to vendors/tools such as:
 - Security tooling
 - Agents/forwarders
-- Cloud or SaaS services used for lab work
+- Cloud or SaaS services used for Enterprise Security Operations Environment (JCE) work
 
 ## 3. Policy Requirements
 - Vendor/tool must be assessed before adoption:
