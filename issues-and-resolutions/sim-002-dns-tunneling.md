@@ -246,7 +246,7 @@ were successfully resolved through structured analysis and validation.
 
 ## 🛡 GRC Note (Control Impact)
 
-These issues affected the lab’s Detect (DE.CM / DE.AE) capability for DNS-based threats.
+These issues affected the Enterprise Security Operations Environment (JCE)’s Detect (DE.CM / DE.AE) capability for DNS-based threats.
 Resolution restored consistent, audit-ready telemetry visibility and investigation capability.
 
 - Impacted Control Area: Network Monitoring / Detection Engineering
