@@ -1,7 +1,7 @@
 # Architecture Overview
 
 This section documents the **network topology, log flow, and design decisions**
-used in the JCE Cyber Lab.
+used in the Enterprise Security Operations Environment (JCE).
 
 The architecture is intentionally designed to mirror **real-world SOC
 environments**, emphasizing:
@@ -11,7 +11,7 @@ environments**, emphasizing:
 - Reproducible detection engineering workflows  
 - Identity, email, and authentication telemetry integration  
 
-The lab now includes a **dedicated enterprise mail server** to simulate
+The Enterprise Security Operations Environment (JCE) now includes a **dedicated enterprise mail server** to simulate
 realistic phishing, authentication abuse, and email-borne attack paths.
 
 ---
@@ -48,7 +48,7 @@ Adding the mail server enables simulation of:
 - Account compromise via email access  
 - Internal lateral movement following email-based intrusion  
 
-This shifts the lab from **endpoint-only visibility** to a full **SOC detection chain**:
+This shifts the Enterprise Security Operations Environment (JCE) from **endpoint-only visibility** to a full **SOC detection chain**:
 
 > Email ➜ Identity ➜ Endpoint ➜ Network ➜ SIEM Correlation
 
@@ -69,7 +69,7 @@ This mirrors modern SOC and detection engineering best practices where
 
 ## 🔭 Detection Coverage Expansion
 
-With the mail server, the lab now supports detection engineering across:
+With the mail server, the Enterprise Security Operations Environment (JCE) now supports detection engineering across:
 
 - Endpoint telemetry (Sysmon, Windows Security logs)  
 - Network telemetry (Zeek, Suricata)  
@@ -79,5 +79,5 @@ With the mail server, the lab now supports detection engineering across:
 
 ---
 
-**Result:** The lab now models a **complete enterprise attack surface** rather
+**Result:** The Enterprise Security Operations Environment (JCE) now models a **complete enterprise attack surface** rather
 than isolated host monitoring.
