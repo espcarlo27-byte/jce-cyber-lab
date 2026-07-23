@@ -1,4 +1,4 @@
-# Risk Register – JCE Cyber Lab
+# Risk Register – Enterprise Security Operations Environment (JCE)
 
 > Purpose: Identify, prioritize, and track cybersecurity risks and mitigation efforts.
 
