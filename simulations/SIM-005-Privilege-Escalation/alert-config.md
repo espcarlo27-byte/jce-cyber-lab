@@ -44,14 +44,14 @@ Scheduled
 **Search Time Range:**  
 Last 15 minutes
 
-> This schedule provides near-real-time detection while minimizing alert noise in a lab environment.
+> This schedule provides near-real-time detection while minimizing alert noise in the Enterprise Security Operations Environment (JCE).
 
 ---
 
 ## 🔎 Detection Logic (Alert Search)
 
 This alert uses the **primary detection query** finalized in `queries.md` and reflects
-**real-world Windows logging behavior** observed during lab execution.
+**real-world Windows logging behavior** observed during Enterprise Security Operations Environment (JCE) execution.
 
 ```spl
 index=winevent_security EventCode=4688 host="Windows11Pro"
@@ -135,7 +135,7 @@ This behavior is expected and accounted for in detection logic.
 For this simulation, the following alert actions are recommended:
 - ✅ Create notable event
 - ✅ Log alert results for validation tracking
-- ⛔ No automated remediation (lab simulation)
+- ⛔ No automated remediation (Enterprise Security Operations Environment (JCE) simulation)
 
 ---
 
