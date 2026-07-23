@@ -1,6 +1,6 @@
 # Zimbra Mail Server → Splunk Log Ingestion
 
-This document describes how telemetry from the **Ubuntu Mail Server (Zimbra)** is collected, transported, and used for detection inside the JCE Cyber Lab SIEM environment.
+This document describes how telemetry from the **Ubuntu Mail Server (Zimbra)** is collected, transported, and used for detection inside the Enterprise Security Operations Environment (JCE) SIEM environment.
 
 The goal is to treat **email and authentication activity** as first-class SOC telemetry alongside endpoint, identity, and network data.
 
@@ -127,7 +127,7 @@ With Zimbra integrated:
 - Email becomes a monitored attack surface  
 - Identity abuse becomes visible earlier  
 - Detection chains span email → identity → endpoint → network  
-- The lab now models enterprise SOC telemetry flow  
+- The Enterprise Security Operations Environment (JCE) now models enterprise SOC telemetry flow  
 
 This architecture mirrors real production environments where:
 
