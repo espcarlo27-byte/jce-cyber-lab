@@ -240,7 +240,7 @@ sudo cp ~/Desktop/phish_log.txt /var/www/html/
 
 > ⚠ Note:
 > Cloning the repository is not required to run the simulation.
-> However, it is recommended for maintaining reproducibility and version alignment with lab documentation.
+> However, it is recommended for maintaining reproducibility and version alignment with Enterprise Security Operations Environment (JCE) documentation.
 
 ---
 
@@ -299,7 +299,7 @@ You should see a log entry similar to:
 
 > ⚠ Important Notes
 - Do NOT expose this server to the internet.
-- This simulation is for controlled lab use only.
+- This simulation is for controlled Enterprise Security Operations Environment (JCE) use only.
 - Do NOT commit runtime logs (with IP addresses) back to GitHub.
 - If permissions are incorrect, track.php will fail silently.
 
