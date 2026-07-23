@@ -28,7 +28,7 @@ Sysmon telemetry is included as **supplemental enrichment when available**.
 
 ## 🔄 Field Normalization Notes
 
-The following field mappings were confirmed as reliable in this lab environment:
+The following field mappings were confirmed as reliable in this Enterprise Security Operations Environment (JCE):
 
 ### Windows Security (Event ID 4688)
 - `Account_Name` / `User` → normalized as **actor**
