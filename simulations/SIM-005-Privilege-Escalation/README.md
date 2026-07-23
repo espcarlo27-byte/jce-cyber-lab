@@ -22,7 +22,7 @@ This simulation validates the **Privilege Escalation** row in the
 
 ---
 
-## 🏗 Lab Components Used
+## 🏗 Enterprise Security Operations Environment (JCE) Components Used
 
 | Component | Role |
 |---------|-----|
@@ -33,7 +33,7 @@ This simulation validates the **Privilege Escalation** row in the
 | **Windows Server** | SOC console (Splunk UI access) |
 
 > ❌ Kali and Security Onion are **not required** for this simulation.  
-> ℹ️ pfSense is present in the lab as the **DHCP gateway**, but is **not used for detection or correlation**.
+> ℹ️ pfSense is present in the Enterprise Security Operations Environment (JCE) as the **DHCP gateway**, but is **not used for detection or correlation**.
 
 ---
 
@@ -136,7 +136,7 @@ These issues included:
 - Disk space exhaustion blocking Splunk searches
 
 All issues were **investigated, documented, and resolved where possible** within
-the constraints of the lab environment.
+the constraints of the Enterprise Security Operations Environment (JCE).
 
 👉 **Full technical breakdown:**  
 [SIM-003 – Issues & Resolutions](../../issues-and-resolutions/sim-003-privilege-escalation.md)
