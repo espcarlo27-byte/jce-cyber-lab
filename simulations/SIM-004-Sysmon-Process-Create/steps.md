@@ -23,7 +23,7 @@ Before running this simulation, confirm the following components are online and 
   - Used only to access Splunk Web UI
 
 > ❌ Kali and Security Onion are **not required** for this simulation.  
-> ℹ️ pfSense is present in the lab as the **DHCP gateway**, but is **not used for detection or correlation**.
+> ℹ️ pfSense is present in the Enterprise Security Operations Environment (JCE) as the **DHCP gateway**, but is **not used for detection or correlation**.
 
 ---
 
