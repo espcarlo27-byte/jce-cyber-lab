@@ -66,7 +66,7 @@ Why This Matters:
 - Elevated command shells spawning child processes is a high-risk behavioral pattern
 - Parent → child process analysis reflects real attacker tradecraft
 - Using process lineage rather than usernames reduces reliance on brittle identity fields
-- Results in a low false-positive rate in baseline lab environments
+- Results in a low false-positive rate in baseline environments
 
 ---
 
@@ -75,7 +75,7 @@ Why This Matters:
 Purpose:
 Provide additional context using Sysmon process creation events.
 
-> ⚠️ Sysmon events are ingested into index=winlog in this lab environment.
+> ⚠️ Sysmon events are ingested into index=winlog in the Enterprise Security Operations Environment (JCE).
 ```spl
 index=winlog EventCode=1 host="Windows11Pro"
 | table _time host User Image ParentImage CommandLine IntegrityLevel
