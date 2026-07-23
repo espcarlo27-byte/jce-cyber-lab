@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Identity & Access Management (IAM) section of the JCE Cyber Lab demonstrates
+The Identity & Access Management (IAM) section of the Enterprise Security Operations Environment (JCE) demonstrates
 the design and implementation of a **role-based Active Directory identity model**
 that supports **security operations, detection engineering, and governance**.
 
@@ -21,7 +21,7 @@ where access is granted to **roles**, not individuals.
 
 ## 🧠 IAM Design Philosophy
 
-This lab follows **enterprise identity governance principles**, where:
+This Enterprise Security Operations Environment (JCE) follows **enterprise identity governance principles**, where:
 
 | Principle | Implementation |
 |-----------|----------------|
