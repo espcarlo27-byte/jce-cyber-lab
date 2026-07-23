@@ -22,7 +22,7 @@ to appear in Splunk searches but returned **no results**.
 Sysmon was:
 - Installed and running correctly on the Windows 11 endpoint
 - Writing events to the **Sysmon Operational log**
-- **Not ingested into Splunk** as part of the baseline lab configuration
+- **Not ingested into Splunk** as part of the baseline Enterprise Security Operations Environment (JCE) configuration
 
 This behavior was expected, as Sysmon ingestion was not required for SIM-004.
 
@@ -146,7 +146,7 @@ SIM-004 reinforced core detection engineering principles:
 - Not all telemetry should immediately trigger alerts
 - Endpoint validation is sometimes preferable to SIEM correlation
 - Baseline behavior is essential for meaningful contrast
-- Honest documentation of lab constraints increases credibility
+- Honest documentation of Enterprise Security Operations Environment (JCE) constraints increases credibility
 
 Establishing a clean execution baseline significantly improves
 the accuracy of downstream detections.
