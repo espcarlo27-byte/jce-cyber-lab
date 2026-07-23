@@ -1,5 +1,5 @@
 # 📊 Detection Validation Matrix  
-### JCE Cyber Lab — Detection Engineering Program
+### Enterprise Security Operations Environment (JCE) — Detection Engineering Program
 
 This matrix tracks the **validation status of detection scenarios** built as part of a structured, evidence-driven detection engineering program. Each simulation represents a stage of attacker behavior and is validated through:
 
@@ -27,13 +27,13 @@ Rather than isolated tests, simulations are mapped to **real attack progression*
 | **Impact / Data Interaction** | File or system access activity | **SIM-006**, **SIM-007** |
 | **External Exploitation Scenario** | Perimeter-facing vulnerability | **SIM-003** |
 
-This structure mirrors **enterprise incident investigation workflows**, not standalone lab exercises.
+This structure mirrors **enterprise incident investigation workflows**, not standalone Enterprise Security Operations Environment (JCE) exercises.
 
 ---
 
 ## 🔐 Identity & Email Telemetry Integration
 
-The JCE Cyber Lab detection program extends beyond traditional network and endpoint monitoring.  
+The Enterprise Security Operations Environment (JCE) detection program extends beyond traditional network and endpoint monitoring.  
 The environment integrates:
 
 - **Active Directory Identity & Access Management (IAM)**
