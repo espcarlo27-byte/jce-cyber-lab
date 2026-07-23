@@ -1,7 +1,7 @@
 # Network Topology
 
 This document describes the **network topology and system roles** used in the
-JCE Cyber Lab. The topology is intentionally designed to reflect
+Enterprise Security Operations Environment (JCE). The topology is intentionally designed to reflect
 **real-world enterprise and SOC environments**, with a clear separation
 between infrastructure components, endpoints, and security monitoring.
 
@@ -9,7 +9,7 @@ between infrastructure components, endpoints, and security monitoring.
 
 ## 🖧 High-Level Topology Overview
 
-The lab is built around a **single routed internal network** protected and
+The Enterprise Security Operations Environment (JCE) is built around a **single routed internal network** protected and
 managed by a central firewall. All traffic flows through **pfSense**, which
 provides routing, NAT, DHCP, and traffic mirroring for security monitoring.
 
@@ -106,7 +106,7 @@ flowchart TB
   - Message delivery patterns (internal/external)
   - Admin access and configuration changes (where logging is enabled)
 - Uses a static IP to ensure:
-  - Stable DNS/MX-style dependencies (lab internal)
+  - Stable DNS/MX-style dependencies (internal)
   - Predictable log forwarding and correlation
   - Reliable directory integration (AD ↔ mail server)
 
@@ -172,7 +172,7 @@ flowchart TB
 
 ## 🔁 DHCP vs Static IP Design Rationale
 
-This lab intentionally uses a **hybrid IP addressing strategy** to mirror real-world enterprise and SOC environments.
+This Enterprise Security Operations Environment (JCE) intentionally uses a **hybrid IP addressing strategy** to mirror real-world enterprise and SOC environments.
 
 ---
 
