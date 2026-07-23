@@ -1,4 +1,4 @@
-# Asset Inventory – JCE Cyber Lab
+# Asset Inventory – Enterprise Security Operations Environment (JCE)
 
 > Purpose: Maintain a living inventory of systems within the environment, supporting governance, risk analysis, and control ownership.
 
@@ -66,7 +66,7 @@ Criticality is based on:
 
 ---
 
-### 🛡 Example from the JCE Cyber Lab
+### 🛡 Example from the Enterprise Security Operations Environment (JCE)
 
 The **Ubuntu Server (Splunk Enterprise)** is marked **High Criticality** because:
 
