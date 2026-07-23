@@ -1,8 +1,8 @@
-# # JCE Enterprise-Modeled Security Operations Environment 🛡️
+# # Enterprise Security Operations Environment (JCE) 🛡️
 
 ## Executive Summary
 
-The JCE Enterprise-Modeled Security Operations Environment demonstrates the design, deployment, operation, and validation of a structured **Security Operations and Incident Response program** across network, endpoint, identity, and email layers.
+The Enterprise Security Operations Environment (JCE) demonstrates the design, deployment, operation, and validation of a structured **Security Operations and Incident Response program** across network, endpoint, identity, and email layers.
 
 This environment mirrors enterprise SOC workflows and emphasizes:
 
@@ -44,7 +44,7 @@ The objective is not tool demonstration, but structured security operations matu
 
 ## 🧠 Detection Coverage Philosophy
 
-The JCE Enterprise-Modeled Security Operations Environment is structured as a **detection engineering program**, not a linear attack tutorial. Simulations are designed to collectively represent **how real breaches unfold**, and how SOC teams detect activity at different stages of attacker behavior.
+The Enterprise Security Operations Environment (JCE) is structured as a **detection engineering program**, not a linear attack tutorial. Simulations are designed to collectively represent **how real breaches unfold**, and how SOC teams detect activity at different stages of attacker behavior.
 
 ### 🔗 Breach Lifecycle Mapping
 
