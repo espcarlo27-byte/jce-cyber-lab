@@ -3,7 +3,7 @@
 ## Executive Summary
 
 This document defines the governance model for **service accounts**
-within the JCE Cyber Lab Active Directory environment.
+within the Enterprise Security Operations Environment (JCE) Active Directory environment.
 
 Service accounts represent **machine or application identities** and are
 managed separately from human users to maintain:
@@ -77,5 +77,5 @@ Separating service identities improves detection accuracy and reduces false posi
 
 ---
 
-> Service account governance strengthens identity hygiene and enhances the reliability of detection engineering across the JCE Cyber Lab.
+> Service account governance strengthens identity hygiene and enhances the reliability of detection engineering across the Enterprise Security Operations Environment (JCE).
 
