@@ -112,7 +112,7 @@ Screenshots follow naming convention:
 
 | Item | Value |
 |------|------|
-| Control Owner | JCE (Lab Owner / Security Program Owner) |
+| Control Owner | JCE (Owner / Security Program Owner) |
 | Control Type | Detective |
 | Test Frequency | Quarterly or after telemetry/detection changes |
 | Evidence Retention | 90 days minimum |
