@@ -1,4 +1,4 @@
-# Security Control Inventory – JCE Cyber Lab
+# Security Control Inventory – Enterprise Security Operations Environment (JCE)
 
 > Purpose: Maintain a centralized inventory of implemented security controls,
 their associated risks, validation records, and operational status.
@@ -54,7 +54,7 @@ Controls should be:
 
 ## 🟢 Overall Control Posture
 
-The JCE Cyber Lab maintains layered controls across:
+The Enterprise Security Operations Environment (JCE) maintains layered controls across:
 
 - Endpoint monitoring  
 - Network monitoring  
