@@ -3,7 +3,7 @@
 ## Executive Summary
 
 This document provides the **authoritative inventory of human identities**
-within the JCE Cyber Lab Active Directory environment.
+within the Enterprise Security Operations Environment (JCE) Active Directory environment.
 
 The user inventory demonstrates:
 
