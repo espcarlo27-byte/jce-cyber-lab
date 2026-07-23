@@ -2,7 +2,7 @@
 
 This file contains **symbolic and representative Zeek DNS log evidence**
 captured during SIM-002, demonstrating **DNS-based command-and-control–style
-tunneling behavior** within the lab environment.
+tunneling behavior** within the Enterprise Security Operations Environment (JCE).
 
 The logs below reflect **actual telemetry observed in Security Onion**
 and are used to validate:
