@@ -1,4 +1,4 @@
-# Control Mapping – NIST CSF (JCE Cyber Lab)
+# Control Mapping – NIST CSF (Enterprise Security Operations Environment (JCE))
 
 > Purpose: Map lab security controls and validations to NIST Cybersecurity Framework (CSF) functions and categories.
 
