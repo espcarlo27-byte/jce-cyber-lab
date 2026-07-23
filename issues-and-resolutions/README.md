@@ -1,8 +1,8 @@
 # ⚠️ Issues & Resolutions – Index
 This section provides a centralized index of operational issues, limitations, and resolutions
-encountered while executing the JCE Cyber Lab simulations.
+encountered while executing the Enterprise Security Operations Environment (JCE) simulations.
 
-Rather than hiding failures, this lab documents real-world challenges transparently, reflecting
+Rather than hiding failures, this Enterprise Security Operations Environment (JCE) documents real-world challenges transparently, reflecting
 how security operations teams troubleshoot, adapt, and validate detections in imperfect environments.
 
 Each simulation has a dedicated Issues & Resolutions document with:
