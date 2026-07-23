@@ -11,7 +11,7 @@ when available.
 SIM-004 intentionally focuses on **execution visibility**, not malicious detection
 or privilege escalation.
 
-> ℹ️ Note: In this lab environment, Windows Security Event ID 4688 populates
+> ℹ️ Note: In this Enterprise Security Operations Environment (JCE), Windows Security Event ID 4688 populates
 > user context under `Account_Name`. `SubjectUserName` is not consistently
 > present and is therefore not referenced directly in SIM-004 tables.
 
@@ -97,7 +97,7 @@ What This Confirms:
 Provide additional execution context using Sysmon Process Create events.
 
 > ⚠️ Sysmon telemetry is validated at the endpoint for this simulation.
-> SIEM ingestion is treated as a lab enhancement, not a prerequisite.
+> SIEM ingestion is treated as a Enterprise Security Operations Environment (JCE) enhancement, not a prerequisite.
 ```spl
 index=winevent_sysmon EventCode=1 host="Windows11Pro"
 | table _time host User Image ParentImage CommandLine IntegrityLevel
