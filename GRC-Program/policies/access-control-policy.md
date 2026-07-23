@@ -1,7 +1,7 @@
 # Access Control Policy
 
 ## 1. Purpose
-Define requirements for access control to ensure only authorized users can access systems and data within the JCE Cyber Lab.
+Define requirements for access control to ensure only authorized users can access systems and data within the Enterprise Security Operations Environment (JCE).
 
 ## 2. Scope
 Applies to:
