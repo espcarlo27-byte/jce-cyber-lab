@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This project documents the end-to-end deployment, configuration, validation, and operational monitoring using Microsoft Sentinel within the JCE Enterprise-Modeled Security Operations Environment.
+This project documents the end-to-end deployment, configuration, validation, and operational monitoring using Microsoft Sentinel within the Enterprise Security Operations Environment (JCE).
 
 The implementation extends the enterprise security monitoring capabilities of the environment into Microsoft Azure by integrating Microsoft Sentinel with Azure Monitor Agent (AMA), Log Analytics Workspace, Data Collection Rules (DCR), Windows Event Logs, Sysmon telemetry, and Kusto Query Language (KQL).
 
@@ -81,7 +81,7 @@ This deployment demonstrates practical experience deploying, configuring, valida
 
 # Project Documentation
 
-The following documents provide a comprehensive guide to the deployment, configuration, operation, and validation of Microsoft Sentinel within the JCE Enterprise-Modeled Security Operations Environment.
+The following documents provide a comprehensive guide to the deployment, configuration, operation, and validation of Microsoft Sentinel within the Enterprise Security Operations Environment (JCE).
 
 | Document | Purpose |
 |----------|---------|
@@ -102,7 +102,7 @@ The following documents provide a comprehensive guide to the deployment, configu
 
 # Environment Overview
 
-The Microsoft Sentinel deployment integrates with the JCE Enterprise-Modeled Security Operations Environment, providing centralized visibility across endpoint, identity, and cloud telemetry.
+The Microsoft Sentinel deployment integrates with the Enterprise Security Operations Environment (JCE), providing centralized visibility across endpoint, identity, and cloud telemetry.
 
 Primary components include:
 
