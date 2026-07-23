@@ -4,7 +4,7 @@
 
 This document provides the **authoritative inventory of security groups**
 used to implement **Role-Based Access Control (RBAC)** and identity governance
-within the JCE Cyber Lab Active Directory environment.
+within the Enterprise Security Operations Environment (JCE) Active Directory environment.
 
 Group structure is designed to be:
 
@@ -47,7 +47,7 @@ RBAC groups represent **who a user is** (role/department), not what they can acc
 | RBAC_Marketing_Users | Marketing role group | **Reserved** (future) |
 | RBAC_Operations_Users | Operations role group | **Reserved** (future) |
 
-> 📌 Reserved groups exist intentionally to keep the IAM model scalable and consistent as the lab expands.
+> 📌 Reserved groups exist intentionally to keep the IAM model scalable and consistent as the Enterprise Security Operations Environment (JCE) expands.
 
 ---
 
@@ -77,7 +77,7 @@ Resource groups represent **access to shares/folders/resources**, not human role
 
 ## 🔗 Recommended Enterprise Mapping Pattern
 
-This lab follows an enterprise-friendly mapping:
+This Enterprise Security Operations Environment (JCE) follows an enterprise-friendly mapping:
 
 - **RBAC group** (role) → nested into → **RES group** (resource access)
 
@@ -88,4 +88,4 @@ This avoids one-off per-user access and keeps permissions explainable.
 
 ---
 
-> Group inventory supports audit-ready access reviews and detection engineering context throughout the JCE Cyber Lab.
+> Group inventory supports audit-ready access reviews and detection engineering context throughout the Enterprise Security Operations Environment (JCE).
