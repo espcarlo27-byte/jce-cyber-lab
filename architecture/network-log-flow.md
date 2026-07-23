@@ -1,7 +1,7 @@
 # Network & Log Flow
 
 This document describes how **network traffic and security telemetry**
-flow through the JCE Cyber Lab, from generation to detection, correlation,
+flow through the Enterprise Security Operations Environment (JCE), from generation to detection, correlation,
 and investigation.
 
 The design mirrors **real-world SOC architectures**, emphasizing:
