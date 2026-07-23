@@ -15,7 +15,7 @@ These exports support:
 
 ## 🧠 Evidence Philosophy
 
-The lab follows an enterprise-style approach:
+The Enterprise Security Operations Environment (JCE) follows an enterprise-style approach:
 
 - **Exports are authoritative** (pulled directly from AD)
 - Documentation is updated only after evidence is refreshed
