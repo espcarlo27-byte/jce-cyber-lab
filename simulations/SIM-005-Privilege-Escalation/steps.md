@@ -48,7 +48,7 @@ Before running this simulation, confirm the following components are online and 
 
 - Acts as:
   - **DHCP server** for endpoints
-  - **DNS resolver** for the lab network
+  - **DNS resolver** for the Enterprise Security Operations Environment (JCE) network
 - No simulation steps require pfSense interaction
 - Included to document **network-layer responsibility and scope**
 
