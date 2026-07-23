@@ -124,7 +124,7 @@ For this simulation, the following alert actions are recommended:
 - ✅ Analyst review of HTTP request context
 - ✅ Validation against application behavior
 - ✅ Documentation of exploit attempt
-- ⛔ No automated remediation (lab simulation)
+- ⛔ No automated remediation (Enterprise Security Operations Environment (JCE) simulation)
 
 ---
 
