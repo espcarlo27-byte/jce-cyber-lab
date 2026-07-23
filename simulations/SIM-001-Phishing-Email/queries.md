@@ -185,7 +185,7 @@ Enterprise detection would typically:
 - Assign risk score to user/session  
 - Trigger automated containment if threshold met  
 
-SIM-001 models this workflow at lab scale using:
+SIM-001 models this workflow at Enterprise Security Operations Environment (JCE) scale using:
 
 > Active Directory + Windows Logs + Apache Logs + Splunk Correlation  
 
