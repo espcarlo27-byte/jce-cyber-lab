@@ -15,7 +15,7 @@ This simulation validates the **LAB-SIM-002** entry in the Detection Validation 
 
 ---
 
-## 🏗 Lab Components Used
+## 🏗 Enterprise Security Operations Environment (JCE) Components Used
 
 - **Attacker:** Kali Linux  
 - **Endpoints:** Windows 11, Ubuntu  
@@ -101,7 +101,7 @@ Example analyst indicators:
 ## 🛡 GRC Control Validation (Governance / Risk / Compliance)
 
 This simulation is treated as a **security control test** to support audit readiness
-and continuous improvement in the JCE Cyber Lab security program.
+and continuous improvement in the Enterprise Security Operations Environment (JCE) security program.
 
 ### 🎯 Control Objective
 
@@ -135,10 +135,10 @@ by validating that:
 
 | Item | Value |
 |------|-------|
-| Control Owner | JCE (Lab Owner / Security Program Owner) |
+| Control Owner | JCE (Owner / Security Program Owner) |
 | Control Type | Detective |
 | Test Frequency | Quarterly (or after sensor / pipeline changes) |
-| Evidence Retention | 90 days minimum (lab standard) |
+| Evidence Retention | 90 days minimum (standard) |
 | Exception Handling | If telemetry/indexing fails → document in Issues & Resolutions and re-test after remediation |
 
 ### 📌 Evidence Collected (Audit-Ready)
