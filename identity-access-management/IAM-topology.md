@@ -1,6 +1,6 @@
 # 🗺 IAM Topology (Simplified)
 
-This diagram illustrates how identities, role groups, application roles, and resource access groups interact within the JCE Cyber Lab Active Directory environment.
+This diagram illustrates how identities, role groups, application roles, and resource access groups interact within the Enterprise Security Operations Environment (JCE) Active Directory environment.
 
 ```mermaid
 flowchart TB
