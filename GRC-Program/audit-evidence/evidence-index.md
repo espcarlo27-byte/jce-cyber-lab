@@ -1,4 +1,4 @@
-# Audit Evidence Index – JCE Cyber Lab
+# Audit Evidence Index – Enterprise Security Operations Environment (JCE)
 
 > Purpose: Track evidence artifacts used to validate security controls.
 > This structure mirrors audit-readiness workflows (SOC2/PCI-style).
