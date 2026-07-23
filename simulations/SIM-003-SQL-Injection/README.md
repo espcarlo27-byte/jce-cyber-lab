@@ -52,7 +52,7 @@ SOC teams regularly investigate SQLi alerts originating from public-facing and i
 
 ---
 
-## 🏗 Lab Components Used
+## 🏗 Enterprise Security Operations Environment (JCE) Components Used
 
 | Role           | System            | Purpose                          |
 | -------------- | ----------------- | -------------------------------- |
@@ -68,7 +68,7 @@ SOC teams regularly investigate SQLi alerts originating from public-facing and i
 ---
 
 ## 🌐 Network Placement
-- DVWA resides on the internal lab network
+- DVWA resides on the internal Enterprise Security Operations Environment (JCE) network
 - Kali and DVWA share the same LAN segment
 - Security Onion is placed inline by forcing Kali’s default gateway
 - All SQL injection traffic traverses Security Onion’s monitoring interface (ens192)
@@ -114,7 +114,7 @@ These payloads successfully altered backend query logic and returned multiple re
 > Earlier textbook payloads (1' OR '1'='1) did not execute due to application context and security level state.
 
 This method was selected because it:
-- Worked reliably in the actual lab
+- Worked reliably in the actual Enterprise Security Operations Environment (JCE)
 - Altered application behavior visibly
 - Generated observable network artifacts
 
