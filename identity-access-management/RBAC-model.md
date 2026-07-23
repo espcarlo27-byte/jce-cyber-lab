@@ -3,7 +3,7 @@
 ## Executive Summary
 
 This document defines the **Role-Based Access Control (RBAC) architecture**
-implemented in the JCE Cyber Lab Active Directory environment.
+implemented in the Enterprise Security Operations Environment (JCE) Active Directory environment.
 
 The RBAC model ensures:
 
@@ -51,11 +51,11 @@ RBAC groups represent **job roles** or **organizational functions**.
 
 ## 🔐 Privilege Tiering Model
 
-The lab models **privilege separation** similar to enterprise environments.
+The Enterprise Security Operations Environment (JCE) models **privilege separation** similar to enterprise environments.
 
 | Tier | Scope | Example Role |
 |------|------|--------------|
-| Tier 0 | Domain control (not widely used in lab) | Domain Admins |
+| Tier 0 | Domain control (not widely used in Enterprise Security Operations Environment (JCE)) | Domain Admins |
 | Tier 1 | Server & infrastructure administration | RBAC_IT_ServerAdmins (reserved) |
 | Tier 2 | Workstations & user support | RBAC_IT_Helpdesk, RBAC_IT_WorkstationAdmins |
 | Business Users | Standard employee access | Finance, HR, Sales, Executives |
@@ -124,5 +124,5 @@ This structure reflects real-world identity governance practices.
 
 ---
 
-> The RBAC model forms the foundation of identity governance in the JCE Cyber Lab, supporting detection engineering, SOC operations, and audit readiness.
+> The RBAC model forms the foundation of identity governance in the Enterprise Security Operations Environment (JCE), supporting detection engineering, SOC operations, and audit readiness.
 
