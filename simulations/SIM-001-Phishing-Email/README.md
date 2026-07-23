@@ -24,7 +24,7 @@ This simulation validates **multi-layer detection correlation** using:
 
 ---
 
-## 🏗 Lab Components Used
+## 🏗 Enterprise Security Operations Environment (JCE) Components Used
 
 | Component | Role |
 |----------|------|
